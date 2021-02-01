@@ -40,18 +40,19 @@ Offset verticalPositionDependentBox({
   required Size size,
   required Size childSize,
   required Offset target,
-  required bool preferBelow,
+  // required bool preferBelow,
+  required bool below,
   double verticalOffset = 0.0,
   double margin = 10.0,
 }) {
   // VERTICAL DIRECTION
-  final fitsBelow =
-      target.dy + verticalOffset + childSize.height <= size.height - margin;
-  final fitsAbove = target.dy - verticalOffset - childSize.height >= margin;
-  final tooltipBelow =
-      preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
+  // final fitsBelow =
+  //     target.dy + verticalOffset + childSize.height <= size.height - margin;
+  // final fitsAbove = target.dy - verticalOffset - childSize.height >= margin;
+  // final tooltipBelow =
+  //     preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
   double y;
-  if (tooltipBelow) {
+  if (below) {
     y = math.min(target.dy + verticalOffset, size.height - margin);
   } else {
     y = math.max(target.dy - verticalOffset - childSize.height, margin);

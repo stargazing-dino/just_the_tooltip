@@ -27,10 +27,16 @@ class TooltipPositionDelegate extends SingleChildLayoutDelegate {
   /// direction, the tooltip will be displayed in the opposite direction.
   final AxisDirection preferredDirection;
 
+  /// This is set during [getConstraintsForChild] and is used in
+  /// [getPositionForChild] to know the definitive direction
+  AxisDirection? _direction;
+
+  double? _offset;
+
   /// Creates a delegate for computing the layout of a tooltip.
   ///
   /// The arguments must not be null.
-  const TooltipPositionDelegate({
+  TooltipPositionDelegate({
     required this.boxSize,
     required this.target,
     required this.offset,
@@ -38,17 +44,84 @@ class TooltipPositionDelegate extends SingleChildLayoutDelegate {
     required this.preferredDirection,
   });
 
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
+  @override // 1
+  Size getSize(BoxConstraints constraints) {
+    return super.getSize(constraints);
+  }
+
+  @override // 2
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     switch (preferredDirection) {
+      case AxisDirection.down:
+      case AxisDirection.up:
+        final verticalOffset = offset + (boxSize.height / 2) + tailLength / 2;
+        _offset = verticalOffset;
+        final margin = 10.0;
+        final fitsBelow = target.dy + verticalOffset + boxSize.height <=
+            constraints.maxHeight - margin;
+        final fitsAbove = target.dy - verticalOffset - boxSize.height >= margin;
+        final preferBelow = preferredDirection == AxisDirection.down;
+        final tooltipBelow =
+            preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
+
+        if (tooltipBelow) {
+          _direction = AxisDirection.down;
+          return constraints.loosen().copyWith(
+              maxHeight: constraints.maxHeight -
+                  target.dy +
+                  (boxSize.height / 2) +
+                  margin);
+        } else {
+          _direction = AxisDirection.up;
+          return constraints
+              .loosen()
+              .copyWith(maxHeight: target.dy - (boxSize.height / 2) - margin);
+        }
+      case AxisDirection.left:
+      case AxisDirection.right:
+        final horizontalOffset = offset + (boxSize.height / 2) + tailLength / 2;
+        _offset = horizontalOffset;
+        final margin = 10.0;
+        final fitsLeft = target.dx + horizontalOffset + boxSize.width <=
+            constraints.maxWidth - margin;
+        final fitsRight =
+            target.dx - horizontalOffset - boxSize.width >= margin;
+        final preferLeft = preferredDirection == AxisDirection.left;
+        final tooltipLeft =
+            preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
+
+        if (tooltipLeft) {
+          _direction = AxisDirection.left;
+          final _constraints = constraints.loosen().copyWith(
+                maxWidth: target.dx - (boxSize.width / 2) - margin,
+              );
+          return _constraints;
+        } else {
+          _direction = AxisDirection.right;
+          final _constraints = constraints.loosen().copyWith(
+                maxWidth: constraints.maxWidth -
+                    target.dx -
+                    (boxSize.width / 2) -
+                    margin,
+              );
+          return _constraints;
+        }
+      default:
+        throw ArgumentError.value(preferredDirection);
+    }
+  }
+
+  @override // 3
+  Offset getPositionForChild(Size size, Size childSize) {
+    switch (_direction) {
       case AxisDirection.down:
       case AxisDirection.up:
         return verticalPositionDependentBox(
           size: size,
           childSize: childSize,
           target: target,
-          verticalOffset: offset + (boxSize.height / 2) + tailLength / 2,
-          preferBelow: preferredDirection == AxisDirection.down,
+          verticalOffset: _offset!,
+          below: _direction == AxisDirection.down,
         );
       case AxisDirection.left:
       case AxisDirection.right:
@@ -56,17 +129,12 @@ class TooltipPositionDelegate extends SingleChildLayoutDelegate {
           size: size,
           childSize: childSize,
           target: target,
-          preferLeft: preferredDirection == AxisDirection.left,
-          horizontalOffset: offset + (boxSize.height / 2) + tailLength / 2,
+          horizontalOffset: _offset!,
+          left: _direction == AxisDirection.left,
         );
       default:
         throw ArgumentError.value(preferredDirection);
     }
-  }
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return constraints.loosen();
   }
 
   @override

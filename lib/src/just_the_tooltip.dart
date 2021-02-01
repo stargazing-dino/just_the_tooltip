@@ -108,7 +108,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     if (box == null) {
       throw 'Cannot find the box for the given object with context $context';
     }
-
+    final boxSize = box.getDryLayout(BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
     final offsetToTarget = Offset(
       -target.dx + box.size.width / 2,
@@ -121,7 +121,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
         content: widget.content,
         padding: widget.padding,
         margin: widget.margin,
-        boxSize: box.size,
+        boxSize: boxSize,
         target: target,
         offset: widget.offset,
         preferredDirection: widget.preferredDirection,

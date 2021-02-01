@@ -8,7 +8,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: Colors.blue, brightness: Brightness.dark),
       home: MyHomePage(),
     );
   }
@@ -28,7 +28,7 @@ class MyHomePage extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 15) {
             return JustTheTooltip(
-              preferredDirection: AxisDirection.right,
+              preferredDirection: AxisDirection.down,
               child: Material(
                 color: Colors.blue,
                 shape: CircleBorder(),
@@ -42,8 +42,7 @@ class MyHomePage extends StatelessWidget {
                 ),
               ),
               content: Text(
-                'W',
-                style: TextStyle(color: Colors.black),
+                'Look at me and look at how big I am Look at me and look at how big I am Look at me and look at how big I am',
               ),
             );
           }

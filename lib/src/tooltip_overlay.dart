@@ -58,8 +58,12 @@ class TooltipOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO: Replace this transition for generic.
     // Should this even have an animation? Is it this widget's responsibility
-    return FadeTransition(
-      opacity: animation,
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) => FadeTransition(
+        opacity: animation,
+        child: child,
+      ),
       child: CompositedTransformFollower(
         link: link,
         showWhenUnlinked: false,

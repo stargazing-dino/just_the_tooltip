@@ -36,18 +36,21 @@ Offset horizontalPositionDependentBox({
   required Size size,
   required Size childSize,
   required Offset target,
-  required bool preferLeft,
+  required bool left,
   double horizontalOffset = 0.0,
   double margin = 10.0,
 }) {
+  if (left) {
+    margin *= -1;
+  }
   // HORIZONTAL DIRECTION
-  final fitsLeft =
-      target.dx + horizontalOffset + childSize.width <= size.width - margin;
-  final fitsRight = target.dx - horizontalOffset - childSize.width >= margin;
-  final tooltipLeft =
-      preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
+  // final fitsLeft =
+  //     target.dx + horizontalOffset + childSize.width <= size.width - margin;
+  // final fitsRight = target.dx - horizontalOffset - childSize.width >= margin;
+  // final tooltipLeft =
+  //     preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
   double x;
-  if (tooltipLeft) {
+  if (left) {
     x = math.max(target.dx - horizontalOffset - childSize.width, margin);
   } else {
     x = math.min(target.dx + horizontalOffset, size.width - margin);
