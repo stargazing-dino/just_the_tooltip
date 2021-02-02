@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
 class JustTheTooltip extends StatefulWidget {
@@ -28,7 +29,23 @@ class JustTheTooltip extends StatefulWidget {
 
   final double tailBaseWidth;
 
+  /// These directly affect the constraints of the tooltip
+  // BoxConstraints constraints;
+
+  final AnimatedTransitionBuilder animatedTransitionBuilder;
+
   final Color? color;
+
+  static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
+    context,
+    animation,
+    child,
+  ) {
+    return FadeTransition(
+      opacity: animation,
+      child: child,
+    );
+  }
 
   const JustTheTooltip({
     Key? key,
@@ -45,7 +62,12 @@ class JustTheTooltip extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(6)),
     this.tailLength = 16.0,
     this.tailBaseWidth = 32.0,
+    this.animatedTransitionBuilder = defaultAnimatedTransitionBuilder,
     this.color,
+    // this.minWidth,
+    // this.minHeight,
+    // this.maxWidth,
+    // this.maxHeight,
   });
 
   @override
@@ -96,28 +118,43 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     );
   }
 
-  Future<void> _showTooltip() async {
-    _createOverlayEntries();
+  void _hideTooltip({bool immediately = false}) async {
+    if (!immediately) {
+      await _animationController.reverse();
+    }
+
+    _entry?.remove();
+    _skrim?.remove();
+
+    setState(() {
+      _entry = null;
+      _skrim = null;
+    });
+  }
+
+  void _showTooltip({bool immediately = false}) async {
+    _createNewEntries();
 
     await _animationController.forward();
   }
 
-  void _createOverlayEntries() {
+  void _createNewEntries() {
     final box = context.findRenderObject() as RenderBox?;
 
     if (box == null) {
       throw 'Cannot find the box for the given object with context $context';
     }
+
     final boxSize = box.getDryLayout(BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
     final offsetToTarget = Offset(
       -target.dx + box.size.width / 2,
       -target.dy + box.size.height / 2,
     );
-
     final entry = Directionality(
       textDirection: Directionality.of(context),
       child: TooltipOverlay(
+        animatedTransitionBuilder: widget.animatedTransitionBuilder,
         content: widget.content,
         padding: widget.padding,
         margin: widget.margin,
@@ -138,21 +175,10 @@ class _SimpleTooltipState extends State<JustTheTooltip>
         ),
       ),
     );
-
-    // TODO: This needs a raw gesture detector probably so scroll events still
-    // work
     final skrim = GestureDetector(
       child: SizedBox.expand(),
       behavior: HitTestBehavior.translucent,
-      onTap: () {
-        _entry?.remove();
-        _skrim?.remove();
-
-        setState(() {
-          _entry = null;
-          _skrim = null;
-        });
-      },
+      onTap: _hideTooltip,
     );
 
     _entry = OverlayEntry(builder: (BuildContext context) => entry);

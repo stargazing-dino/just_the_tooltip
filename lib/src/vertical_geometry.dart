@@ -45,12 +45,6 @@ Offset verticalPositionDependentBox({
   double verticalOffset = 0.0,
   double margin = 10.0,
 }) {
-  // VERTICAL DIRECTION
-  // final fitsBelow =
-  //     target.dy + verticalOffset + childSize.height <= size.height - margin;
-  // final fitsAbove = target.dy - verticalOffset - childSize.height >= margin;
-  // final tooltipBelow =
-  //     preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
   double y;
   if (below) {
     y = math.min(target.dy + verticalOffset, size.height - margin);

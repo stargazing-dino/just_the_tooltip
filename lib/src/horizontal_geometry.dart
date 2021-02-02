@@ -43,12 +43,7 @@ Offset horizontalPositionDependentBox({
   if (left) {
     margin *= -1;
   }
-  // HORIZONTAL DIRECTION
-  // final fitsLeft =
-  //     target.dx + horizontalOffset + childSize.width <= size.width - margin;
-  // final fitsRight = target.dx - horizontalOffset - childSize.width >= margin;
-  // final tooltipLeft =
-  //     preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
+
   double x;
   if (left) {
     x = math.max(target.dx - horizontalOffset - childSize.width, margin);

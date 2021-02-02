@@ -33,6 +33,8 @@ class TooltipOverlay extends StatelessWidget {
 
   final double tailLength;
 
+  final AnimatedTransitionBuilder animatedTransitionBuilder;
+
   final Color? color;
 
   const TooltipOverlay({
@@ -51,6 +53,7 @@ class TooltipOverlay extends StatelessWidget {
     required this.borderRadius,
     required this.tailBaseWidth,
     required this.tailLength,
+    required this.animatedTransitionBuilder,
     required this.color,
   }) : super(key: key);
 
@@ -60,10 +63,9 @@ class TooltipOverlay extends StatelessWidget {
     // Should this even have an animation? Is it this widget's responsibility
     return AnimatedBuilder(
       animation: animation,
-      builder: (context, child) => FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      builder: (context, child) {
+        return animatedTransitionBuilder(context, animation, child);
+      },
       child: CompositedTransformFollower(
         link: link,
         showWhenUnlinked: false,
