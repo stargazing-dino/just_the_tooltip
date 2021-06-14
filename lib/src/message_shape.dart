@@ -36,38 +36,48 @@ class MessageShape extends ShapeBorder {
   @override
   Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     final radius = borderRadius.resolve(textDirection);
+
+    // Clockwise: center point, right, left
     double x, y, x2, y2, x3, y3;
 
     if (rect.bottomLeft.dy < target.dy && rect.bottomRight.dy < target.dy) {
       // AxisDirection.up
+      // TODO: double check this is clockwise
       final baseWidth = math.min(
         tailBaseWidth,
         (rect.right - rect.left) - (radius.bottomLeft.x + radius.bottomRight.x),
       );
 
-      x = target.dx - (baseWidth / 2);
-      y = rect.bottom;
+      final halfBaseWidth = baseWidth / 2;
+      final leftCorner = rect.left + radius.bottomLeft.x;
+      final rightCorner = rect.right - radius.bottomRight.x;
 
-      x2 = baseWidth / 2;
-      y2 = tailLength;
+      x = target.dx;
+      y = target.dy;
 
-      x3 = baseWidth / 2;
-      y3 = -tailLength;
+      x2 = math.min(target.dx + halfBaseWidth, rightCorner);
+      y2 = target.dy - tailLength;
+
+      x3 = math.max(target.dx - halfBaseWidth, leftCorner);
+      y3 = target.dy - tailLength;
     } else if (rect.topLeft.dy > target.dy && rect.topRight.dy > target.dy) {
       // AxisDirection.down
       final baseWidth = math.min(
         tailBaseWidth,
         (rect.right - rect.left) - (radius.topLeft.x + radius.topRight.x),
       );
+      final halfBaseWidth = baseWidth / 2;
+      final leftCorner = rect.left + radius.topLeft.x;
+      final rightCorner = rect.right - radius.topRight.x;
 
-      x = target.dx - (baseWidth / 2);
-      y = rect.top;
+      x = target.dx;
+      y = target.dy;
 
-      x2 = baseWidth / 2;
-      y2 = -tailLength;
+      x2 = math.min(target.dx + halfBaseWidth, rightCorner);
+      y2 = target.dy + tailLength;
 
-      x3 = baseWidth / 2;
-      y3 = tailLength;
+      x3 = math.max(target.dx - halfBaseWidth, leftCorner);
+      y3 = target.dy + tailLength;
     } else if (rect.topRight.dx < target.dx &&
         rect.bottomRight.dx < target.dx) {
       // AxisDirection.left
@@ -76,14 +86,18 @@ class MessageShape extends ShapeBorder {
         (rect.bottom - rect.top) - (radius.topRight.y + radius.bottomRight.y),
       );
 
-      x = rect.right + tailLength;
+      final halfBaseWidth = baseWidth / 2;
+      final bottomCorner = rect.bottom + radius.bottomRight.x;
+      final topCorner = rect.top - radius.topRight.x;
+
+      x = target.dx;
       y = target.dy;
 
-      x2 = -tailLength;
-      y2 = baseWidth / 2;
+      x2 = target.dx - tailLength;
+      y2 = math.max(target.dy - halfBaseWidth, topCorner);
 
-      x3 = 0;
-      y3 = -baseWidth;
+      x3 = target.dx - tailLength;
+      y3 = math.min(target.dy + halfBaseWidth, bottomCorner);
     } else if (rect.topLeft.dx > target.dx && rect.bottomLeft.dx > target.dx) {
       // AxisDirection.right
       final baseWidth = math.min(
@@ -91,14 +105,18 @@ class MessageShape extends ShapeBorder {
         (rect.bottom - rect.top) - (radius.topLeft.y + radius.topRight.y),
       );
 
-      x = rect.left - tailLength;
+      final halfBaseWidth = baseWidth / 2;
+      final bottomCorner = rect.bottom + radius.bottomLeft.x;
+      final topCorner = rect.top - radius.topLeft.x;
+
+      x = target.dx;
       y = target.dy;
 
-      x2 = tailLength;
-      y2 = baseWidth / 2;
+      x2 = target.dx + tailLength;
+      y2 = math.max(target.dy - halfBaseWidth, topCorner);
 
-      x3 = 0;
-      y3 = -baseWidth;
+      x3 = target.dx + tailLength;
+      y3 = math.min(target.dy + halfBaseWidth, bottomCorner);
     } else {
       throw ArgumentError();
     }
@@ -107,8 +125,8 @@ class MessageShape extends ShapeBorder {
       ..fillType = PathFillType.evenOdd
       ..addPath(getInnerPath(rect), Offset.zero)
       ..moveTo(x, y)
-      ..relativeLineTo(x2, y2)
-      ..relativeLineTo(x3, y3)
+      ..lineTo(x2, y2)
+      ..lineTo(x3, y3)
       ..close();
   }
 

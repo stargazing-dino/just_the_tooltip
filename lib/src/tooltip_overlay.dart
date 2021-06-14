@@ -1,15 +1,16 @@
 library simple_tooltip;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:just_the_tooltip/src/message_shape.dart';
+import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:just_the_tooltip/src/tooltip_position_delegate.dart';
 
-class TooltipOverlay extends StatelessWidget {
+class TooltipOverlay extends StatefulWidget {
   final Widget content;
 
-  final EdgeInsetsGeometry padding;
+  final EdgeInsets padding;
 
-  final EdgeInsetsGeometry margin;
+  final double margin;
 
   final Animation<double> animation;
 
@@ -58,41 +59,74 @@ class TooltipOverlay extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<TooltipOverlay> createState() => _TooltipOverlayState();
+}
+
+class _TooltipOverlayState extends State<TooltipOverlay> {
+  final _key = GlobalKey();
+  final child = ValueNotifier<RenderBox?>(null);
+
+  @override
+  void initState() {
+    Future.delayed(Duration.zero).then((value) {
+      _setRenderBox();
+    });
+
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    _setRenderBox();
+    super.didChangeDependencies();
+  }
+
+  void _setRenderBox() {
+    final renderBox = _key.currentContext?.findRenderObject() as RenderBox?;
+
+    child.value = renderBox;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: Replace this transition for generic.
-    // Should this even have an animation? Is it this widget's responsibility
     return AnimatedBuilder(
-      animation: animation,
+      animation: widget.animation,
       builder: (context, child) {
-        return animatedTransitionBuilder(context, animation, child);
+        return widget.animatedTransitionBuilder(
+          context,
+          widget.animation,
+          child,
+        );
       },
       child: CompositedTransformFollower(
-        link: link,
+        link: widget.link,
         showWhenUnlinked: false,
-        // TODO: following anchor and target anchor
-        offset: offsetToTarget,
+        // TODO: expose following anchor and target anchor
+        offset: widget.offsetToTarget,
         child: CustomSingleChildLayout(
           delegate: TooltipPositionDelegate(
-            boxSize: boxSize,
-            target: target,
-            offset: offset,
-            tailLength: tailLength,
-            preferredDirection: preferredDirection,
+            child: child,
+            boxSize: widget.boxSize,
+            target: widget.target,
+            offset: widget.offset,
+            tailLength: widget.tailLength,
+            preferredDirection: widget.preferredDirection,
+            margin: widget.margin,
           ),
           child: Material(
+            key: _key,
             type: MaterialType.transparency,
             child: Container(
-              padding: padding,
-              margin: margin,
-              child: content,
+              padding: widget.padding,
+              child: widget.content,
               decoration: ShapeDecoration(
-                color: color ?? Theme.of(context).cardColor,
-                shadows: kElevationToShadow[elevation],
+                color: widget.color ?? Theme.of(context).cardColor,
+                shadows: kElevationToShadow[widget.elevation],
                 shape: MessageShape(
-                  target: target,
-                  borderRadius: borderRadius,
-                  tailBaseWidth: tailBaseWidth,
-                  tailLength: tailLength,
+                  target: widget.target,
+                  borderRadius: widget.borderRadius,
+                  tailBaseWidth: widget.tailBaseWidth,
+                  tailLength: widget.tailLength,
                 ),
               ),
             ),

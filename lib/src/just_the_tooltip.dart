@@ -15,9 +15,9 @@ class JustTheTooltip extends StatefulWidget {
 
   final Curve curve;
 
-  final EdgeInsetsGeometry padding;
+  final EdgeInsets padding;
 
-  final EdgeInsetsGeometry margin;
+  final double margin;
 
   final double offset;
 
@@ -56,7 +56,7 @@ class JustTheTooltip extends StatefulWidget {
     this.fadeOutDuration = const Duration(milliseconds: 0),
     this.curve = Curves.easeInOut,
     this.padding = const EdgeInsets.all(8.0),
-    this.margin = const EdgeInsets.all(8.0),
+    this.margin = 10.0,
     this.offset = 0.0,
     this.elevation = 4,
     this.borderRadius = const BorderRadius.all(Radius.circular(6)),
@@ -142,7 +142,9 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     final box = context.findRenderObject() as RenderBox?;
 
     if (box == null) {
-      throw 'Cannot find the box for the given object with context $context';
+      throw StateError(
+        'Cannot find the box for the given object with context $context',
+      );
     }
 
     final boxSize = box.getDryLayout(BoxConstraints.tightForFinite());
@@ -151,6 +153,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       -target.dx + box.size.width / 2,
       -target.dy + box.size.height / 2,
     );
+
     final entry = Directionality(
       textDirection: Directionality.of(context),
       child: TooltipOverlay(
@@ -187,7 +190,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     final overlay = Overlay.of(context);
 
     if (overlay == null) {
-      throw 'Cannot find the overlay for the context $context';
+      throw StateError('Cannot find the overlay for the context $context');
     }
 
     setState(() {

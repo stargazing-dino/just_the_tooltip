@@ -18,48 +18,58 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Tooltip Components')),
-        floatingActionButton: FloatingActionButton(
-          child: Text('Close'),
-          onPressed: () {},
+      backgroundColor: Colors.grey.shade900,
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.black,
+        child: Text(
+          'Close',
+          style: TextStyle(color: Colors.grey),
         ),
-        body: Column(
+        onPressed: () {},
+      ),
+      body: SizedBox.expand(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Spacer(),
             JustTheTooltip(
-              preferredDirection: AxisDirection.up,
+              tailLength: 50.0,
+              preferredDirection: AxisDirection.right,
+              margin: 10.0,
               child: Material(
-                color: Colors.blue,
-                shape: CircleBorder(),
+                color: Colors.grey.shade800,
+                shape: const CircleBorder(),
                 elevation: 4.0,
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Icon(
-                    Icons.touch_app,
+                    Icons.add,
                     color: Colors.white,
                   ),
                 ),
               ),
               // This is necessary as otherwise the column would only be
               // constrained by the amount of vertical space
-              content: IntrinsicHeight(
+              content: Container(
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
-                      height: 120,
-                      color: Colors.blue,
-                    ),
                     const SizedBox(height: 8),
                     Text(
-                      'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
+                      'Quia ducimus eius magni voluptatibus ut veniam ducimus.'
+                      ' Ullam ab qui voluptatibus quos est in. Maiores eos ab'
+                      ' magni tempora praesentium libero. Voluptate architecto'
+                      ' rerum vel .',
                     ),
                   ],
                 ),
               ),
             ),
-            Spacer(flex: 2),
+            Spacer(),
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
 

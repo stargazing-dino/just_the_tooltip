@@ -2,6 +2,23 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
+bool isLeft({
+  required Size size,
+  required Size childSize,
+  required Offset target,
+  required bool preferLeft,
+  double horizontalOffset = 0.0,
+  double margin = 10.0,
+}) {
+  final fitsLeft =
+      target.dy + horizontalOffset + childSize.width <= size.width - margin;
+  final fitsRight = target.dy - horizontalOffset - childSize.width >= margin;
+  final tooltipLeft =
+      preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
+
+  return tooltipLeft;
+}
+
 /// Position a child box within a container box, either left or right a target
 /// point.
 ///
@@ -36,16 +53,23 @@ Offset horizontalPositionDependentBox({
   required Size size,
   required Size childSize,
   required Offset target,
-  required bool left,
+  required bool preferLeft,
   double horizontalOffset = 0.0,
   double margin = 10.0,
 }) {
-  if (left) {
-    margin *= -1;
-  }
+  final tooltipLeft = isLeft(
+    childSize: childSize,
+    preferLeft: preferLeft,
+    size: size,
+    target: target,
+    margin: margin,
+    horizontalOffset: 0.0,
+  );
+
+  print(tooltipLeft);
 
   double x;
-  if (left) {
+  if (tooltipLeft) {
     x = math.max(target.dx - horizontalOffset - childSize.width, margin);
   } else {
     x = math.min(target.dx + horizontalOffset, size.width - margin);

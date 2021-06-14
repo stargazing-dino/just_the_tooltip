@@ -6,6 +6,27 @@ import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 
+bool isBelow({
+  required Size size,
+  required Size childSize,
+  required Offset target,
+  required bool preferBelow,
+  double verticalOffset = 0.0,
+  double margin = 10.0,
+}) {
+// final verticalOffset = offset + (boxSize.height / 2) + tailLength / 2;
+  // _offset = verticalOffset;
+  // final margin = 10.0;
+  final fitsBelow =
+      target.dy + verticalOffset + childSize.height <= size.height - margin;
+  final fitsAbove =
+      target.dy - verticalOffset - childSize.height >= size.height - margin;
+  final tooltipBelow =
+      preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
+
+  return tooltipBelow;
+}
+
 /// Position a child box within a container box, either above or below a target
 /// point.
 ///
@@ -40,13 +61,21 @@ Offset verticalPositionDependentBox({
   required Size size,
   required Size childSize,
   required Offset target,
-  // required bool preferBelow,
-  required bool below,
+  required bool preferBelow,
   double verticalOffset = 0.0,
   double margin = 10.0,
 }) {
+  final tooltipBelow = isBelow(
+    childSize: childSize,
+    preferBelow: preferBelow,
+    size: size,
+    target: target,
+    margin: margin,
+    verticalOffset: 0.0,
+  );
+
   double y;
-  if (below) {
+  if (tooltipBelow) {
     y = math.min(target.dy + verticalOffset, size.height - margin);
   } else {
     y = math.max(target.dy - verticalOffset - childSize.height, margin);
