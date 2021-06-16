@@ -27,15 +27,22 @@ class MyHomePage extends StatelessWidget {
         ),
         onPressed: () {},
       ),
+      // body: Container(
+      //   height: 100.0,
+      //   width: 100.0,
+      //   child: Placeholder(),
+      // ),
       body: SizedBox.expand(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Spacer(),
+            // Spacer(),
+            // CustomSingleChildLayout(delegate: delegate)
             JustTheTooltip(
-              tailLength: 50.0,
-              preferredDirection: AxisDirection.right,
-              margin: 10.0,
+              tailLength: 10.0,
+              preferredDirection: AxisDirection.down,
+              margin: EdgeInsets.all(30.0),
+              offset: 20.0,
               child: Material(
                 color: Colors.grey.shade800,
                 shape: const CircleBorder(),
@@ -51,21 +58,24 @@ class MyHomePage extends StatelessWidget {
               // This is necessary as otherwise the column would only be
               // constrained by the amount of vertical space
               content: Container(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 8),
-                    Text(
-                      'Quia ducimus eius magni voluptatibus ut veniam ducimus.'
-                      ' Ullam ab qui voluptatibus quos est in. Maiores eos ab'
-                      ' magni tempora praesentium libero. Voluptate architecto'
-                      ' rerum vel .',
-                    ),
-                  ],
-                ),
+                height: 99.0,
+                width: 99.0,
+                child: Placeholder(),
               ),
+              // content: Column(
+              //   mainAxisSize: MainAxisSize.min,
+              //   children: [
+              //     const SizedBox(height: 8),
+              //     Text(
+              //       'Quia ducimus eius magni voluptatibus ut veniam ducimus.'
+              //       ' Ullam ab qui voluptatibus quos est in. Maiores eos ab'
+              //       ' magni tempora praesentium libero. Voluptate architecto'
+              //       ' rerum vel .',
+              //     ),
+              //   ],
+              // ),
             ),
-            Spacer(),
+            // Spacer(),
           ],
         ),
       ),

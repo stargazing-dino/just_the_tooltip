@@ -17,7 +17,7 @@ class JustTheTooltip extends StatefulWidget {
 
   final EdgeInsets padding;
 
-  final double margin;
+  final EdgeInsets margin;
 
   final double offset;
 
@@ -34,7 +34,9 @@ class JustTheTooltip extends StatefulWidget {
 
   final AnimatedTransitionBuilder animatedTransitionBuilder;
 
-  final Color? color;
+  final Color? backgroundColor;
+
+  final TextDirection textDirection;
 
   static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
     context,
@@ -56,14 +58,15 @@ class JustTheTooltip extends StatefulWidget {
     this.fadeOutDuration = const Duration(milliseconds: 0),
     this.curve = Curves.easeInOut,
     this.padding = const EdgeInsets.all(8.0),
-    this.margin = 10.0,
+    this.margin = const EdgeInsets.all(8.0),
     this.offset = 0.0,
     this.elevation = 4,
     this.borderRadius = const BorderRadius.all(Radius.circular(6)),
     this.tailLength = 16.0,
     this.tailBaseWidth = 32.0,
     this.animatedTransitionBuilder = defaultAnimatedTransitionBuilder,
-    this.color,
+    this.backgroundColor,
+    this.textDirection = TextDirection.ltr,
     // this.minWidth,
     // this.minHeight,
     // this.maxWidth,
@@ -92,12 +95,13 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     super.initState();
   }
 
-  @override
-  void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-    // TODO: Figure out how to rebuild the tooltip without opening and closing
-    // it again
-    super.didUpdateWidget(oldWidget);
-  }
+  // @override
+  // void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+  //   _entry?.markNeedsBuild();
+  //   _skrim?.markNeedsBuild();
+
+  //   super.didUpdateWidget(oldWidget);
+  // }
 
   @override
   void dispose() {
@@ -139,6 +143,8 @@ class _SimpleTooltipState extends State<JustTheTooltip>
   }
 
   void _createNewEntries() {
+    assert(_entry == null);
+    assert(_skrim == null);
     final box = context.findRenderObject() as RenderBox?;
 
     if (box == null) {
@@ -147,7 +153,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       );
     }
 
-    final boxSize = box.getDryLayout(BoxConstraints.tightForFinite());
+    final targetSize = box.getDryLayout(BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
     final offsetToTarget = Offset(
       -target.dx + box.size.width / 2,
@@ -158,10 +164,10 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       textDirection: Directionality.of(context),
       child: TooltipOverlay(
         animatedTransitionBuilder: widget.animatedTransitionBuilder,
-        content: widget.content,
+        child: widget.content,
         padding: widget.padding,
         margin: widget.margin,
-        boxSize: boxSize,
+        targetSize: targetSize,
         target: target,
         offset: widget.offset,
         preferredDirection: widget.preferredDirection,
@@ -171,7 +177,8 @@ class _SimpleTooltipState extends State<JustTheTooltip>
         borderRadius: widget.borderRadius,
         tailBaseWidth: widget.tailBaseWidth,
         tailLength: widget.tailLength,
-        color: widget.color,
+        backgroundColor: widget.backgroundColor,
+        textDirection: widget.textDirection,
         animation: CurvedAnimation(
           parent: _animationController,
           curve: widget.curve,

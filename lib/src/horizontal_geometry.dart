@@ -1,23 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
-
-bool isLeft({
-  required Size size,
-  required Size childSize,
-  required Offset target,
-  required bool preferLeft,
-  double horizontalOffset = 0.0,
-  double margin = 10.0,
-}) {
-  final fitsLeft =
-      target.dy + horizontalOffset + childSize.width <= size.width - margin;
-  final fitsRight = target.dy - horizontalOffset - childSize.width >= margin;
-  final tooltipLeft =
-      preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
-
-  return tooltipLeft;
-}
+import 'package:just_the_tooltip/src/position_dependent_box.dart';
 
 /// Position a child box within a container box, either left or right a target
 /// point.
@@ -49,46 +33,60 @@ bool isLeft({
 /// Used by [Tooltip] to position a tooltip relative to its parent.
 ///
 /// The arguments must not be null.
-Offset horizontalPositionDependentBox({
+PositionDependentBox horizontalPositionDependentBox({
   required Size size,
+  required Size targetSize,
   required Size childSize,
   required Offset target,
   required bool preferLeft,
-  double horizontalOffset = 0.0,
-  double margin = 10.0,
+  required double horizontalOffset,
+  required EdgeInsets margin,
 }) {
-  final tooltipLeft = isLeft(
-    childSize: childSize,
-    preferLeft: preferLeft,
-    size: size,
-    target: target,
-    margin: margin,
-    horizontalOffset: 0.0,
-  );
+  final childAndOffsetWidth = horizontalOffset + childSize.width;
+  final targetWidthRadius = targetSize.width / 2;
+  final rightTargetEdge = target.dx + targetWidthRadius;
+  final leftTargetEdge = target.dx - targetWidthRadius;
 
-  print(tooltipLeft);
+  // LTE = leftTargetEdge
+  // |margin.L          child+offset            LTE                           |
+  final fitsLeft = leftTargetEdge - margin.left >= childAndOffsetWidth;
+
+  //                                   size.width
+  // |              RTE                      child+offset             margin.R|
+  final fitsRight =
+      size.width - rightTargetEdge - margin.right >= childAndOffsetWidth;
+
+  final tooltipLeft =
+      preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
 
   double x;
   if (tooltipLeft) {
-    x = math.max(target.dx - horizontalOffset - childSize.width, margin);
+    x = math.max(margin.left, leftTargetEdge - childAndOffsetWidth);
   } else {
-    x = math.min(target.dx + horizontalOffset, size.width - margin);
+    x = math.min(rightTargetEdge + horizontalOffset, size.width - margin.right);
   }
 
   // VERTICAL DIRECTION
   double y;
-  if (size.height - margin * 2.0 < childSize.height) {
+  // If the childSize is greater than the screen space available to it
+  // then center it
+  if (size.height - margin.vertical < childSize.height) {
     y = (size.height - childSize.height) / 2.0;
   } else {
-    final normalizedTargetY = target.dy.clamp(margin, size.height - margin);
-    final edge = margin + childSize.height / 2.0;
+    final normalizedTargetY =
+        target.dy.clamp(margin.top, size.height - margin.bottom);
+    final edge = (margin.bottom + childSize.height) / 2.0;
     if (normalizedTargetY < edge) {
-      y = margin;
+      y = margin.bottom;
     } else if (normalizedTargetY > size.height - edge) {
-      y = size.height - margin - childSize.height;
+      y = size.height - margin.bottom - childSize.height;
     } else {
       y = normalizedTargetY - childSize.height / 2.0;
     }
   }
-  return Offset(x, y);
+
+  return PositionDependentBox(
+    offset: Offset(x, y),
+    axisDirection: tooltipLeft ? AxisDirection.left : AxisDirection.right,
+  );
 }

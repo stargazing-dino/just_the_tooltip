@@ -5,27 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
-
-bool isBelow({
-  required Size size,
-  required Size childSize,
-  required Offset target,
-  required bool preferBelow,
-  double verticalOffset = 0.0,
-  double margin = 10.0,
-}) {
-// final verticalOffset = offset + (boxSize.height / 2) + tailLength / 2;
-  // _offset = verticalOffset;
-  // final margin = 10.0;
-  final fitsBelow =
-      target.dy + verticalOffset + childSize.height <= size.height - margin;
-  final fitsAbove =
-      target.dy - verticalOffset - childSize.height >= size.height - margin;
-  final tooltipBelow =
-      preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
-
-  return tooltipBelow;
-}
+import 'package:just_the_tooltip/src/position_dependent_box.dart';
 
 /// Position a child box within a container box, either above or below a target
 /// point.
@@ -57,44 +37,53 @@ bool isBelow({
 /// Used by [Tooltip] to position a tooltip relative to its parent.
 ///
 /// The arguments must not be null.
-Offset verticalPositionDependentBox({
+PositionDependentBox verticalPositionDependentBox({
   required Size size,
+  required Size targetSize,
   required Size childSize,
   required Offset target,
-  required bool preferBelow,
-  double verticalOffset = 0.0,
-  double margin = 10.0,
+  // FIXME: This should be preferAbove to fit the semantics of preferLeft
+  required bool preferAbove,
+  required double verticalOffset,
+  required EdgeInsets margin,
 }) {
-  final tooltipBelow = isBelow(
-    childSize: childSize,
-    preferBelow: preferBelow,
-    size: size,
-    target: target,
-    margin: margin,
-    verticalOffset: 0.0,
-  );
+  final childAndOffsetHeight = verticalOffset + childSize.height;
+  final targetHeightRadius = targetSize.height / 2;
+  final bottomTargetEdge = target.dy + targetHeightRadius;
+  final topTargetEdge = target.dy - targetHeightRadius;
+
+  final fitsAbove = topTargetEdge - margin.top >= childAndOffsetHeight;
+  final fitsBelow =
+      size.height - bottomTargetEdge - margin.bottom >= childAndOffsetHeight;
+  final tooltipAbove =
+      preferAbove ? fitsAbove || !fitsBelow : !(fitsBelow || !fitsAbove);
 
   double y;
-  if (tooltipBelow) {
-    y = math.min(target.dy + verticalOffset, size.height - margin);
+  if (tooltipAbove) {
+    y = math.max(margin.bottom, topTargetEdge - childAndOffsetHeight);
   } else {
-    y = math.max(target.dy - verticalOffset - childSize.height, margin);
+    y = math.min(bottomTargetEdge + verticalOffset, size.height - margin.top);
   }
 
   // HORIZONTAL DIRECTION
   double x;
-  if (size.width - margin * 2.0 < childSize.width) {
+  if (size.width - margin.horizontal < childSize.width) {
     x = (size.width - childSize.width) / 2.0;
   } else {
-    final normalizedTargetX = target.dx.clamp(margin, size.width - margin);
-    final edge = margin + childSize.width / 2.0;
+    final normalizedTargetX =
+        target.dx.clamp(margin.left, size.width - margin.right);
+    final edge = margin.left + childSize.width / 2.0;
     if (normalizedTargetX < edge) {
-      x = margin;
+      x = margin.left;
     } else if (normalizedTargetX > size.width - edge) {
-      x = size.width - margin - childSize.width;
+      x = size.width - margin.left - childSize.width;
     } else {
       x = normalizedTargetX - childSize.width / 2.0;
     }
   }
-  return Offset(x, y);
+
+  return PositionDependentBox(
+    offset: Offset(x, y),
+    axisDirection: tooltipAbove ? AxisDirection.up : AxisDirection.down,
+  );
 }
