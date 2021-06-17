@@ -38,6 +38,8 @@ class JustTheTooltip extends StatefulWidget {
 
   final TextDirection textDirection;
 
+  final Shadow? shadow;
+
   static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
     context,
     animation,
@@ -67,6 +69,8 @@ class JustTheTooltip extends StatefulWidget {
     this.animatedTransitionBuilder = defaultAnimatedTransitionBuilder,
     this.backgroundColor,
     this.textDirection = TextDirection.ltr,
+    this.shadow,
+    // TODO:
     // this.minWidth,
     // this.minHeight,
     // this.maxWidth,
@@ -84,6 +88,8 @@ class _SimpleTooltipState extends State<JustTheTooltip>
   OverlayEntry? _entry;
   OverlayEntry? _skrim;
 
+  var _key = 0;
+
   @override
   void initState() {
     _animationController = AnimationController(
@@ -95,13 +101,19 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     super.initState();
   }
 
-  // @override
-  // void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-  //   _entry?.markNeedsBuild();
-  //   _skrim?.markNeedsBuild();
+  @override
+  void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+    Future.delayed(Duration.zero).then((_) {
+      setState(() {
+        _key++;
+        _key %= 2;
+      });
+      _entry?.markNeedsBuild();
+      _skrim?.markNeedsBuild();
+    });
 
-  //   super.didUpdateWidget(oldWidget);
-  // }
+    super.didUpdateWidget(oldWidget);
+  }
 
   @override
   void dispose() {
@@ -153,6 +165,12 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       );
     }
 
+    final theme = Theme.of(context);
+    final defaultShadow = Shadow(
+      offset: Offset.zero,
+      blurRadius: 0.0,
+      color: theme.shadowColor,
+    );
     final targetSize = box.getDryLayout(BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
     final offsetToTarget = Offset(
@@ -160,39 +178,50 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       -target.dy + box.size.height / 2,
     );
 
-    final entry = Directionality(
-      textDirection: Directionality.of(context),
-      child: TooltipOverlay(
-        animatedTransitionBuilder: widget.animatedTransitionBuilder,
-        child: widget.content,
-        padding: widget.padding,
-        margin: widget.margin,
-        targetSize: targetSize,
-        target: target,
-        offset: widget.offset,
-        preferredDirection: widget.preferredDirection,
-        link: _layerLink,
-        offsetToTarget: offsetToTarget,
-        elevation: widget.elevation,
-        borderRadius: widget.borderRadius,
-        tailBaseWidth: widget.tailBaseWidth,
-        tailLength: widget.tailLength,
-        backgroundColor: widget.backgroundColor,
-        textDirection: widget.textDirection,
-        animation: CurvedAnimation(
-          parent: _animationController,
-          curve: widget.curve,
-        ),
-      ),
+    _entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Directionality(
+          textDirection: widget.textDirection,
+          // TODO: This is just a weird hack I found
+          key: ValueKey(_key),
+          child: TooltipOverlay(
+            animatedTransitionBuilder: widget.animatedTransitionBuilder,
+            child: Material(
+              type: MaterialType.transparency,
+              child: widget.content,
+            ),
+            padding: widget.padding,
+            margin: widget.margin,
+            targetSize: targetSize,
+            target: target,
+            offset: widget.offset,
+            preferredDirection: widget.preferredDirection,
+            link: _layerLink,
+            offsetToTarget: offsetToTarget,
+            borderRadius: widget.borderRadius,
+            tailBaseWidth: widget.tailBaseWidth,
+            tailLength: widget.tailLength,
+            backgroundColor: widget.backgroundColor ?? theme.cardColor,
+            textDirection: widget.textDirection,
+            animation: CurvedAnimation(
+              parent: _animationController,
+              curve: widget.curve,
+            ),
+            shadow: widget.shadow ?? defaultShadow,
+            elevation: widget.elevation,
+          ),
+        );
+      },
     );
-    final skrim = GestureDetector(
-      child: SizedBox.expand(),
-      behavior: HitTestBehavior.translucent,
-      onTap: _hideTooltip,
+    _skrim = OverlayEntry(
+      builder: (BuildContext context) {
+        return GestureDetector(
+          child: SizedBox.expand(),
+          behavior: HitTestBehavior.translucent,
+          onTap: _hideTooltip,
+        );
+      },
     );
-
-    _entry = OverlayEntry(builder: (BuildContext context) => entry);
-    _skrim = OverlayEntry(builder: (BuildContext context) => skrim);
 
     final overlay = Overlay.of(context);
 

@@ -27,8 +27,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final Offset offsetToTarget;
 
-  final double elevation;
-
   final BorderRadiusGeometry borderRadius;
 
   final double tailBaseWidth;
@@ -39,7 +37,11 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final TextDirection textDirection;
 
-  final Color? backgroundColor;
+  final Color backgroundColor;
+
+  final Shadow shadow;
+
+  final double elevation;
 
   const TooltipOverlay({
     Key? key,
@@ -53,18 +55,17 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.preferredDirection,
     required this.link,
     required this.offsetToTarget,
-    required this.elevation,
     required this.borderRadius,
     required this.tailBaseWidth,
     required this.tailLength,
     required this.animatedTransitionBuilder,
     required this.textDirection,
     required this.backgroundColor,
+    required this.shadow,
+    required this.elevation,
   }) : super(key: key, child: child);
 
   RenderObject createRenderObject(BuildContext context) {
-    final _backgroundColor = backgroundColor ?? Theme.of(context).cardColor;
-
     return _RenderTooltipOverlay(
       margin: margin,
       offset: offset,
@@ -73,9 +74,11 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       tailLength: tailLength,
       tailBaseWidth: tailBaseWidth,
       textDirection: textDirection,
-      backgroundColor: _backgroundColor,
+      backgroundColor: backgroundColor,
       preferredDirection: preferredDirection,
       targetSize: targetSize,
+      shadow: shadow,
+      elevation: elevation,
     );
   }
 
@@ -100,7 +103,25 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
     properties
         .add(DiagnosticsProperty<Animation<double>>('animation', animation));
-    // TODO:
+    properties.add(DiagnosticsProperty<Offset>('target', target));
+    properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
+    properties.add(DoubleProperty('offset', offset));
+    properties.add(DiagnosticsProperty<AxisDirection>(
+        'preferredDirection', preferredDirection));
+    properties.add(DiagnosticsProperty<LayerLink>('link', link));
+    properties
+        .add(DiagnosticsProperty<Offset>('offsetToTarget', offsetToTarget));
+    properties.add(DiagnosticsProperty<BorderRadiusGeometry>(
+        'borderRadius', borderRadius));
+    properties.add(DoubleProperty('tailBaseWidth', tailBaseWidth));
+    properties.add(DoubleProperty('tailLength', tailLength));
+    properties.add(DiagnosticsProperty<AnimatedTransitionBuilder>(
+        'animatedTransitionBuilder', animatedTransitionBuilder));
+    properties.add(
+        DiagnosticsProperty<TextDirection>('textDirection', textDirection));
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
+    properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
+    properties.add(DoubleProperty('elevation', elevation));
   }
 }
 
@@ -125,6 +146,10 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
   final Size targetSize;
 
+  final Shadow shadow;
+
+  final double elevation;
+
   _RenderTooltipOverlay({
     RenderBox? child,
     required this.margin,
@@ -137,6 +162,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     required this.backgroundColor,
     required this.preferredDirection,
     required this.targetSize,
+    required this.shadow,
+    required this.elevation,
   }) : super(child);
 
   double get sumOffset => offset + tailLength;
@@ -151,16 +178,77 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final _child = child;
 
     if (_child != null) {
-      _child.layout(constraints.loosen(), parentUsesSize: true);
+      final deflated = constraints.copyWith(
+        minWidth: margin.left,
+        maxWidth: constraints.maxWidth - margin.right,
+        minHeight: margin.top,
+        maxHeight: constraints.maxHeight - margin.left,
+      );
+      _child.layout(
+        deflated,
+        parentUsesSize: true,
+      );
+
       size = constraints.constrain(Size(
         shrinkWrapWidth ? _child.size.width : double.infinity,
         shrinkWrapHeight ? _child.size.height : double.infinity,
       ));
 
+      BoxConstraints quadrantConstrained;
+
+      // TODO: Once you get the positioned box, relayout the child.
+      // It's the right thing to do
       final positionBox = getPositionBoxForChild(
         size: size,
         childSize: _child.size,
       );
+
+      switch (positionBox.axisDirection) {
+        case AxisDirection.up:
+          quadrantConstrained = deflated.copyWith(
+            maxHeight: target.dy -
+                (targetSize.height / 2) -
+                offset -
+                tailLength -
+                margin.top,
+          );
+          break;
+        case AxisDirection.down:
+          quadrantConstrained = deflated.copyWith(
+            maxHeight: target.dy +
+                (targetSize.height / 2) +
+                offset +
+                tailLength +
+                margin.bottom,
+          );
+          break;
+        case AxisDirection.left:
+          quadrantConstrained = deflated.copyWith(
+            maxWidth: target.dx -
+                (targetSize.width / 2) -
+                offset -
+                tailLength -
+                margin.left,
+          );
+
+          break;
+        case AxisDirection.right:
+          quadrantConstrained = deflated.copyWith(
+            maxWidth: constraints.maxWidth -
+                target.dx -
+                (targetSize.width / 2) -
+                offset -
+                tailLength -
+                margin.right,
+          );
+          break;
+      }
+
+      _child.layout(
+        quadrantConstrained,
+        parentUsesSize: true,
+      );
+
       axisDirection = positionBox.axisDirection;
 
       final childParentData = _child.parentData! as BoxParentData;
@@ -214,37 +302,48 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final _child = child;
 
     if (_child != null) {
+      context.canvas.save();
+      context.canvas.translate(offset.dx, offset.dy);
+
       final childParentData = _child.parentData! as BoxParentData;
       final _offset = childParentData.offset;
-      final totalOffset = offset + _offset;
-
-      context.canvas.save();
-      context.canvas.translate(totalOffset.dx, totalOffset.dy);
 
       final paint = Paint()
-        ..color = Colors.blue
+        ..color = backgroundColor
         ..style = PaintingStyle.fill;
-      final path = Path()..moveTo(_offset.dx, _offset.dy);
+      final path = Path();
       final radius = borderRadius.resolve(textDirection);
       final rect = _offset & _child.size;
 
-      path
-        ..addRRect(RRect.fromRectAndCorners(
-          rect,
-          topLeft: radius.topLeft,
-          topRight: radius.topRight,
-          bottomLeft: radius.bottomLeft,
-          bottomRight: radius.bottomRight,
-        ));
+      // TODO:
+      // Currently, I don't think this is triggered by an empty child. Dunno
+      // why this is the case or if this is a feature.
+      if (!rect.isEmpty) {
+        path
+          ..addRRect(RRect.fromRectAndCorners(
+            rect,
+            topLeft: radius.topLeft,
+            topRight: radius.topRight,
+            bottomLeft: radius.bottomLeft,
+            bottomRight: radius.bottomRight,
+          ))
+          ..addPath(
+            _paintTail(
+              rect: rect,
+              radius: radius,
+            ),
+            Offset.zero,
+          );
 
-      _paintTail(
-        path: path,
-        rect: rect,
-        radius: radius,
-      );
-
-      context.canvas.drawPath(path, paint);
-      context.canvas.restore();
+        // TODO: What do I do about the blurSigma property on shadow?
+        context.canvas.drawShadow(
+          path.shift(shadow.offset),
+          shadow.color,
+          elevation,
+          false,
+        );
+        context.canvas.drawPath(path, paint);
+      }
     }
 
     super.paint(context, offset);
@@ -262,6 +361,10 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     Color? backgroundColor,
     AxisDirection? preferredDirection,
     Size? targetSize,
+    // TODO: This just needs a markNeedsPaint
+    Shadow? shadow,
+    // TODO: This just needs a markNeedsPaint
+    double? elevation,
   }) {
     markNeedsLayout();
 
@@ -276,119 +379,143 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       backgroundColor: backgroundColor ?? this.backgroundColor,
       preferredDirection: preferredDirection ?? this.preferredDirection,
       targetSize: targetSize ?? this.targetSize,
+      shadow: shadow ?? this.shadow,
+      elevation: elevation ?? this.elevation,
     );
   }
 
-  void _paintTail({
-    required Path path,
+  Path _paintTail({
     required Rect rect,
     required BorderRadius radius,
   }) {
-    // Paint tail of tooltip
-    // Clockwise: center point, right, left
-    double x, y, x2, y2, x3, y3;
+    final path = Path();
+
+    // Clockwise around the triangle starting at the target center
+    // point + offset
+    double x = 0, y = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
+    final targetWidthRadius = targetSize.width / 2;
+    final targetHeightRadius = targetSize.height / 2;
 
     switch (axisDirection) {
       case AxisDirection.up:
-        final baseWidth = math.min(
+        final baseLength = math.min(
           tailBaseWidth,
           (rect.right - rect.left) -
               (radius.bottomLeft.x + radius.bottomRight.x),
         );
+        final halfBaseLength = baseLength / 2;
+        final insetLeftCorner = rect.left + radius.bottomLeft.x;
+        final insetRightCorner = rect.right - radius.bottomRight.x;
 
-        final halfBaseWidth = baseWidth / 2;
-        final leftCorner = rect.left + radius.bottomLeft.x;
-        final rightCorner = rect.right - radius.bottomRight.x;
+        if (insetLeftCorner > insetRightCorner) {
+          // This happens when the content is so small, accounting for the
+          // border radius messes up our measurements. Might as well not draw
+          // a tail at this point
+          break;
+        }
 
-        final _target = target.translate(0, -offset - margin.bottom);
+        final _target = target.translate(0, -offset - targetHeightRadius);
+
+        print('rect.bottom: ${rect.bottom}');
+        print('_target.dy: ${_target.dy}');
+        print('tailLength: $tailLength');
+        print('_target.dy - tailLength: ${_target.dy - tailLength}');
+        // assert(rect.bottom == _target.dy - tailLength);
 
         x = _target.dx;
-        y = _target.dy - offset;
+        y = _target.dy;
 
-        x2 = math.min(_target.dx + halfBaseWidth, rightCorner);
-        y2 = _target.dy - tailLength;
+        x2 = (math.min(_target.dx, insetRightCorner) - halfBaseLength)
+            .clamp(insetLeftCorner, insetRightCorner);
+        y2 = rect.bottom;
 
-        x3 = math.max(_target.dx - halfBaseWidth, leftCorner);
-        y3 = _target.dy - tailLength;
+        x3 = (math.max(_target.dx, insetLeftCorner) + halfBaseLength)
+            .clamp(insetLeftCorner, insetRightCorner);
+        y3 = rect.bottom;
         break;
       case AxisDirection.down:
-        final baseWidth = math.min(
+        final baseLength = math.min(
           tailBaseWidth,
           (rect.right - rect.left) - (radius.topLeft.x + radius.topRight.x),
         );
-        final halfBaseWidth = baseWidth / 2;
-        final leftCorner = rect.left + radius.topLeft.x;
-        final rightCorner = rect.right - radius.topRight.x;
+        final halfBaseLength = baseLength / 2;
+        final insetLeftCorner = rect.left + radius.topLeft.x;
+        final insetRightCorner = rect.right - radius.topRight.x;
 
-        final _target = target.translate(0, offset + margin.top);
+        if (insetLeftCorner > insetRightCorner) break;
+
+        final _target = target.translate(0, offset + targetHeightRadius);
+
+        assert(rect.top == _target.dy + tailLength);
 
         x = _target.dx;
         y = _target.dy;
 
-        x2 = math.min(
-          math.max(_target.dx, leftCorner) + halfBaseWidth,
-          rightCorner,
-        );
-        y2 = _target.dy + tailLength;
+        x2 = (math.max(_target.dx, insetLeftCorner) + halfBaseLength)
+            .clamp(insetLeftCorner, insetRightCorner);
+        y2 = rect.top;
 
-        x3 = math.max(
-          math.min(_target.dx, rightCorner) - halfBaseWidth,
-          leftCorner,
-        );
-        y3 = _target.dy + tailLength;
+        x3 = (math.min(_target.dx, insetRightCorner) - halfBaseLength)
+            .clamp(insetLeftCorner, insetRightCorner);
+        y3 = rect.top;
         break;
       case AxisDirection.left:
-        final baseWidth = math.min(
+        final baseLength = math.min(
           tailBaseWidth,
           (rect.bottom - rect.top) - (radius.topRight.y + radius.bottomRight.y),
         );
+        final halfBaseLength = baseLength / 2;
+        final insetBottomCorner = rect.bottom - radius.bottomRight.y;
+        final insetTopCorner = rect.top + radius.topRight.y;
 
-        final halfBaseWidth = baseWidth / 2;
-        final bottomCorner = rect.bottom + radius.bottomRight.x;
-        final topCorner = rect.top - radius.topRight.x;
+        if (insetBottomCorner > insetTopCorner) break;
 
-        final _target = target.translate(-offset - margin.right, 0);
+        final _target = target.translate(-offset - targetWidthRadius, 0.0);
 
-        x = _target.dx - offset;
+        assert(rect.right == _target.dx - tailLength);
+
+        x = _target.dx;
         y = _target.dy;
 
-        x2 = _target.dx - tailLength;
-        y2 = math.max(_target.dy - halfBaseWidth, topCorner);
+        x2 = rect.right;
+        y2 = (math.max(_target.dy, insetTopCorner) + halfBaseLength)
+            .clamp(insetTopCorner, insetBottomCorner);
 
-        x3 = _target.dx - tailLength;
-        y3 = math.min(_target.dy + halfBaseWidth, bottomCorner);
+        x3 = rect.right;
+        y3 = (math.min(_target.dy, insetBottomCorner) - halfBaseLength)
+            .clamp(insetTopCorner, insetBottomCorner);
+
         break;
       case AxisDirection.right:
-        final baseWidth = math.min(
+        final baseLength = math.min(
           tailBaseWidth,
           (rect.bottom - rect.top) - (radius.topLeft.y + radius.topRight.y),
         );
 
-        final halfBaseWidth = baseWidth / 2;
-        final bottomCorner = rect.bottom + radius.bottomLeft.x;
-        final topCorner = rect.top - radius.topLeft.x;
+        final halfBaseLength = baseLength / 2;
+        final insetBottomCorner = rect.bottom - radius.bottomLeft.y;
+        final insetTopCorner = rect.top + radius.topLeft.y;
 
-        final _target = target.translate(offset + margin.left, 0.0);
+        if (insetBottomCorner > insetTopCorner) break;
 
-        x = _target.dx + offset;
+        final _target = target.translate(offset + targetWidthRadius, 0.0);
+
+        assert(rect.left == _target.dx + tailLength);
+
+        x = _target.dx;
         y = _target.dy;
 
-        x2 = _target.dx + tailLength;
-        y2 = math.max(_target.dy - halfBaseWidth, topCorner);
+        x2 = rect.left;
+        y2 = (math.min(_target.dy, insetBottomCorner) - halfBaseLength)
+            .clamp(insetTopCorner, insetBottomCorner);
 
-        x3 = _target.dx + tailLength;
-        y3 = math.min(_target.dy + halfBaseWidth, bottomCorner);
+        x3 = rect.left;
+        y3 = (math.max(_target.dy, insetTopCorner) + halfBaseLength)
+            .clamp(insetTopCorner, insetBottomCorner);
         break;
     }
 
-    // print('---------');
-    // print('(x, y) = ($x, $y)');
-    // print('(x2, y2) = ($x2, $y2)');
-    // print('(x3, y3) = ($x3, $y3)');
-    // print('---------');
-
-    path
-      ..fillType = PathFillType.evenOdd
+    return path
       ..moveTo(x, y)
       ..lineTo(x2, y2)
       ..lineTo(x3, y3)

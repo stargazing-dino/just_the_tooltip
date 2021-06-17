@@ -61,7 +61,7 @@ PositionDependentBox horizontalPositionDependentBox({
 
   double x;
   if (tooltipLeft) {
-    x = math.max(margin.left, leftTargetEdge - childAndOffsetWidth);
+    x = math.max(margin.right, leftTargetEdge - childAndOffsetWidth);
   } else {
     x = math.min(rightTargetEdge + horizontalOffset, size.width - margin.right);
   }
