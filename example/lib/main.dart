@@ -4,6 +4,7 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 
 void main() => runApp(MyApp());
 
+// ignore: use_key_in_widget_constructors
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -15,6 +16,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+// ignore: use_key_in_widget_constructors
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -25,43 +27,33 @@ class MyHomePage extends StatelessWidget {
       ),
       child: Scaffold(
         body: SizedBox.expand(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Spacer(flex: 2),
-              JustTheTooltip(
-                tailLength: 20.0,
-                preferredDirection: AxisDirection.up,
-                margin: EdgeInsets.all(16.0),
-                borderRadius: BorderRadius.circular(16.0),
-                offset: 0,
-                child: Material(
-                  color: Colors.grey.shade800,
-                  shape: const CircleBorder(),
-                  elevation: 4.0,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Icon(
-                      Icons.add,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                content: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  // child: Text(
-                  //   'hello this ',
-                  // ),
-                  child: RotatedBox(
-                    quarterTurns: 1,
-                    child: Text(
-                      'hello this is a lot of text and i don\'t think thats such a bad thing, hello this is a lot of text and i don\'t think thats such a bad thing',
-                    ),
+          child: Align(
+            alignment: Alignment.center,
+            child: JustTheTooltip(
+              tailLength: 20.0,
+              preferredDirection: AxisDirection.up,
+              margin: const EdgeInsets.all(16.0),
+              borderRadius: BorderRadius.circular(16.0),
+              offset: 0,
+              child: Material(
+                color: Colors.grey.shade800,
+                shape: const CircleBorder(),
+                elevation: 4.0,
+                child: const Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(
+                    Icons.add,
+                    color: Colors.white,
                   ),
                 ),
               ),
-              Spacer(flex: 2),
-            ],
+              content: const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Text(
+                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut auctor mi. Ut eros orci, rhoncus in cursus ut, mollis vel velit. Curabitur in finibus massa. Sed posuere placerat lectus non finibus. Quisque ultricies aliquet felis, sit amet semper nisi tempor at. Integer auctor quam neque. Nulla mollis justo ac ex vulputate, in mollis sem fringilla.',
+                ),
+              ),
+            ),
           ),
         ),
       ),

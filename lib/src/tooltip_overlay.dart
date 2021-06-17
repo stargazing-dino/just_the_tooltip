@@ -65,6 +65,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.elevation,
   }) : super(key: key, child: child);
 
+  @override
   RenderObject createRenderObject(BuildContext context) {
     return _RenderTooltipOverlay(
       margin: margin,
@@ -82,6 +83,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     );
   }
 
+  @override
   void updateRenderObject(
     BuildContext context,
     _RenderTooltipOverlay renderObject,
@@ -97,6 +99,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     );
   }
 
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding));
@@ -106,19 +109,29 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     properties.add(DiagnosticsProperty<Offset>('target', target));
     properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
     properties.add(DoubleProperty('offset', offset));
-    properties.add(DiagnosticsProperty<AxisDirection>(
-        'preferredDirection', preferredDirection));
+    properties.add(
+      DiagnosticsProperty<AxisDirection>(
+        'preferredDirection',
+        preferredDirection,
+      ),
+    );
     properties.add(DiagnosticsProperty<LayerLink>('link', link));
     properties
         .add(DiagnosticsProperty<Offset>('offsetToTarget', offsetToTarget));
-    properties.add(DiagnosticsProperty<BorderRadiusGeometry>(
-        'borderRadius', borderRadius));
+    properties.add(
+      DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius),
+    );
     properties.add(DoubleProperty('tailBaseWidth', tailBaseWidth));
     properties.add(DoubleProperty('tailLength', tailLength));
-    properties.add(DiagnosticsProperty<AnimatedTransitionBuilder>(
-        'animatedTransitionBuilder', animatedTransitionBuilder));
     properties.add(
-        DiagnosticsProperty<TextDirection>('textDirection', textDirection));
+      DiagnosticsProperty<AnimatedTransitionBuilder>(
+        'animatedTransitionBuilder',
+        animatedTransitionBuilder,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<TextDirection>('textDirection', textDirection),
+    );
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
     properties.add(DoubleProperty('elevation', elevation));
@@ -178,6 +191,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final _child = child;
 
     if (_child != null) {
+      final childParentData = _child.parentData! as BoxParentData;
       final deflated = constraints.copyWith(
         minWidth: margin.left,
         maxWidth: constraints.maxWidth - margin.right,
@@ -189,10 +203,12 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         parentUsesSize: true,
       );
 
-      size = constraints.constrain(Size(
-        shrinkWrapWidth ? _child.size.width : double.infinity,
-        shrinkWrapHeight ? _child.size.height : double.infinity,
-      ));
+      size = constraints.constrain(
+        Size(
+          shrinkWrapWidth ? _child.size.width : double.infinity,
+          shrinkWrapHeight ? _child.size.height : double.infinity,
+        ),
+      );
 
       BoxConstraints quadrantConstrained;
 
@@ -244,28 +260,57 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           break;
       }
 
+      // We relayout because we for sure know which quadrant the child belongs
       _child.layout(
         quadrantConstrained,
         parentUsesSize: true,
       );
 
       axisDirection = positionBox.axisDirection;
-
-      final childParentData = _child.parentData! as BoxParentData;
-
       childParentData.offset = positionBox.offset;
     } else {
-      size = constraints.constrain(Size(
-        shrinkWrapWidth ? 0.0 : double.infinity,
-        shrinkWrapHeight ? 0.0 : double.infinity,
-      ));
+      size = constraints.constrain(
+        Size(
+          shrinkWrapWidth ? 0.0 : double.infinity,
+          shrinkWrapHeight ? 0.0 : double.infinity,
+        ),
+      );
     }
   }
 
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<TextDirection>('textDirection', textDirection,
-        defaultValue: null));
+    // TODO: Is it necessary to fill these twice, once in the parent and once
+    // here?
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
+    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+    properties.add(DiagnosticsProperty<Offset>('target', target));
+    properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
+    properties.add(DoubleProperty('offset', offset));
+    properties.add(
+      DiagnosticsProperty<AxisDirection>(
+        'preferredDirection',
+        preferredDirection,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius),
+    );
+    properties.add(DoubleProperty('tailBaseWidth', tailBaseWidth));
+    properties.add(DoubleProperty('tailLength', tailLength));
+    properties.add(
+      DiagnosticsProperty<TextDirection>('textDirection', textDirection),
+    );
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
+    properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
+    properties.add(DoubleProperty('elevation', elevation));
   }
 
   PositionDependentBox getPositionBoxForChild({
@@ -298,6 +343,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     }
   }
 
+  @override
   void paint(PaintingContext context, Offset offset) {
     final _child = child;
 
@@ -320,13 +366,15 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       // why this is the case or if this is a feature.
       if (!rect.isEmpty) {
         path
-          ..addRRect(RRect.fromRectAndCorners(
-            rect,
-            topLeft: radius.topLeft,
-            topRight: radius.topRight,
-            bottomLeft: radius.bottomLeft,
-            bottomRight: radius.bottomRight,
-          ))
+          ..addRRect(
+            RRect.fromRectAndCorners(
+              rect,
+              topLeft: radius.topLeft,
+              topRight: radius.topRight,
+              bottomLeft: radius.bottomLeft,
+              bottomRight: radius.bottomRight,
+            ),
+          )
           ..addPath(
             _paintTail(
               rect: rect,
@@ -416,11 +464,12 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
         final _target = target.translate(0, -offset - targetHeightRadius);
 
-        print('rect.bottom: ${rect.bottom}');
-        print('_target.dy: ${_target.dy}');
-        print('tailLength: $tailLength');
-        print('_target.dy - tailLength: ${_target.dy - tailLength}');
-        // assert(rect.bottom == _target.dy - tailLength);
+        // print('rect.bottom: ${rect.bottom}');
+        // print('_target.dy: ${_target.dy}');
+        // print('tailLength: $tailLength');
+        // print('_target.dy - tailLength: ${_target.dy - tailLength}');
+        // print(rect.bottom == _target.dy - tailLength);
+        assert(rect.bottom == _target.dy - tailLength);
 
         x = _target.dx;
         y = _target.dy;

@@ -41,9 +41,9 @@ class JustTheTooltip extends StatefulWidget {
   final Shadow? shadow;
 
   static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
-    context,
-    animation,
-    child,
+    BuildContext context,
+    Animation<double> animation,
+    Widget? child,
   ) {
     return FadeTransition(
       opacity: animation,
@@ -75,7 +75,7 @@ class JustTheTooltip extends StatefulWidget {
     // this.minHeight,
     // this.maxWidth,
     // this.maxHeight,
-  });
+  }) : super(key: key);
 
   @override
   _SimpleTooltipState createState() => _SimpleTooltipState();
@@ -103,7 +103,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
 
   @override
   void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-    Future.delayed(Duration.zero).then((_) {
+    Future<void>.delayed(Duration.zero).then((_) {
       setState(() {
         _key++;
         _key %= 2;
@@ -134,7 +134,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     );
   }
 
-  void _hideTooltip({bool immediately = false}) async {
+  Future<void> _hideTooltip({bool immediately = false}) async {
     if (!immediately) {
       await _animationController.reverse();
     }
@@ -148,7 +148,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     });
   }
 
-  void _showTooltip({bool immediately = false}) async {
+  Future<void> _showTooltip({bool immediately = false}) async {
     _createNewEntries();
 
     await _animationController.forward();
@@ -171,7 +171,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       blurRadius: 0.0,
       color: theme.shadowColor,
     );
-    final targetSize = box.getDryLayout(BoxConstraints.tightForFinite());
+    final targetSize = box.getDryLayout(const BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
     final offsetToTarget = Offset(
       -target.dx + box.size.width / 2,
@@ -216,7 +216,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     _skrim = OverlayEntry(
       builder: (BuildContext context) {
         return GestureDetector(
-          child: SizedBox.expand(),
+          child: const SizedBox.expand(),
           behavior: HitTestBehavior.translucent,
           onTap: _hideTooltip,
         );

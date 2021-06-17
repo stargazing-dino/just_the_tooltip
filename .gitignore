@@ -30,6 +30,9 @@
 .pub/
 build/
 
+# don't check in golden failure output
+**/failures/*.png
+
 # Android related
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
