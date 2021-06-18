@@ -12,6 +12,10 @@ install it
 
 Tooltip can be set to prefer any axis but will try to fit in opposite axis if the space is not big enough. This tooltip sizes itself to fit the size of its child.
 
+<p>  
+ <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true"/>
+</p>
+
 ```dart
 JustTheTooltip(
   child: Material(
@@ -29,10 +33,16 @@ JustTheTooltip(
   content: const Padding(
     padding: EdgeInsets.all(8.0),
     child: Text(
-      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut auctor mi. Ut eros orci, rhoncus in cursus ut, mollis vel velit. Curabitur in finibus massa. Sed posuere placerat lectus non finibus. Quisque ultricies aliquet felis, sit amet semper nisi tempor at. Integer auctor quam neque. Nulla mollis justo ac ex vulputate, in mollis sem fringilla.',
+      'Bacon ipsum dolor amet kevin turducken brisket pastrami, salami ribeye spare ribs tri-tip sirloin shoulder venison shank burgdoggen chicken pork belly. Short loin filet mignon shoulder rump beef ribs meatball kevin.',
     ),
   ),
 )
 ```
 
 The child will be wrapped with a gesture detecor that is responsible for showing the content.
+
+<p>  
+ <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true"/>
+</p>
+
+The tooltip should also work in lists.

@@ -267,14 +267,14 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         break;
       case AxisDirection.left:
         quadrantConstrained = constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.horizontal,
+          maxHeight: constraints.maxHeight - margin.vertical,
           maxWidth:
               target.dx - margin.left - targetWidthRadius - offset - tailLength,
         );
         break;
       case AxisDirection.right:
         quadrantConstrained = constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.horizontal,
+          maxHeight: constraints.maxHeight - margin.vertical,
           maxWidth: constraints.maxWidth -
               margin.right -
               target.dx -
@@ -285,6 +285,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         break;
     }
 
+    // FIXME: Why doesn't this break when the child size is overbound?
     _child.layout(
       quadrantConstrained,
       parentUsesSize: true,
@@ -432,6 +433,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
         final _target = target.translate(0, -offset - targetHeightRadius);
 
+        assert(rect.bottom == _target.dy - tailLength);
+
         x = _target.dx;
         y = _target.dy;
 
@@ -482,7 +485,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
         final _target = target.translate(-offset - targetWidthRadius, 0.0);
 
-        // assert(rect.right == _target.dx - tailLength);
+        assert(rect.right == _target.dx - tailLength);
 
         x = _target.dx;
         y = _target.dy;
