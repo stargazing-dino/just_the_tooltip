@@ -1,3 +1,6 @@
+## [0.0.2] - Jun 18, 2021
+Change layout strategy and add screnshots
+
 ## [0.0.1+2] - Jun 17, 2021
 We only do one layout now
 
