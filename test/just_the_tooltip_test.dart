@@ -57,12 +57,14 @@ void main() {
 
   DeviceBuilder allAxisWithContent(Widget content, WidgetTester tester) {
     return DeviceBuilder()
-      ..overrideDevicesForAllScenarios(devices: [
-        Device.phone,
-        Device.iphone11,
-        Device.tabletPortrait,
-        Device.tabletLandscape,
-      ])
+      ..overrideDevicesForAllScenarios(
+        devices: [
+          Device.phone,
+          Device.iphone11,
+          Device.tabletPortrait,
+          Device.tabletLandscape,
+        ],
+      )
       ..addScenario(
         name: 'up',
         widget: JustTheTooltip(

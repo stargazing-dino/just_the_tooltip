@@ -2,9 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:just_the_tooltip/src/horizontal_geometry.dart';
-import 'package:just_the_tooltip/src/position_dependent_box.dart';
-import 'package:just_the_tooltip/src/vertical_geometry.dart';
+import 'package:just_the_tooltip/src/get_axis_direction.dart';
+import 'package:just_the_tooltip/src/position_dependent_offset.dart';
 
 /// Getting the intrinsic size of the child was from [Align] and
 /// [RenderPositionedBox]
@@ -184,92 +183,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   late AxisDirection axisDirection;
 
   @override
-  void performLayout() {
-    final constraints = this.constraints;
-    final shrinkWrapWidth = constraints.maxWidth == double.infinity;
-    final shrinkWrapHeight = constraints.maxHeight == double.infinity;
-    final targetHeightRadius = targetSize.height / 2;
-    final targetWidthRadius = targetSize.width / 2;
-    final _child = child;
-
-    if (_child != null) {
-      final childParentData = _child.parentData! as BoxParentData;
-      final deflated = constraints.copyWith(
-        minWidth: margin.left,
-        maxWidth: constraints.maxWidth - margin.right,
-        minHeight: margin.top,
-        maxHeight: constraints.maxHeight - margin.left,
-      );
-
-      final childSize = _child.getDryLayout(deflated);
-
-      BoxConstraints quadrantConstrained;
-
-      // TODO: Once you get the positioned box, relayout the child.
-      // It's the right thing to do
-      final positionBox = getPositionBoxForChild(
-        size: constraints.biggest,
-        childSize: childSize,
-      );
-
-      switch (positionBox.axisDirection) {
-        case AxisDirection.up:
-          quadrantConstrained = deflated.copyWith(
-            maxHeight: target.dy - targetHeightRadius - offset - tailLength,
-          );
-          break;
-        case AxisDirection.down:
-          final newConstraints = deflated.copyWith(
-            maxHeight: deflated.maxHeight -
-                target.dy -
-                targetHeightRadius -
-                offset -
-                tailLength,
-          );
-          quadrantConstrained = newConstraints;
-          break;
-        case AxisDirection.left:
-          quadrantConstrained = deflated.copyWith(
-            maxWidth: target.dx - targetWidthRadius - offset - tailLength,
-          );
-
-          break;
-        case AxisDirection.right:
-          quadrantConstrained = deflated.copyWith(
-            maxWidth: constraints.maxWidth -
-                target.dx -
-                targetWidthRadius -
-                offset -
-                tailLength,
-          );
-          break;
-      }
-
-      _child.layout(
-        quadrantConstrained,
-        parentUsesSize: true,
-      );
-
-      size = constraints.constrain(
-        Size(
-          shrinkWrapWidth ? _child.size.width : double.infinity,
-          shrinkWrapHeight ? _child.size.height : double.infinity,
-        ),
-      );
-
-      axisDirection = positionBox.axisDirection;
-      childParentData.offset = positionBox.offset;
-    } else {
-      size = constraints.constrain(
-        Size(
-          shrinkWrapWidth ? 0.0 : double.infinity,
-          shrinkWrapHeight ? 0.0 : double.infinity,
-        ),
-      );
-    }
-  }
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     // TODO: Is it necessary to fill these twice, once in the parent and once
@@ -304,34 +217,102 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     properties.add(DoubleProperty('elevation', elevation));
   }
 
-  PositionDependentBox getPositionBoxForChild({
-    required Size size,
-    required Size childSize,
-  }) {
-    switch (preferredDirection) {
-      case AxisDirection.down:
-      case AxisDirection.up:
-        return verticalPositionDependentBox(
-          size: size,
-          targetSize: targetSize,
-          childSize: childSize,
-          target: target,
-          verticalOffset: sumOffset,
-          preferAbove: preferredDirection == AxisDirection.up,
-          margin: margin,
-        );
-      case AxisDirection.left:
-      case AxisDirection.right:
-        return horizontalPositionDependentBox(
-          size: size,
-          targetSize: targetSize,
-          childSize: childSize,
-          target: target,
-          horizontalOffset: sumOffset,
-          preferLeft: preferredDirection == AxisDirection.left,
-          margin: margin,
-        );
+  @override
+  BoxConstraints get constraints => super.constraints.loosen();
+
+  @override
+  void performLayout() {
+    final _child = child;
+
+    if (_child == null) {
+      size = constraints.constrain(margin.collapsedSize);
+      return;
     }
+
+    final childSize = _child.getDryLayout(constraints.deflate(margin));
+    axisDirection = getAxisDirection(
+      targetSize: targetSize,
+      target: target,
+      preferredDirection: preferredDirection,
+      offset: offset,
+      margin: margin,
+      size: constraints.biggest,
+      childSize: childSize,
+    );
+    final targetHeightRadius = targetSize.height / 2;
+    final targetWidthRadius = targetSize.width / 2;
+    final childParentData = _child.parentData as BoxParentData;
+
+    // We further constrain where the box is allowed to take space by
+    // conditionally squishing it against an axis.
+    BoxConstraints quadrantConstrained;
+
+    switch (axisDirection) {
+      case AxisDirection.up:
+        quadrantConstrained = constraints.copyWith(
+          maxWidth: constraints.maxWidth - margin.horizontal,
+          maxHeight:
+              target.dy - targetHeightRadius - offset - tailLength - margin.top,
+        );
+        break;
+      case AxisDirection.down:
+        quadrantConstrained = constraints.copyWith(
+          maxWidth: constraints.maxWidth - margin.horizontal,
+          maxHeight: constraints.maxHeight -
+              target.dy -
+              targetHeightRadius -
+              offset -
+              tailLength,
+        );
+        break;
+      case AxisDirection.left:
+        quadrantConstrained = constraints.copyWith(
+          maxHeight: constraints.maxHeight - margin.horizontal,
+          maxWidth:
+              target.dx - margin.left - targetWidthRadius - offset - tailLength,
+        );
+        break;
+      case AxisDirection.right:
+        quadrantConstrained = constraints.copyWith(
+          maxHeight: constraints.maxHeight - margin.horizontal,
+          maxWidth: constraints.maxWidth -
+              margin.right -
+              target.dx -
+              targetWidthRadius -
+              offset -
+              tailLength,
+        );
+        break;
+    }
+
+    _child.layout(
+      quadrantConstrained,
+      parentUsesSize: true,
+    );
+
+    // Now that we've done real layout, child is actual size
+
+    final shrinkWrapWidth = constraints.maxWidth == double.infinity;
+    final shrinkWrapHeight = constraints.maxHeight == double.infinity;
+
+    size = constraints.constrain(
+      Size(
+        shrinkWrapWidth ? _child.size.width : double.infinity,
+        shrinkWrapHeight ? _child.size.height : double.infinity,
+      ),
+    );
+
+    final quadrantOffset = positionDependentOffset(
+      axisDirection: axisDirection,
+      childSize: _child.size,
+      margin: margin,
+      offset: offset,
+      size: size,
+      target: target,
+      targetSize: targetSize,
+    );
+
+    childParentData.offset = quadrantOffset;
   }
 
   @override
@@ -339,18 +320,14 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final _child = child;
 
     if (_child != null) {
-      context.canvas.save();
-      context.canvas.translate(offset.dx, offset.dy);
-
       final childParentData = _child.parentData! as BoxParentData;
       final _offset = childParentData.offset;
-
       final paint = Paint()
         ..color = backgroundColor
         ..style = PaintingStyle.fill;
       final path = Path();
       final radius = borderRadius.resolve(textDirection);
-      final rect = _offset & _child.size;
+      final rect = (offset + _offset) & _child.size;
 
       // TODO:
       // Currently, I don't think this is triggered by an empty child. Dunno
@@ -455,13 +432,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
         final _target = target.translate(0, -offset - targetHeightRadius);
 
-        // print('rect.bottom: ${rect.bottom}');
-        // print('_target.dy: ${_target.dy}');
-        // print('tailLength: $tailLength');
-        // print('_target.dy - tailLength: ${_target.dy - tailLength}');
-        // print(rect.bottom == _target.dy - tailLength);
-        assert(rect.bottom == _target.dy - tailLength);
-
         x = _target.dx;
         y = _target.dy;
 
@@ -505,14 +475,14 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           (rect.bottom - rect.top) - (radius.topRight.y + radius.bottomRight.y),
         );
         final halfBaseLength = baseLength / 2;
-        final insetBottomCorner = rect.bottom - radius.bottomRight.y;
         final insetTopCorner = rect.top + radius.topRight.y;
+        final insetBottomCorner = rect.bottom - radius.bottomRight.y;
 
-        if (insetBottomCorner > insetTopCorner) break;
+        if (insetBottomCorner < insetTopCorner) break;
 
         final _target = target.translate(-offset - targetWidthRadius, 0.0);
 
-        assert(rect.right == _target.dx - tailLength);
+        // assert(rect.right == _target.dx - tailLength);
 
         x = _target.dx;
         y = _target.dy;
@@ -536,7 +506,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         final insetBottomCorner = rect.bottom - radius.bottomLeft.y;
         final insetTopCorner = rect.top + radius.topLeft.y;
 
-        if (insetBottomCorner > insetTopCorner) break;
+        if (insetBottomCorner < insetTopCorner) break;
 
         final _target = target.translate(offset + targetWidthRadius, 0.0);
 

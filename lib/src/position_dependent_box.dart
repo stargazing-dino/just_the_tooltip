@@ -31,4 +31,9 @@ class PositionDependentBox {
 
   @override
   int get hashCode => offset.hashCode ^ axisDirection.hashCode;
+
+  @override
+  String toString() {
+    return 'PositionDependentBox(  $offset,  $axisDirection  )';
+  }
 }
