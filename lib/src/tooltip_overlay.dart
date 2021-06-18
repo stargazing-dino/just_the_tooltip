@@ -188,6 +188,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final constraints = this.constraints;
     final shrinkWrapWidth = constraints.maxWidth == double.infinity;
     final shrinkWrapHeight = constraints.maxHeight == double.infinity;
+    final targetHeightRadius = targetSize.height / 2;
+    final targetWidthRadius = targetSize.width / 2;
     final _child = child;
 
     if (_child != null) {
@@ -222,29 +224,22 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       switch (positionBox.axisDirection) {
         case AxisDirection.up:
           quadrantConstrained = deflated.copyWith(
-            maxHeight: target.dy -
-                (targetSize.height / 2) -
-                offset -
-                tailLength -
-                margin.top,
+            maxHeight: target.dy - targetHeightRadius - offset - tailLength,
           );
           break;
         case AxisDirection.down:
-          quadrantConstrained = deflated.copyWith(
-            maxHeight: target.dy +
-                (targetSize.height / 2) +
-                offset +
-                tailLength +
-                margin.bottom,
+          final newConstraints = deflated.copyWith(
+            maxHeight: deflated.maxHeight -
+                target.dy -
+                targetHeightRadius -
+                offset -
+                tailLength,
           );
+          quadrantConstrained = newConstraints;
           break;
         case AxisDirection.left:
           quadrantConstrained = deflated.copyWith(
-            maxWidth: target.dx -
-                (targetSize.width / 2) -
-                offset -
-                tailLength -
-                margin.left,
+            maxWidth: target.dx - targetWidthRadius - offset - tailLength,
           );
 
           break;
@@ -252,10 +247,9 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           quadrantConstrained = deflated.copyWith(
             maxWidth: constraints.maxWidth -
                 target.dx -
-                (targetSize.width / 2) -
+                targetWidthRadius -
                 offset -
-                tailLength -
-                margin.right,
+                tailLength,
           );
           break;
       }

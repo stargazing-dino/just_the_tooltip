@@ -40,6 +40,8 @@ class JustTheTooltip extends StatefulWidget {
 
   final Shadow? shadow;
 
+  final bool showWhenUnlinked;
+
   static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
     BuildContext context,
     Animation<double> animation,
@@ -70,6 +72,7 @@ class JustTheTooltip extends StatefulWidget {
     this.backgroundColor,
     this.textDirection = TextDirection.ltr,
     this.shadow,
+    this.showWhenUnlinked = false,
     // TODO:
     // this.minWidth,
     // this.minHeight,
@@ -180,35 +183,40 @@ class _SimpleTooltipState extends State<JustTheTooltip>
 
     _entry = OverlayEntry(
       builder: (BuildContext context) {
-        return Directionality(
-          textDirection: widget.textDirection,
-          // TODO: This is just a weird hack I found
+        return CompositedTransformFollower(
           key: ValueKey(_key),
-          child: TooltipOverlay(
-            animatedTransitionBuilder: widget.animatedTransitionBuilder,
-            child: Material(
-              type: MaterialType.transparency,
-              child: widget.content,
-            ),
-            padding: widget.padding,
-            margin: widget.margin,
-            targetSize: targetSize,
-            target: target,
-            offset: widget.offset,
-            preferredDirection: widget.preferredDirection,
-            link: _layerLink,
-            offsetToTarget: offsetToTarget,
-            borderRadius: widget.borderRadius,
-            tailBaseWidth: widget.tailBaseWidth,
-            tailLength: widget.tailLength,
-            backgroundColor: widget.backgroundColor ?? theme.cardColor,
+          showWhenUnlinked: widget.showWhenUnlinked,
+          offset: offsetToTarget,
+          link: _layerLink,
+          child: Directionality(
             textDirection: widget.textDirection,
-            animation: CurvedAnimation(
-              parent: _animationController,
-              curve: widget.curve,
+            // TODO: This is just a weird hack I found
+            child: TooltipOverlay(
+              animatedTransitionBuilder: widget.animatedTransitionBuilder,
+              child: Material(
+                type: MaterialType.transparency,
+                child: widget.content,
+              ),
+              padding: widget.padding,
+              margin: widget.margin,
+              targetSize: targetSize,
+              target: target,
+              offset: widget.offset,
+              preferredDirection: widget.preferredDirection,
+              link: _layerLink,
+              offsetToTarget: offsetToTarget,
+              borderRadius: widget.borderRadius,
+              tailBaseWidth: widget.tailBaseWidth,
+              tailLength: widget.tailLength,
+              backgroundColor: widget.backgroundColor ?? theme.cardColor,
+              textDirection: widget.textDirection,
+              animation: CurvedAnimation(
+                parent: _animationController,
+                curve: widget.curve,
+              ),
+              shadow: widget.shadow ?? defaultShadow,
+              elevation: widget.elevation,
             ),
-            shadow: widget.shadow ?? defaultShadow,
-            elevation: widget.elevation,
           ),
         );
       },
