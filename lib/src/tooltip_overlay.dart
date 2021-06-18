@@ -200,25 +200,16 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         minHeight: margin.top,
         maxHeight: constraints.maxHeight - margin.left,
       );
-      _child.layout(
-        deflated,
-        parentUsesSize: true,
-      );
 
-      size = constraints.constrain(
-        Size(
-          shrinkWrapWidth ? _child.size.width : double.infinity,
-          shrinkWrapHeight ? _child.size.height : double.infinity,
-        ),
-      );
+      final childSize = _child.getDryLayout(deflated);
 
       BoxConstraints quadrantConstrained;
 
       // TODO: Once you get the positioned box, relayout the child.
       // It's the right thing to do
       final positionBox = getPositionBoxForChild(
-        size: size,
-        childSize: _child.size,
+        size: constraints.biggest,
+        childSize: childSize,
       );
 
       switch (positionBox.axisDirection) {
@@ -254,10 +245,16 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           break;
       }
 
-      // We relayout because we for sure know which quadrant the child belongs
       _child.layout(
         quadrantConstrained,
         parentUsesSize: true,
+      );
+
+      size = constraints.constrain(
+        Size(
+          shrinkWrapWidth ? _child.size.width : double.infinity,
+          shrinkWrapHeight ? _child.size.height : double.infinity,
+        ),
       );
 
       axisDirection = positionBox.axisDirection;
