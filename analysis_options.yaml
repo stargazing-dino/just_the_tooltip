@@ -7,6 +7,7 @@ analyzer:
 
 linter:
   rules:
+    - public_member_api_docs
     - parameter_assignments
     - require_trailing_commas
     - only_throw_errors

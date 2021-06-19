@@ -33,7 +33,7 @@ class HomePage extends StatelessWidget {
             alignment: Alignment.center,
             child: JustTheTooltip(
               tailLength: 20.0,
-              preferredDirection: AxisDirection.up,
+              preferredDirection: AxisDirection.left,
               margin: margin,
               borderRadius: BorderRadius.circular(16.0),
               offset: 0,

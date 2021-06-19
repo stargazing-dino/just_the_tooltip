@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
+// TODO: Add a controller
+// TODO: Add a builder
+
+class JustTheController extends ChangeNotifier {}
+
 class JustTheTooltip extends StatefulWidget {
   final Widget content;
 
@@ -191,7 +196,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
           child: FadeTransition(
             opacity: CurvedAnimation(
               parent: _animationController,
-              curve: Curves.fastOutSlowIn,
+              curve: widget.curve,
             ),
             child: Directionality(
               textDirection: widget.textDirection,
@@ -215,10 +220,6 @@ class _SimpleTooltipState extends State<JustTheTooltip>
                 tailLength: widget.tailLength,
                 backgroundColor: widget.backgroundColor ?? theme.cardColor,
                 textDirection: widget.textDirection,
-                animation: CurvedAnimation(
-                  parent: _animationController,
-                  curve: widget.curve,
-                ),
                 shadow: widget.shadow ?? defaultShadow,
                 elevation: widget.elevation,
               ),

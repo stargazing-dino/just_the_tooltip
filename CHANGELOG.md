@@ -1,3 +1,6 @@
+## [0.0.2+2] - Jun 19, 2021
+Add in curve animation property
+
 ## [0.0.2+1] - Jun 18, 2021
 Wire up already in place fade animations
 

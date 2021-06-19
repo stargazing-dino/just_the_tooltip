@@ -12,8 +12,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final EdgeInsets margin;
 
-  final Animation<double> animation;
-
   final Offset target;
 
   final Size targetSize;
@@ -47,7 +45,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required Widget child,
     required this.padding,
     required this.margin,
-    required this.animation,
     required this.targetSize,
     required this.target,
     required this.offset,
@@ -87,15 +84,19 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     BuildContext context,
     _RenderTooltipOverlay renderObject,
   ) {
-    renderObject.copyWith(
-      margin: margin,
-      offset: offset,
-      target: target,
-      borderRadius: borderRadius,
-      tailLength: tailLength,
-      tailBaseWidth: tailBaseWidth,
-      textDirection: textDirection,
-    );
+    renderObject
+      ..margin = margin
+      ..offset = offset
+      ..target = target
+      ..borderRadius = borderRadius
+      ..tailLength = tailLength
+      ..tailBaseWidth = tailBaseWidth
+      ..textDirection = textDirection
+      ..backgroundColor = backgroundColor
+      ..preferredDirection = preferredDirection
+      ..targetSize = targetSize
+      ..shadow = shadow
+      ..elevation = elevation;
   }
 
   @override
@@ -103,8 +104,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding));
     properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
-    properties
-        .add(DiagnosticsProperty<Animation<double>>('animation', animation));
     properties.add(DiagnosticsProperty<Offset>('target', target));
     properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
     properties.add(DoubleProperty('offset', offset));
@@ -138,84 +137,134 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 }
 
 class _RenderTooltipOverlay extends RenderShiftedBox {
-  final EdgeInsets margin;
-
-  final double offset;
-
-  final Offset target;
-
-  final BorderRadiusGeometry borderRadius;
-
-  final double tailLength;
-
-  final double tailBaseWidth;
-
-  final TextDirection textDirection;
-
-  final Color backgroundColor;
-
-  final AxisDirection preferredDirection;
-
-  final Size targetSize;
-
-  final Shadow shadow;
-
-  final double elevation;
-
   _RenderTooltipOverlay({
     RenderBox? child,
-    required this.margin,
-    required this.offset,
-    required this.target,
-    required this.borderRadius,
-    required this.tailLength,
-    required this.tailBaseWidth,
-    required this.textDirection,
-    required this.backgroundColor,
-    required this.preferredDirection,
-    required this.targetSize,
-    required this.shadow,
-    required this.elevation,
-  }) : super(child);
-
-  double get sumOffset => offset + tailLength;
+    required EdgeInsets margin,
+    required double offset,
+    required Offset target,
+    required BorderRadiusGeometry borderRadius,
+    required double tailLength,
+    required double tailBaseWidth,
+    required TextDirection textDirection,
+    required Color backgroundColor,
+    required AxisDirection preferredDirection,
+    required Size targetSize,
+    required Shadow shadow,
+    required double elevation,
+  })  : _margin = margin,
+        _offset = offset,
+        _target = target,
+        _borderRadius = borderRadius,
+        _tailLength = tailLength,
+        _tailBaseWidth = tailBaseWidth,
+        _textDirection = textDirection,
+        _backgroundColor = backgroundColor,
+        _preferredDirection = preferredDirection,
+        _targetSize = targetSize,
+        _shadow = shadow,
+        _elevation = elevation,
+        super(child);
 
   late AxisDirection axisDirection;
 
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    // TODO: Is it necessary to fill these twice, once in the parent and once
-    // here?
-    properties.add(
-      EnumProperty<TextDirection>(
-        'textDirection',
-        textDirection,
-        defaultValue: null,
-      ),
-    );
-    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
-    properties.add(DiagnosticsProperty<Offset>('target', target));
-    properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
-    properties.add(DoubleProperty('offset', offset));
-    properties.add(
-      DiagnosticsProperty<AxisDirection>(
-        'preferredDirection',
-        preferredDirection,
-      ),
-    );
-    properties.add(
-      DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius),
-    );
-    properties.add(DoubleProperty('tailBaseWidth', tailBaseWidth));
-    properties.add(DoubleProperty('tailLength', tailLength));
-    properties.add(
-      DiagnosticsProperty<TextDirection>('textDirection', textDirection),
-    );
-    properties.add(ColorProperty('backgroundColor', backgroundColor));
-    properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
-    properties.add(DoubleProperty('elevation', elevation));
+  EdgeInsets get margin => _margin;
+  EdgeInsets _margin;
+  set margin(EdgeInsets value) {
+    if (_margin == value) return;
+    _margin = margin;
+    markNeedsLayout();
   }
+
+  double get offset => _offset;
+  double _offset;
+  set offset(double value) {
+    if (_offset == value) return;
+    _offset = offset;
+    markNeedsLayout();
+  }
+
+  Offset get target => _target;
+  Offset _target;
+  set target(Offset value) {
+    if (_target == value) return;
+    _target = target;
+    markNeedsLayout();
+  }
+
+  BorderRadiusGeometry get borderRadius => _borderRadius;
+  BorderRadiusGeometry _borderRadius;
+  set borderRadius(BorderRadiusGeometry value) {
+    if (_borderRadius == value) return;
+    _borderRadius = borderRadius;
+    markNeedsLayout();
+  }
+
+  double get tailLength => _tailLength;
+  double _tailLength;
+  set tailLength(double value) {
+    if (_tailLength == value) return;
+    _tailLength = tailLength;
+    markNeedsLayout();
+  }
+
+  double get tailBaseWidth => _tailBaseWidth;
+  double _tailBaseWidth;
+  set tailBaseWidth(double value) {
+    if (_tailBaseWidth == value) return;
+    _tailBaseWidth = tailBaseWidth;
+    markNeedsLayout();
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value) return;
+    _textDirection = textDirection;
+    // TODO: Does this need layout or repaint?
+    markNeedsLayout();
+  }
+
+  Color get backgroundColor => _backgroundColor;
+  Color _backgroundColor;
+  set backgroundColor(Color value) {
+    if (_backgroundColor == value) return;
+    _backgroundColor = backgroundColor;
+    markNeedsPaint();
+  }
+
+  AxisDirection get preferredDirection => _preferredDirection;
+  AxisDirection _preferredDirection;
+  set preferredDirection(AxisDirection value) {
+    if (_preferredDirection == value) return;
+    _preferredDirection = preferredDirection;
+    markNeedsLayout();
+  }
+
+  Size get targetSize => _targetSize;
+  Size _targetSize;
+  set targetSize(Size value) {
+    if (_targetSize == value) return;
+    _targetSize = targetSize;
+    markNeedsLayout();
+  }
+
+  Shadow get shadow => _shadow;
+  Shadow _shadow;
+  set shadow(Shadow value) {
+    if (_shadow == value) return;
+    _shadow = shadow;
+    markNeedsPaint();
+  }
+
+  double get elevation => _elevation;
+  double _elevation;
+  set elevation(double value) {
+    if (_elevation == value) return;
+    _elevation = elevation;
+    markNeedsPaint();
+  }
+
+  double get sumOffset => offset + tailLength;
 
   @override
   BoxConstraints get constraints => super.constraints.loosen();
@@ -366,41 +415,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     super.paint(context, offset);
   }
 
-  _RenderTooltipOverlay copyWith({
-    EdgeInsets? margin,
-    double? offset,
-    Offset? target,
-    BorderRadiusGeometry? borderRadius,
-    double? tailLength,
-    double? tailBaseWidth,
-    TextDirection? textDirection,
-    // TODO: This just needs a markNeedsPaint
-    Color? backgroundColor,
-    AxisDirection? preferredDirection,
-    Size? targetSize,
-    // TODO: This just needs a markNeedsPaint
-    Shadow? shadow,
-    // TODO: This just needs a markNeedsPaint
-    double? elevation,
-  }) {
-    markNeedsLayout();
-
-    return _RenderTooltipOverlay(
-      margin: margin ?? this.margin,
-      offset: offset ?? this.offset,
-      target: target ?? this.target,
-      borderRadius: borderRadius ?? this.borderRadius,
-      tailLength: tailLength ?? this.tailLength,
-      tailBaseWidth: tailBaseWidth ?? this.tailBaseWidth,
-      textDirection: textDirection ?? this.textDirection,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      preferredDirection: preferredDirection ?? this.preferredDirection,
-      targetSize: targetSize ?? this.targetSize,
-      shadow: shadow ?? this.shadow,
-      elevation: elevation ?? this.elevation,
-    );
-  }
-
   Path _paintTail({
     required Rect rect,
     required BorderRadius radius,
@@ -533,5 +547,40 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       ..lineTo(x2, y2)
       ..lineTo(x3, y3)
       ..close();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    // TODO: Is it necessary to fill these twice, once in the parent and once
+    // here?
+    properties.add(
+      EnumProperty<TextDirection>(
+        'textDirection',
+        textDirection,
+        defaultValue: null,
+      ),
+    );
+    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+    properties.add(DiagnosticsProperty<Offset>('target', target));
+    properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
+    properties.add(DoubleProperty('offset', offset));
+    properties.add(
+      DiagnosticsProperty<AxisDirection>(
+        'preferredDirection',
+        preferredDirection,
+      ),
+    );
+    properties.add(
+      DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius),
+    );
+    properties.add(DoubleProperty('tailBaseWidth', tailBaseWidth));
+    properties.add(DoubleProperty('tailLength', tailLength));
+    properties.add(
+      DiagnosticsProperty<TextDirection>('textDirection', textDirection),
+    );
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
+    properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
+    properties.add(DoubleProperty('elevation', elevation));
   }
 }
