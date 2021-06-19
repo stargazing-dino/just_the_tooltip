@@ -188,34 +188,40 @@ class _SimpleTooltipState extends State<JustTheTooltip>
           showWhenUnlinked: widget.showWhenUnlinked,
           offset: offsetToTarget,
           link: _layerLink,
-          child: Directionality(
-            textDirection: widget.textDirection,
-            // TODO: This is just a weird hack I found
-            child: TooltipOverlay(
-              animatedTransitionBuilder: widget.animatedTransitionBuilder,
-              child: Material(
-                type: MaterialType.transparency,
-                child: widget.content,
-              ),
-              padding: widget.padding,
-              margin: widget.margin,
-              targetSize: targetSize,
-              target: target,
-              offset: widget.offset,
-              preferredDirection: widget.preferredDirection,
-              link: _layerLink,
-              offsetToTarget: offsetToTarget,
-              borderRadius: widget.borderRadius,
-              tailBaseWidth: widget.tailBaseWidth,
-              tailLength: widget.tailLength,
-              backgroundColor: widget.backgroundColor ?? theme.cardColor,
+          child: FadeTransition(
+            opacity: CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.fastOutSlowIn,
+            ),
+            child: Directionality(
               textDirection: widget.textDirection,
-              animation: CurvedAnimation(
-                parent: _animationController,
-                curve: widget.curve,
+              // TODO: This is just a weird hack I found
+              child: TooltipOverlay(
+                animatedTransitionBuilder: widget.animatedTransitionBuilder,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: widget.content,
+                ),
+                padding: widget.padding,
+                margin: widget.margin,
+                targetSize: targetSize,
+                target: target,
+                offset: widget.offset,
+                preferredDirection: widget.preferredDirection,
+                link: _layerLink,
+                offsetToTarget: offsetToTarget,
+                borderRadius: widget.borderRadius,
+                tailBaseWidth: widget.tailBaseWidth,
+                tailLength: widget.tailLength,
+                backgroundColor: widget.backgroundColor ?? theme.cardColor,
+                textDirection: widget.textDirection,
+                animation: CurvedAnimation(
+                  parent: _animationController,
+                  curve: widget.curve,
+                ),
+                shadow: widget.shadow ?? defaultShadow,
+                elevation: widget.elevation,
               ),
-              shadow: widget.shadow ?? defaultShadow,
-              elevation: widget.elevation,
             ),
           ),
         );
