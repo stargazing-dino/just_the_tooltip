@@ -20,8 +20,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final AxisDirection preferredDirection;
 
-  final LayerLink link;
-
   final Offset offsetToTarget;
 
   final BorderRadiusGeometry borderRadius;
@@ -40,6 +38,10 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final double elevation;
 
+  final double? scrollOffset;
+
+  final ScrollPosition? scrollPosition;
+
   const TooltipOverlay({
     Key? key,
     required Widget child,
@@ -49,7 +51,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.target,
     required this.offset,
     required this.preferredDirection,
-    required this.link,
     required this.offsetToTarget,
     required this.borderRadius,
     required this.tailBaseWidth,
@@ -59,6 +60,8 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.backgroundColor,
     required this.shadow,
     required this.elevation,
+    this.scrollOffset,
+    this.scrollPosition,
   }) : super(key: key, child: child);
 
   @override
@@ -76,6 +79,8 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       targetSize: targetSize,
       shadow: shadow,
       elevation: elevation,
+      scrollOffset: scrollOffset,
+      scrollPosition: scrollPosition,
     );
   }
 
@@ -96,7 +101,9 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       ..preferredDirection = preferredDirection
       ..targetSize = targetSize
       ..shadow = shadow
-      ..elevation = elevation;
+      ..elevation = elevation
+      ..scrollOffset = scrollOffset
+      ..scrollPosition = scrollPosition;
   }
 
   @override
@@ -113,7 +120,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
         preferredDirection,
       ),
     );
-    properties.add(DiagnosticsProperty<LayerLink>('link', link));
     properties
         .add(DiagnosticsProperty<Offset>('offsetToTarget', offsetToTarget));
     properties.add(
@@ -133,6 +139,9 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(DoubleProperty('scrollOffset', scrollOffset));
+    properties.add(
+        DiagnosticsProperty<ScrollPosition>('scrollPosition', scrollPosition));
   }
 }
 
@@ -151,6 +160,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     required Size targetSize,
     required Shadow shadow,
     required double elevation,
+    required double? scrollOffset,
+    required ScrollPosition? scrollPosition,
   })  : _margin = margin,
         _offset = offset,
         _target = target,
@@ -163,6 +174,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         _targetSize = targetSize,
         _shadow = shadow,
         _elevation = elevation,
+        _scrollOffset = scrollOffset,
+        _scrollPosition = scrollPosition,
         super(child);
 
   late AxisDirection axisDirection;
@@ -264,10 +277,36 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     markNeedsPaint();
   }
 
+  double? get scrollOffset => _scrollOffset;
+  double? _scrollOffset;
+  set scrollOffset(double? value) {
+    if (_scrollOffset == value) return;
+    _scrollOffset = scrollOffset;
+    markNeedsLayout();
+  }
+
+  ScrollPosition? get scrollPosition => _scrollPosition;
+  ScrollPosition? _scrollPosition;
+  set scrollPosition(ScrollPosition? value) {
+    if (_scrollPosition == value) return;
+    _scrollPosition = scrollPosition;
+    markNeedsLayout();
+  }
+
   double get sumOffset => offset + tailLength;
 
   @override
-  BoxConstraints get constraints => super.constraints.loosen();
+  BoxConstraints get constraints {
+    final _scrollPosition = scrollPosition;
+    if (_scrollPosition != null) {
+      return super
+          .constraints
+          .loosen()
+          .copyWith(maxHeight: _scrollPosition.maxScrollExtent);
+    }
+
+    return super.constraints.loosen();
+  }
 
   @override
   void performLayout() {
@@ -278,6 +317,9 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       return;
     }
 
+    // print(scrollOffset);
+    // print(scrollPosition);
+    print(constraints);
     final childSize = _child.getDryLayout(constraints.deflate(margin));
     axisDirection = getAxisDirection(
       targetSize: targetSize,

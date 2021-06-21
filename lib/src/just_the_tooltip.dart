@@ -1,50 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:just_the_tooltip/src/just_the_tooltip_area.dart';
+import 'package:just_the_tooltip/src/models/just_the_handler.dart';
+import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
 // TODO: Add a controller
 // TODO: Add a builder
 
-class JustTheController extends ChangeNotifier {}
-
-class JustTheTooltip extends StatefulWidget {
+class JustTheTooltip extends StatefulWidget implements JustTheInterface {
+  @override
   final Widget content;
 
+  @override
   final Widget child;
 
+  @override
   final AxisDirection preferredDirection;
 
+  @override
   final Duration fadeInDuration;
 
+  @override
   final Duration fadeOutDuration;
 
+  @override
   final Curve curve;
 
+  @override
   final EdgeInsets padding;
 
+  @override
   final EdgeInsets margin;
 
+  @override
   final double offset;
 
+  @override
   final double elevation;
 
+  @override
   final BorderRadiusGeometry borderRadius;
 
+  @override
   final double tailLength;
 
+  @override
   final double tailBaseWidth;
 
   /// These directly affect the constraints of the tooltip
   // BoxConstraints constraints;
 
+  @override
   final AnimatedTransitionBuilder animatedTransitionBuilder;
 
+  @override
   final Color? backgroundColor;
 
+  @override
   final TextDirection textDirection;
 
+  @override
   final Shadow? shadow;
 
+  @override
   final bool showWhenUnlinked;
 
   static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
@@ -58,6 +77,8 @@ class JustTheTooltip extends StatefulWidget {
     );
   }
 
+  // FIXME: I don't like this at all. We should just forward this so we don't
+  // create two function signatures we have to upkeep.
   const JustTheTooltip({
     Key? key,
     required this.content,
@@ -90,7 +111,7 @@ class JustTheTooltip extends StatefulWidget {
 }
 
 class _SimpleTooltipState extends State<JustTheTooltip>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, JustTheHandler {
   final _layerLink = LayerLink();
   late final AnimationController _animationController;
   OverlayEntry? _entry;
@@ -136,13 +157,24 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     return CompositedTransformTarget(
       link: _layerLink,
       child: GestureDetector(
-        onTap: _entry == null ? _showTooltip : null,
+        onTap: _entry == null ? showTooltip : null,
         child: widget.child,
       ),
     );
   }
 
-  Future<void> _hideTooltip({bool immediately = false}) async {
+  void debugCheck() {
+    assert(
+      JustTheTooltipArea.maybeOf(context) == null,
+      'Did you mean to create a JustTheTooltipEntry? JustTheTooltip must not '
+      'wrapped in a JustTheTooltipArea. If you\'re use case is valid, please '
+      'file an issue on the repo.',
+    );
+  }
+
+  @override
+  Future<void> hideTooltip({bool immediately = false}) async {
+    debugCheck();
     if (!immediately) {
       await _animationController.reverse();
     }
@@ -156,34 +188,25 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     });
   }
 
-  Future<void> _showTooltip({bool immediately = false}) async {
-    _createNewEntries();
+  @override
+  Future<void> showTooltip({bool immediately = false}) async {
+    debugCheck();
+    createEntries();
 
     await _animationController.forward();
   }
 
-  void _createNewEntries() {
+  void createEntries({RenderBox? targetBox}) {
+    assert(targetBox == null);
     assert(_entry == null);
     assert(_skrim == null);
-    final box = context.findRenderObject() as RenderBox?;
 
-    if (box == null) {
-      throw StateError(
-        'Cannot find the box for the given object with context $context',
-      );
-    }
-
+    final targetInformation = getTargetInformation(context);
     final theme = Theme.of(context);
     final defaultShadow = Shadow(
       offset: Offset.zero,
       blurRadius: 0.0,
       color: theme.shadowColor,
-    );
-    final targetSize = box.getDryLayout(const BoxConstraints.tightForFinite());
-    final target = box.localToGlobal(box.size.center(Offset.zero));
-    final offsetToTarget = Offset(
-      -target.dx + box.size.width / 2,
-      -target.dy + box.size.height / 2,
     );
 
     _entry = OverlayEntry(
@@ -191,7 +214,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
         return CompositedTransformFollower(
           key: ValueKey(_key),
           showWhenUnlinked: widget.showWhenUnlinked,
-          offset: offsetToTarget,
+          offset: targetInformation.offsetToTarget,
           link: _layerLink,
           child: FadeTransition(
             opacity: CurvedAnimation(
@@ -209,12 +232,11 @@ class _SimpleTooltipState extends State<JustTheTooltip>
                 ),
                 padding: widget.padding,
                 margin: widget.margin,
-                targetSize: targetSize,
-                target: target,
+                targetSize: targetInformation.size,
+                target: targetInformation.target,
                 offset: widget.offset,
                 preferredDirection: widget.preferredDirection,
-                link: _layerLink,
-                offsetToTarget: offsetToTarget,
+                offsetToTarget: targetInformation.offsetToTarget,
                 borderRadius: widget.borderRadius,
                 tailBaseWidth: widget.tailBaseWidth,
                 tailLength: widget.tailLength,
@@ -233,7 +255,7 @@ class _SimpleTooltipState extends State<JustTheTooltip>
         return GestureDetector(
           child: const SizedBox.expand(),
           behavior: HitTestBehavior.translucent,
-          onTap: _hideTooltip,
+          onTap: hideTooltip,
         );
       },
     );
