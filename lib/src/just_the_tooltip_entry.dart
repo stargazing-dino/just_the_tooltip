@@ -178,8 +178,8 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
                     ),
                     builder: (context, child) {
                       return TooltipOverlay(
-                        scrollOffset: scrollController.offset,
-                        scrollPosition: scrollController.position,
+                        extentBefore: scrollController.position.extentBefore,
+                        extentAfter: scrollController.position.extentAfter,
                         animatedTransitionBuilder:
                             widget.animatedTransitionBuilder,
                         child: child!,
