@@ -38,10 +38,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final double elevation;
 
-  final double? extentBefore;
-
-  final double? extentAfter;
-
   const TooltipOverlay({
     Key? key,
     required Widget child,
@@ -60,8 +56,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.backgroundColor,
     required this.shadow,
     required this.elevation,
-    this.extentBefore,
-    this.extentAfter,
   }) : super(key: key, child: child);
 
   @override
@@ -79,8 +73,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       targetSize: targetSize,
       shadow: shadow,
       elevation: elevation,
-      extentBefore: extentBefore,
-      extentAfter: extentAfter,
     );
   }
 
@@ -101,9 +93,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       ..preferredDirection = preferredDirection
       ..targetSize = targetSize
       ..shadow = shadow
-      ..elevation = elevation
-      ..extentBefore = extentBefore
-      ..extentAfter = extentAfter;
+      ..elevation = elevation;
   }
 
   @override
@@ -139,8 +129,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DoubleProperty('extentBefore', extentBefore));
-    properties.add(DoubleProperty('extentAfter', extentAfter));
   }
 }
 
@@ -159,8 +147,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     required Size targetSize,
     required Shadow shadow,
     required double elevation,
-    required double? extentBefore,
-    required double? extentAfter,
   })  : _margin = margin,
         _offset = offset,
         _target = target,
@@ -173,8 +159,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         _targetSize = targetSize,
         _shadow = shadow,
         _elevation = elevation,
-        _extentBefore = extentBefore,
-        _extentAfter = extentAfter,
         super(child);
 
   late AxisDirection axisDirection;
@@ -276,22 +260,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     markNeedsPaint();
   }
 
-  double? get extentBefore => _extentBefore;
-  double? _extentBefore;
-  set extentBefore(double? value) {
-    if (_extentBefore == value) return;
-    _extentBefore = extentBefore;
-    markNeedsLayout();
-  }
-
-  double? get extentAfter => _extentAfter;
-  double? _extentAfter;
-  set extentAfter(double? value) {
-    if (_extentAfter == value) return;
-    _extentAfter = extentAfter;
-    markNeedsLayout();
-  }
-
   double get sumOffset => offset + tailLength;
 
   @override
@@ -317,8 +285,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       margin: margin,
       size: constraints.biggest,
       childSize: childSize,
-      extentBefore: extentBefore ?? 0.0,
-      extentAfter: extentAfter ?? 0.0,
     );
     final targetHeightRadius = targetSize.height / 2;
     final targetWidthRadius = targetSize.width / 2;

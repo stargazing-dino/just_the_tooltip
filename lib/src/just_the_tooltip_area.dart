@@ -28,13 +28,7 @@ class InheritedTooltipArea extends InheritedWidget {
 class JustTheTooltipArea extends StatefulWidget {
   final TooltipBuilder builder;
 
-  final ScrollController? scrollController;
-
-  const JustTheTooltipArea({
-    Key? key,
-    required this.builder,
-    this.scrollController,
-  }) : super(key: key);
+  const JustTheTooltipArea({Key? key, required this.builder}) : super(key: key);
 
   /// Used to retrieve the scope of the tooltip. This scope is responsible for
   /// managing the children `JustTheTooltip`s
@@ -124,10 +118,7 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea>
   }
 
   void buildChild({
-    required Widget Function(
-      AnimationController animationController,
-      ScrollController? scrollController,
-    )
+    required Widget Function(AnimationController animationController)
         withAnimation,
     required Widget skrim,
     required Duration duration,
@@ -137,7 +128,7 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea>
     _animationController.reverseDuration = reverseDuration;
 
     setState(() {
-      _entry = withAnimation(_animationController, widget.scrollController);
+      _entry = withAnimation(_animationController);
       _skrim = skrim;
     });
   }

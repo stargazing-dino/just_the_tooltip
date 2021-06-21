@@ -62,8 +62,6 @@ class JustTheTooltipEntry extends StatefulWidget with JustTheInterface {
   @override
   final bool showWhenUnlinked;
 
-  final ScrollController? scrollController;
-
   static SingleChildRenderObjectWidget defaultAnimatedTransitionBuilder(
     BuildContext context,
     Animation<double> animation,
@@ -95,7 +93,6 @@ class JustTheTooltipEntry extends StatefulWidget with JustTheInterface {
     this.textDirection = TextDirection.ltr,
     this.shadow,
     this.showWhenUnlinked = false,
-    this.scrollController,
   }) : super(key: key);
 
   @override
@@ -127,7 +124,7 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
     );
 
     tooltipArea.buildChild(
-      withAnimation: (animationController, scrollController) {
+      withAnimation: (animationController) {
         return CompositedTransformFollower(
           // key: ValueKey(key),
           showWhenUnlinked: widget.showWhenUnlinked,
@@ -141,67 +138,26 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
             child: Directionality(
               textDirection: widget.textDirection,
               // TODO: This is just a weird hack I found
-              child: Builder(
-                builder: (context) {
-                  if (scrollController == null) {
-                    return TooltipOverlay(
-                      animatedTransitionBuilder:
-                          widget.animatedTransitionBuilder,
-                      child: Material(
-                        type: MaterialType.transparency,
-                        child: widget.content,
-                      ),
-                      padding: widget.padding,
-                      margin: widget.margin,
-                      targetSize: targetInformation.size,
-                      target: targetInformation.target,
-                      offset: widget.offset,
-                      preferredDirection: widget.preferredDirection,
-                      offsetToTarget: targetInformation.offsetToTarget,
-                      borderRadius: widget.borderRadius,
-                      tailBaseWidth: widget.tailBaseWidth,
-                      tailLength: widget.tailLength,
-                      backgroundColor:
-                          widget.backgroundColor ?? theme.cardColor,
-                      textDirection: widget.textDirection,
-                      shadow: widget.shadow ?? defaultShadow,
-                      elevation: widget.elevation,
-                    );
-                  }
-
-                  // With a ScrollController, it needs offset and maxLength
-                  return AnimatedBuilder(
-                    animation: scrollController,
-                    child: Material(
-                      type: MaterialType.transparency,
-                      child: widget.content,
-                    ),
-                    builder: (context, child) {
-                      return TooltipOverlay(
-                        extentBefore: scrollController.position.extentBefore,
-                        extentAfter: scrollController.position.extentAfter,
-                        animatedTransitionBuilder:
-                            widget.animatedTransitionBuilder,
-                        child: child!,
-                        padding: widget.padding,
-                        margin: widget.margin,
-                        targetSize: targetInformation.size,
-                        target: targetInformation.target,
-                        offset: widget.offset,
-                        preferredDirection: widget.preferredDirection,
-                        offsetToTarget: targetInformation.offsetToTarget,
-                        borderRadius: widget.borderRadius,
-                        tailBaseWidth: widget.tailBaseWidth,
-                        tailLength: widget.tailLength,
-                        backgroundColor:
-                            widget.backgroundColor ?? theme.cardColor,
-                        textDirection: widget.textDirection,
-                        shadow: widget.shadow ?? defaultShadow,
-                        elevation: widget.elevation,
-                      );
-                    },
-                  );
-                },
+              child: TooltipOverlay(
+                animatedTransitionBuilder: widget.animatedTransitionBuilder,
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: widget.content,
+                ),
+                padding: widget.padding,
+                margin: widget.margin,
+                targetSize: targetInformation.size,
+                target: targetInformation.target,
+                offset: widget.offset,
+                preferredDirection: widget.preferredDirection,
+                offsetToTarget: targetInformation.offsetToTarget,
+                borderRadius: widget.borderRadius,
+                tailBaseWidth: widget.tailBaseWidth,
+                tailLength: widget.tailLength,
+                backgroundColor: widget.backgroundColor ?? theme.cardColor,
+                textDirection: widget.textDirection,
+                shadow: widget.shadow ?? defaultShadow,
+                elevation: widget.elevation,
               ),
             ),
           ),

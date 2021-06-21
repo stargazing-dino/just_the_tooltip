@@ -9,8 +9,6 @@ AxisDirection getAxisDirection({
   required AxisDirection preferredDirection,
   required double offset,
   required EdgeInsets margin,
-  double extentBefore = 0.0,
-  double extentAfter = 0.0,
 }) {
   switch (preferredDirection) {
     case AxisDirection.left:

@@ -116,33 +116,16 @@ class TooltipAreaExamplePage extends StatefulWidget {
 }
 
 class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
-  late final ScrollController _scrollController;
-
-  @override
-  void initState() {
-    _scrollController = ScrollController();
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('It goes under me')),
       body: JustTheTooltipArea(
-        scrollController: _scrollController,
         builder: (context, tooltip, scrim) {
           return Stack(
             fit: StackFit.passthrough,
             children: [
               ListView(
-                controller: _scrollController,
                 children: List.generate(30, (index) {
                   if (index == 15) {
                     return JustTheTooltipEntry(
