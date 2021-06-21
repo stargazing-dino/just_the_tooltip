@@ -307,8 +307,9 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           maxWidth: constraints.maxWidth - margin.horizontal,
           maxHeight: constraints.maxHeight -
               target.dy -
-              targetHeightRadius -
-              offset -
+              margin.bottom +
+              targetHeightRadius +
+              offset +
               tailLength,
         );
         break;
@@ -323,16 +324,17 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         quadrantConstrained = constraints.copyWith(
           maxHeight: constraints.maxHeight - margin.vertical,
           maxWidth: constraints.maxWidth -
-              margin.right -
               target.dx -
-              targetWidthRadius -
-              offset -
+              margin.right +
+              targetWidthRadius +
+              offset +
               tailLength,
         );
         break;
     }
 
-    // FIXME: Why doesn't this break when the child size is overbound?
+    // TODO: I want the ability to not overflow if we have space below... Almost
+    // like I should pass in extentBefore and extentAfter Aghh!!
     _child.layout(
       quadrantConstrained,
       parentUsesSize: true,
@@ -342,7 +344,12 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
     final shrinkWrapWidth = constraints.maxWidth == double.infinity;
     final shrinkWrapHeight = constraints.maxHeight == double.infinity;
+    // Actual height 247
 
+    print('-----------------');
+    print(constraints);
+    print(_child.size);
+    print('-----------------');
     size = constraints.constrain(
       Size(
         shrinkWrapWidth ? _child.size.width : double.infinity,

@@ -119,53 +119,56 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('It goes under me')),
+      // appBar: AppBar(title: const Text('It goes under me')),
       body: JustTheTooltipArea(
         builder: (context, tooltip, scrim) {
           return Stack(
             fit: StackFit.passthrough,
             children: [
               ListView(
-                children: List.generate(30, (index) {
-                  if (index == 15) {
-                    return JustTheTooltipEntry(
-                      tailLength: 10.0,
-                      preferredDirection: AxisDirection.down,
-                      margin: const EdgeInsets.all(16.0),
-                      child: const Material(
-                        color: Colors.blue,
-                        shape: CircleBorder(),
-                        elevation: 4.0,
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Icon(
-                            Icons.touch_app,
-                            color: Colors.white,
+                children: List.generate(
+                  30,
+                  (index) {
+                    if (index == 15) {
+                      return JustTheTooltipEntry(
+                        tailLength: 10.0,
+                        preferredDirection: AxisDirection.down,
+                        margin: const EdgeInsets.all(16.0),
+                        child: const Material(
+                          color: Colors.blue,
+                          shape: CircleBorder(),
+                          elevation: 4.0,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.touch_app,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                      // This is necessary as otherwise the column would only be
-                      // constrained by the amount of vertical space
-                      content: IntrinsicHeight(
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 120,
-                              color: Colors.blue,
-                              width: double.infinity,
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
-                            ),
-                          ],
+                        // This is necessary as otherwise the column would only be
+                        // constrained by the amount of vertical space
+                        content: IntrinsicHeight(
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 120,
+                                color: Colors.blue,
+                                width: double.infinity,
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  return ListTile(title: Text('Item $index'));
-                }),
+                    return ListTile(title: Text('Item $index'));
+                  },
+                ),
               ),
               if (scrim != null) scrim,
               if (tooltip != null) tooltip,
