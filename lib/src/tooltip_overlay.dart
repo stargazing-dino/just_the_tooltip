@@ -281,7 +281,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       targetSize: targetSize,
       target: target,
       preferredDirection: preferredDirection,
-      offset: offset,
+      offset: offset + tailLength,
       margin: margin,
       size: constraints.biggest,
       childSize: childSize,
