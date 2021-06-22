@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/just_the_tooltip_area.dart';
 import 'package:just_the_tooltip/src/models/just_the_handler.dart';
 import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
-// TODO: Add a controller
-// TODO: Add a builder
-
-class JustTheTooltip extends StatefulWidget implements JustTheInterface {
+class JustTheTooltipEntry extends StatefulWidget with JustTheInterface {
   @override
   final Widget content;
 
@@ -77,9 +73,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     );
   }
 
-  // FIXME: I don't like this at all. We should just forward this so we don't
-  // create two function signatures we have to upkeep.
-  const JustTheTooltip({
+  const JustTheTooltipEntry({
     Key? key,
     required this.content,
     required this.child,
@@ -99,108 +93,28 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.textDirection = TextDirection.ltr,
     this.shadow,
     this.showWhenUnlinked = false,
-    // TODO:
-    // this.minWidth,
-    // this.minHeight,
-    // this.maxWidth,
-    // this.maxHeight,
   }) : super(key: key);
 
   @override
-  _SimpleTooltipState createState() => _SimpleTooltipState();
+  State<JustTheTooltipEntry> createState() => _JustTheTooltipEntryState();
 }
 
-class _SimpleTooltipState extends State<JustTheTooltip>
-    with SingleTickerProviderStateMixin, JustTheHandler {
+class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
   final _layerLink = LayerLink();
-  late final AnimationController _animationController;
-  OverlayEntry? _entry;
-  OverlayEntry? _skrim;
-
-  var _key = 0;
-
-  @override
-  void initState() {
-    _animationController = AnimationController(
-      duration: widget.fadeInDuration,
-      reverseDuration: widget.fadeOutDuration,
-      vsync: this,
-    );
-
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-    Future<void>.delayed(Duration.zero).then((_) {
-      setState(() {
-        _key++;
-        _key %= 2;
-      });
-      _entry?.markNeedsBuild();
-      _skrim?.markNeedsBuild();
-    });
-
-    super.didUpdateWidget(oldWidget);
-  }
-
-  @override
-  void dispose() {
-    _entry?.remove();
-    _skrim?.remove();
-    _animationController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return CompositedTransformTarget(
       link: _layerLink,
       child: GestureDetector(
-        onTap: _entry == null ? showTooltip : null,
+        onTap: _showTooltip,
         child: widget.child,
       ),
     );
   }
 
-  void debugCheck() {
-    assert(
-      JustTheTooltipArea.maybeOf(context) == null,
-      'Did you mean to create a JustTheTooltipEntry? JustTheTooltip must not '
-      'wrapped in a JustTheTooltipArea. If you\'re use case is valid, please '
-      'file an issue on the repo.',
-    );
-  }
-
-  @override
-  Future<void> hideTooltip({bool immediately = false}) async {
-    debugCheck();
-    if (!immediately) {
-      await _animationController.reverse();
-    }
-
-    _entry?.remove();
-    _skrim?.remove();
-
-    setState(() {
-      _entry = null;
-      _skrim = null;
-    });
-  }
-
-  @override
-  Future<void> showTooltip({bool immediately = false}) async {
-    debugCheck();
-    createEntries();
-
-    await _animationController.forward();
-  }
-
-  void createEntries({RenderBox? targetBox}) {
-    assert(targetBox == null);
-    assert(_entry == null);
-    assert(_skrim == null);
-
+  void _showTooltip() {
+    final tooltipArea = JustTheTooltipArea.of(context);
     final targetInformation = getTargetInformation(context);
     final theme = Theme.of(context);
     final defaultShadow = Shadow(
@@ -209,16 +123,16 @@ class _SimpleTooltipState extends State<JustTheTooltip>
       color: theme.shadowColor,
     );
 
-    _entry = OverlayEntry(
-      builder: (BuildContext context) {
+    tooltipArea.buildChild(
+      withAnimation: (animationController) {
         return CompositedTransformFollower(
-          key: ValueKey(_key),
+          // key: ValueKey(key),
           showWhenUnlinked: widget.showWhenUnlinked,
           offset: targetInformation.offsetToTarget,
           link: _layerLink,
           child: FadeTransition(
             opacity: CurvedAnimation(
-              parent: _animationController,
+              parent: animationController,
               curve: widget.curve,
             ),
             child: Directionality(
@@ -249,26 +163,15 @@ class _SimpleTooltipState extends State<JustTheTooltip>
           ),
         );
       },
-    );
-    _skrim = OverlayEntry(
-      builder: (BuildContext context) {
-        return GestureDetector(
-          child: const SizedBox.expand(),
-          behavior: HitTestBehavior.translucent,
-          onTap: hideTooltip,
-        );
-      },
+      skrim: GestureDetector(
+        child: const SizedBox.expand(),
+        behavior: HitTestBehavior.translucent,
+        onTap: tooltipArea.hideTooltip,
+      ),
+      duration: widget.fadeInDuration,
+      reverseDuration: widget.fadeOutDuration,
     );
 
-    final overlay = Overlay.of(context);
-
-    if (overlay == null) {
-      throw StateError('Cannot find the overlay for the context $context');
-    }
-
-    setState(() {
-      overlay.insert(_skrim!);
-      overlay.insert(_entry!, above: _skrim);
-    });
+    tooltipArea.showTooltip();
   }
 }

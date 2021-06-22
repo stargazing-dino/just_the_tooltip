@@ -20,8 +20,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final AxisDirection preferredDirection;
 
-  final LayerLink link;
-
   final Offset offsetToTarget;
 
   final BorderRadiusGeometry borderRadius;
@@ -49,7 +47,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.target,
     required this.offset,
     required this.preferredDirection,
-    required this.link,
     required this.offsetToTarget,
     required this.borderRadius,
     required this.tailBaseWidth,
@@ -113,7 +110,6 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
         preferredDirection,
       ),
     );
-    properties.add(DiagnosticsProperty<LayerLink>('link', link));
     properties
         .add(DiagnosticsProperty<Offset>('offsetToTarget', offsetToTarget));
     properties.add(
@@ -264,7 +260,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     markNeedsPaint();
   }
 
-  double get sumOffset => offset + tailLength;
+  double get offsetAndTailLength => offset + tailLength;
 
   @override
   BoxConstraints get constraints => super.constraints.loosen();
@@ -283,7 +279,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       targetSize: targetSize,
       target: target,
       preferredDirection: preferredDirection,
-      offset: offset,
+      offset: offsetAndTailLength,
       margin: margin,
       size: constraints.biggest,
       childSize: childSize,
@@ -301,7 +297,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         quadrantConstrained = constraints.copyWith(
           maxWidth: constraints.maxWidth - margin.horizontal,
           maxHeight:
-              target.dy - targetHeightRadius - offset - tailLength - margin.top,
+              target.dy - targetHeightRadius - offsetAndTailLength - margin.top,
         );
         break;
       case AxisDirection.down:
@@ -310,36 +306,38 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           maxHeight: constraints.maxHeight -
               target.dy -
               targetHeightRadius -
-              offset -
-              tailLength,
+              offsetAndTailLength -
+              margin.bottom,
         );
         break;
       case AxisDirection.left:
         quadrantConstrained = constraints.copyWith(
           maxHeight: constraints.maxHeight - margin.vertical,
           maxWidth:
-              target.dx - margin.left - targetWidthRadius - offset - tailLength,
+              target.dx - margin.left - targetWidthRadius - offsetAndTailLength,
         );
         break;
       case AxisDirection.right:
         quadrantConstrained = constraints.copyWith(
           maxHeight: constraints.maxHeight - margin.vertical,
           maxWidth: constraints.maxWidth -
-              margin.right -
               target.dx -
+              margin.right -
               targetWidthRadius -
-              offset -
-              tailLength,
+              offsetAndTailLength,
         );
         break;
     }
 
-    // FIXME: Why doesn't this break when the child size is overbound?
+    // TODO: I want the ability to not overflow if we have space below... Almost
+    // like I should pass in extentBefore and extentAfter Aghh!!
+
     _child.layout(
       quadrantConstrained,
       parentUsesSize: true,
     );
 
+    // Once you get the size
     // Now that we've done real layout, child is actual size
 
     final shrinkWrapWidth = constraints.maxWidth == double.infinity;
@@ -356,7 +354,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       axisDirection: axisDirection,
       childSize: _child.size,
       margin: margin,
-      offset: offset + tailLength,
+      offset: offsetAndTailLength,
       size: size,
       target: target,
       targetSize: targetSize,
