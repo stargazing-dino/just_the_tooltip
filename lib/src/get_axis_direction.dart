@@ -7,7 +7,8 @@ AxisDirection getAxisDirection({
   required Size childSize,
   required Offset target,
   required AxisDirection preferredDirection,
-  // This should include both the offset and the tailLength
+
+  /// This should include both the offset and the tailLength
   required double offset,
   required EdgeInsets margin,
 }) {
@@ -28,7 +29,6 @@ AxisDirection getAxisDirection({
       // |              RTE                      child+offset             margin.R|
       final fitsRight =
           size.width - rightTargetEdge - margin.right >= childAndOffsetWidth;
-
       final tooltipLeft =
           preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
 
@@ -45,6 +45,8 @@ AxisDirection getAxisDirection({
       final fitsAbove = topTargetEdge - margin.top >= childAndOffsetHeight;
       final fitsBelow = size.height - bottomTargetEdge - margin.bottom >=
           childAndOffsetHeight;
+      print('fitsAbove: $fitsAbove');
+      print('fitsBelow: $fitsBelow');
       final tooltipAbove =
           preferAbove ? fitsAbove || !fitsBelow : !(fitsBelow || !fitsAbove);
 

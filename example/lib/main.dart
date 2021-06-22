@@ -132,7 +132,7 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                     if (index == 15) {
                       return JustTheTooltipEntry(
                         tailLength: 10.0,
-                        preferredDirection: AxisDirection.down,
+                        preferredDirection: AxisDirection.up,
                         margin: const EdgeInsets.all(16.0),
                         child: const Material(
                           color: Colors.blue,
@@ -152,7 +152,7 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                           child: Column(
                             children: [
                               Container(
-                                height: 120,
+                                height: 40,
                                 color: Colors.blue,
                                 width: double.infinity,
                               ),
