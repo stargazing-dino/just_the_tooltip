@@ -45,9 +45,9 @@ The child will be wrapped with a gesture detector that is responsible for showin
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true"/>
 </p>
 
-The tooltip should also work in lists and follow the target through scrolling
+The tooltip should also work in lists and follow the target through scrolling.
 
-For some use cases, you'd like the tooltip to be apart of the widget tree rather than an overlay. For that use case there is a `JustTheTooltipArea`:
+For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltipArea`:
 
 ```dart
 Scaffold(
@@ -112,3 +112,5 @@ Scaffold(
 This will give you the positioned tooltip and scrim (an empty gesture detector that catches tap events and closes the tooltip) for you to enter into the tree however you like. By doing this, you can make tooltips that are visually "under" other parts of the UI such as the appbar in the above example.
 
 Notice the use of `JustTheTooltipEntry`. It replaces the traditional widget as it no longer is in charge of the animation itself but delegates it to the parent widget area.
+
+Issues and PRs welcome. API subject to change

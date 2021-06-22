@@ -274,8 +274,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       return;
     }
 
-    // target needs to be translated by scroll offset
-
     final childSize = _child.getDryLayout(constraints.deflate(margin));
     axisDirection = getAxisDirection(
       targetSize: targetSize,
@@ -306,8 +304,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         quadrantConstrained = constraints.copyWith(
           maxWidth: constraints.maxWidth - margin.horizontal,
           maxHeight: constraints.maxHeight -
-              target.dy +
-              targetHeightRadius +
+              target.dy -
+              targetHeightRadius -
               offsetAndTailLength -
               margin.bottom,
         );
@@ -324,8 +322,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
           maxHeight: constraints.maxHeight - margin.vertical,
           maxWidth: constraints.maxWidth -
               target.dx -
-              margin.right +
-              targetWidthRadius +
+              margin.right -
+              targetWidthRadius -
               offsetAndTailLength,
         );
         break;
@@ -333,21 +331,18 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
     // TODO: I want the ability to not overflow if we have space below... Almost
     // like I should pass in extentBefore and extentAfter Aghh!!
+
     _child.layout(
       quadrantConstrained,
       parentUsesSize: true,
     );
 
+    // Once you get the size
     // Now that we've done real layout, child is actual size
 
     final shrinkWrapWidth = constraints.maxWidth == double.infinity;
     final shrinkWrapHeight = constraints.maxHeight == double.infinity;
-    // Actual height 247
 
-    print('-----------------');
-    print(constraints);
-    print(_child.size);
-    print('-----------------');
     size = constraints.constrain(
       Size(
         shrinkWrapWidth ? _child.size.width : double.infinity,

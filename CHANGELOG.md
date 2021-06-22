@@ -1,3 +1,6 @@
+## [0.0.3] - Jun 19, 2021
+Added `JustTheTooltipArea` for users who need to insert their tooltips into the tree more precisely.
+
 ## [0.0.2+2] - Jun 19, 2021
 Add in curve animation property
 

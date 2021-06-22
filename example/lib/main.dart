@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const TooltipAreaExamplePage(),
+      home: const DefaultPageExample(),
     );
   }
 }
@@ -20,7 +20,7 @@ class DefaultPageExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const margin = EdgeInsets.all(20.0);
+    const margin = EdgeInsets.all(0.0);
 
     return Scaffold(
       body: SizedBox.expand(
@@ -28,7 +28,7 @@ class DefaultPageExample extends StatelessWidget {
           alignment: Alignment.center,
           child: JustTheTooltip(
             tailLength: 20.0,
-            preferredDirection: AxisDirection.left,
+            preferredDirection: AxisDirection.up,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),
             offset: 0,
@@ -47,7 +47,7 @@ class DefaultPageExample extends StatelessWidget {
             content: const Padding(
               padding: EdgeInsets.all(8.0),
               child: Text(
-                'Bacon ipsum dolor amet kevin turducken brisket pastrami, salami ribeye spare ribs tri-tip sirloin shoulder venison shank burgdoggen chicken pork belly. Short loin filet mignon shoulder rump beef ribs meatball kevin.',
+                'Bacon ipsum dolor amet kevin turducken brisket pastrami, salami ribeye spare ribs tri-tip sirloin shoulder venison shank burgdoggen chicken pork belly. ',
               ),
             ),
           ),
@@ -119,7 +119,7 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(title: const Text('It goes under me')),
+      appBar: AppBar(title: const Text('It goes under me')),
       body: JustTheTooltipArea(
         builder: (context, tooltip, scrim) {
           return Stack(

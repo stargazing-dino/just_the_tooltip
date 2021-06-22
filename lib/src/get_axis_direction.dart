@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// TODO: This needs to account for viewport
 AxisDirection getAxisDirection({
   required Size size,
   required Size targetSize,
@@ -45,8 +44,6 @@ AxisDirection getAxisDirection({
       final fitsAbove = topTargetEdge - margin.top >= childAndOffsetHeight;
       final fitsBelow = size.height - bottomTargetEdge - margin.bottom >=
           childAndOffsetHeight;
-      print('fitsAbove: $fitsAbove');
-      print('fitsBelow: $fitsBelow');
       final tooltipAbove =
           preferAbove ? fitsAbove || !fitsBelow : !(fitsBelow || !fitsAbove);
 
