@@ -1,3 +1,6 @@
+## [0.0.3+5] - Jun 23, 2021
+Accounts for scrollable space in both axis directions
+
 ## [0.0.3+4] - Jun 23, 2021
 Accounts for margin when getting child's intrinsic size
 
