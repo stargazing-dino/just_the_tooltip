@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 /// Position a child box within a container box, either above or below a target
@@ -42,23 +43,37 @@ Offset positionDependentOffset({
   required Size childSize,
   required Offset target,
   required AxisDirection axisDirection,
-  required double offset,
+  required double offsetAndTail,
   required EdgeInsets margin,
+  required ScrollPosition? scrollPosition,
 }) {
   switch (axisDirection) {
     case AxisDirection.down:
     case AxisDirection.up:
       final tooltipAbove = axisDirection == AxisDirection.up;
-      final childAndOffsetHeight = offset + childSize.height;
+      final childAndOffsetHeight = offsetAndTail + childSize.height;
       final targetHeightRadius = targetSize.height / 2;
       final bottomTargetEdge = target.dy + targetHeightRadius;
       final topTargetEdge = target.dy - targetHeightRadius;
+      final hasVerticalScroll =
+          scrollPosition != null && scrollPosition.axis == Axis.vertical;
 
       double y;
       if (tooltipAbove) {
-        y = math.max(margin.top, topTargetEdge - childAndOffsetHeight);
+        if (hasVerticalScroll) {
+          y = topTargetEdge - childAndOffsetHeight;
+        } else {
+          y = math.max(margin.top, topTargetEdge - childAndOffsetHeight);
+        }
       } else {
-        y = math.min(bottomTargetEdge + offset, size.height - margin.top);
+        if (hasVerticalScroll) {
+          y = bottomTargetEdge + offsetAndTail;
+        } else {
+          y = math.min(
+            bottomTargetEdge + offsetAndTail,
+            size.height - margin.top,
+          );
+        }
       }
 
       // HORIZONTAL DIRECTION
@@ -85,16 +100,29 @@ Offset positionDependentOffset({
     case AxisDirection.left:
     case AxisDirection.right:
       final tooltipLeft = axisDirection == AxisDirection.left;
-      final childAndOffsetWidth = offset + childSize.width;
+      final childAndOffsetWidth = offsetAndTail + childSize.width;
       final targetWidthRadius = targetSize.width / 2;
       final rightTargetEdge = target.dx + targetWidthRadius;
       final leftTargetEdge = target.dx - targetWidthRadius;
+      final hasHorizontalScroll =
+          scrollPosition != null && scrollPosition.axis == Axis.horizontal;
 
       double x;
       if (tooltipLeft) {
-        x = math.max(margin.left, leftTargetEdge - childAndOffsetWidth);
+        if (hasHorizontalScroll) {
+          x = leftTargetEdge - childAndOffsetWidth;
+        } else {
+          x = math.max(margin.left, leftTargetEdge - childAndOffsetWidth);
+        }
       } else {
-        x = math.min(rightTargetEdge + offset, size.width - margin.right);
+        if (hasHorizontalScroll) {
+          x = rightTargetEdge + offsetAndTail;
+        } else {
+          x = math.min(
+            rightTargetEdge + offsetAndTail,
+            size.width - margin.right,
+          );
+        }
       }
 
       // VERTICAL DIRECTION

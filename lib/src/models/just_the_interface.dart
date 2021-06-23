@@ -38,5 +38,14 @@ abstract class JustTheInterface {
 
   Shadow? get shadow;
 
+  /// When the target of the tooltip, the [child], goes out of the viewport
+  /// whether the content dissapears along with it is determined by this
+  /// property.
   bool get showWhenUnlinked;
+
+  /// If passed, this will no longer bound the tooltip to the immediate
+  /// viewport but to the space allotted by the ScrollView it is in. For
+  /// example, if the tooltip happens to go beyond its quadrant but there is
+  /// scroll space beneath it the bounds will accomadate it.
+  ScrollController? get scrollController;
 }

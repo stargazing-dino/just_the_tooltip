@@ -38,6 +38,8 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final double elevation;
 
+  final ScrollPosition? scrollPosition;
+
   const TooltipOverlay({
     Key? key,
     required Widget child,
@@ -56,6 +58,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.backgroundColor,
     required this.shadow,
     required this.elevation,
+    required this.scrollPosition,
   }) : super(key: key, child: child);
 
   @override
@@ -73,6 +76,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       targetSize: targetSize,
       shadow: shadow,
       elevation: elevation,
+      scrollPosition: scrollPosition,
     );
   }
 
@@ -93,7 +97,8 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       ..preferredDirection = preferredDirection
       ..targetSize = targetSize
       ..shadow = shadow
-      ..elevation = elevation;
+      ..elevation = elevation
+      ..scrollPosition = scrollPosition;
   }
 
   @override
@@ -129,6 +134,9 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(
+      DiagnosticsProperty<ScrollPosition>('scrollPosition', scrollPosition),
+    );
   }
 }
 
@@ -147,6 +155,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     required Size targetSize,
     required Shadow shadow,
     required double elevation,
+    required ScrollPosition? scrollPosition,
   })  : _margin = margin,
         _offset = offset,
         _target = target,
@@ -159,6 +168,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         _targetSize = targetSize,
         _shadow = shadow,
         _elevation = elevation,
+        _scrollPosition = scrollPosition,
         super(child);
 
   late AxisDirection axisDirection;
@@ -260,62 +270,18 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     markNeedsPaint();
   }
 
+  ScrollPosition? get scrollPosition => _scrollPosition;
+  ScrollPosition? _scrollPosition;
+  set scrollPosition(ScrollPosition? value) {
+    if (_scrollPosition == value) return;
+    _scrollPosition = scrollPosition;
+    markNeedsLayout();
+  }
+
   double get offsetAndTailLength => offset + tailLength;
 
   @override
   BoxConstraints get constraints => super.constraints.loosen();
-
-  @override
-  double computeMinIntrinsicWidth(double height) {
-    // next line relies on double.infinity absorption
-    if (child != null) {
-      return child!.getMinIntrinsicWidth(
-            math.max(0.0, height - margin.vertical),
-          ) +
-          margin.horizontal;
-    }
-
-    return margin.horizontal;
-  }
-
-  @override
-  double computeMaxIntrinsicWidth(double height) {
-    // next line relies on double.infinity absorption
-    if (child != null) {
-      return child!.getMaxIntrinsicWidth(
-            math.max(0.0, height - margin.vertical),
-          ) +
-          margin.horizontal;
-    }
-
-    return margin.horizontal;
-  }
-
-  @override
-  double computeMinIntrinsicHeight(double width) {
-    // next line relies on double.infinity absorption
-    if (child != null) {
-      return child!.getMinIntrinsicHeight(
-            math.max(0.0, width - margin.horizontal),
-          ) +
-          margin.vertical;
-    }
-
-    return margin.vertical;
-  }
-
-  @override
-  double computeMaxIntrinsicHeight(double width) {
-    // next line relies on double.infinity absorption
-    if (child != null) {
-      return child!.getMaxIntrinsicHeight(
-            math.max(0.0, width - margin.horizontal),
-          ) +
-          margin.vertical;
-    }
-
-    return margin.vertical;
-  }
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
@@ -330,14 +296,16 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       targetSize: targetSize,
       target: target,
       preferredDirection: preferredDirection,
-      offset: offsetAndTailLength,
+      offsetAndTail: offsetAndTailLength,
       margin: margin,
       size: constraints.biggest,
       childSize: childSize,
+      scrollPosition: scrollPosition,
     );
     final quadrantConstraints = _getQuadrantConstraints(
       constraints,
       _axisDirection,
+      scrollPosition,
     );
 
     // TODO: I want the ability to not overflow if we have space below... Almost
@@ -368,19 +336,18 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       targetSize: targetSize,
       target: target,
       preferredDirection: preferredDirection,
-      offset: offsetAndTailLength,
+      offsetAndTail: offsetAndTailLength,
       margin: margin,
       size: constraints.biggest,
       childSize: childSize,
+      scrollPosition: scrollPosition,
     );
     final childParentData = _child.parentData as BoxParentData;
-    final quadrantConstraints = _getQuadrantConstraints(
+    var quadrantConstraints = _getQuadrantConstraints(
       constraints,
       axisDirection,
+      scrollPosition,
     );
-
-    // TODO: I want the ability to not overflow if we have space below... Almost
-    // like I should pass in extentBefore and extentAfter
 
     _child.layout(
       quadrantConstraints,
@@ -401,10 +368,11 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       axisDirection: axisDirection,
       childSize: _child.size,
       margin: margin,
-      offset: offsetAndTailLength,
+      offsetAndTail: offsetAndTailLength,
       size: size,
       target: target,
       targetSize: targetSize,
+      scrollPosition: scrollPosition,
     );
 
     childParentData.offset = quadrantOffset;
@@ -462,47 +430,79 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
   /// Constrains where the box is allowed to take space by
   /// conditionally squishing it against an axis.
+  ///
+  /// If we're in a list, let's account for the space before and after the
+  /// viewport so we don't overflow when there's really space.
   BoxConstraints _getQuadrantConstraints(
     BoxConstraints constraints,
     AxisDirection direction,
+    ScrollPosition? scrollPosition,
   ) {
     final targetHeightRadius = targetSize.height / 2;
     final targetWidthRadius = targetSize.width / 2;
+    final scrollAxis = scrollPosition?.axis;
 
     switch (direction) {
       case AxisDirection.up:
-        return constraints.copyWith(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight:
-              target.dy - targetHeightRadius - offsetAndTailLength - margin.top,
-        );
-
       case AxisDirection.down:
-        return constraints.copyWith(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight: constraints.maxHeight -
-              target.dy -
-              targetHeightRadius -
-              offsetAndTailLength -
-              margin.bottom,
-        );
+        final maxWidth = constraints.maxWidth - margin.horizontal;
+        final hasVerticalScroll =
+            scrollPosition != null && scrollAxis == Axis.vertical;
 
+        if (direction == AxisDirection.up) {
+          final heightAvailable = target.dy +
+              (hasVerticalScroll ? scrollPosition!.extentBefore : 0.0);
+
+          return constraints.copyWith(
+            maxWidth: maxWidth,
+            maxHeight: heightAvailable -
+                targetHeightRadius -
+                offsetAndTailLength -
+                margin.top,
+          );
+        } else {
+          final heightAvailable = constraints.maxHeight +
+              (hasVerticalScroll ? scrollPosition!.extentAfter : 0.0);
+
+          return constraints.copyWith(
+            maxWidth: maxWidth,
+            maxHeight: heightAvailable -
+                target.dy -
+                targetHeightRadius -
+                offsetAndTailLength -
+                margin.bottom,
+          );
+        }
       case AxisDirection.left:
-        return constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.vertical,
-          maxWidth:
-              target.dx - margin.left - targetWidthRadius - offsetAndTailLength,
-        );
-
       case AxisDirection.right:
-        return constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.vertical,
-          maxWidth: constraints.maxWidth -
-              target.dx -
-              margin.right -
-              targetWidthRadius -
-              offsetAndTailLength,
-        );
+        final maxHeight = constraints.maxHeight - margin.vertical;
+        final hasHorizontalScroll =
+            scrollPosition != null && scrollAxis == Axis.horizontal;
+
+        if (direction == AxisDirection.left) {
+          final widthAvailable = target.dx +
+              (hasHorizontalScroll ? scrollPosition!.extentBefore : 0.0);
+
+          return constraints.copyWith(
+            maxHeight: maxHeight,
+            maxWidth: widthAvailable -
+                margin.left -
+                targetWidthRadius -
+                offsetAndTailLength,
+          );
+        } else {
+          final widthAvailable = constraints.maxWidth +
+              (hasHorizontalScroll ? scrollPosition!.extentAfter : 0.0);
+
+          return constraints.copyWith(
+            maxHeight: maxHeight,
+            maxWidth: widthAvailable -
+                target.dx -
+                margin.right -
+                targetWidthRadius -
+                offsetAndTailLength,
+          );
+        }
     }
   }
 
@@ -538,7 +538,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
         final _target = target.translate(0, -offset - targetHeightRadius);
 
-        assert(rect.bottom == _target.dy - tailLength);
+        // assert(rect.bottom == _target.dy - tailLength);
 
         x = _target.dx;
         y = _target.dy;

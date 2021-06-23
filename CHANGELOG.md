@@ -1,3 +1,6 @@
+## [0.0.3+3] - Jun 19, 2021
+Uses optional scroll position to better position tooltip
+
 ## [0.0.3+2] - Jun 19, 2021
 Gets child size through intrinsics rather than compute drylayout which breaks textFields
 
