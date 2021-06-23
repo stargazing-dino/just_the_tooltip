@@ -306,6 +306,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       constraints,
       _axisDirection,
       scrollPosition,
+      margin,
     );
 
     // TODO: I want the ability to not overflow if we have space below... Almost
@@ -328,8 +329,9 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     // Until https://github.com/flutter/flutter/issues/71687 is fixed, we must
     // get child size via intrinsics :
 
-    final width = _child.computeMinIntrinsicWidth(constraints.maxHeight);
-    final height = _child.computeMinIntrinsicHeight(constraints.maxWidth);
+    final deflated = constraints.deflate(margin);
+    final width = _child.computeMinIntrinsicWidth(deflated.maxHeight);
+    final height = _child.computeMinIntrinsicHeight(deflated.maxWidth);
     final childSize = Size(width, height);
 
     axisDirection = getAxisDirection(
@@ -347,6 +349,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       constraints,
       axisDirection,
       scrollPosition,
+      margin,
     );
 
     _child.layout(
@@ -437,6 +440,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     BoxConstraints constraints,
     AxisDirection direction,
     ScrollPosition? scrollPosition,
+    EdgeInsets margin,
   ) {
     final targetHeightRadius = targetSize.height / 2;
     final targetWidthRadius = targetSize.width / 2;

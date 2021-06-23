@@ -20,6 +20,8 @@ AxisDirection getAxisDirection({
       final targetWidthRadius = targetSize.width / 2;
       final rightTargetEdge = target.dx + targetWidthRadius;
       final leftTargetEdge = target.dx - targetWidthRadius;
+      final hasHorizontalScroll =
+          scrollPosition != null && scrollPosition.axis == Axis.horizontal;
 
       // LTE = leftTargetEdge
       // |margin.L          child+offset            LTE                           |
@@ -30,22 +32,18 @@ AxisDirection getAxisDirection({
       var fitsRight =
           size.width - rightTargetEdge - margin.right >= childAndOffsetWidth;
 
-      // TODO: Probably a way to make this cleaner and only one operation
-      if (!fitsLeft &&
-          !fitsRight &&
-          scrollPosition != null &&
-          scrollPosition.axis == Axis.horizontal) {
+      if (!fitsLeft && !fitsRight && hasHorizontalScroll) {
         // Because it doesn't fit in either direction, it's going to go the
         // preferredDirection. Let's check one last time if it fits in the
         // opposite direction though accounting for unviewable scroll space
         if (preferLeft) {
-          fitsRight = (size.width + scrollPosition.extentAfter) -
+          fitsRight = (size.width + scrollPosition!.extentAfter) -
                   rightTargetEdge -
                   margin.right >=
               childAndOffsetWidth;
         } else {
           fitsLeft =
-              (leftTargetEdge + scrollPosition.extentBefore) - margin.left >=
+              (leftTargetEdge + scrollPosition!.extentBefore) - margin.left >=
                   childAndOffsetWidth;
         }
       }
@@ -62,23 +60,22 @@ AxisDirection getAxisDirection({
       final targetHeightRadius = targetSize.height / 2;
       final bottomTargetEdge = target.dy + targetHeightRadius;
       final topTargetEdge = target.dy - targetHeightRadius;
+      final hasVerticalScroll =
+          scrollPosition != null && scrollPosition.axis == Axis.vertical;
 
       var fitsAbove = topTargetEdge - margin.top >= childAndOffsetHeight;
       var fitsBelow = size.height - bottomTargetEdge - margin.bottom >=
           childAndOffsetHeight;
 
-      if (!fitsAbove &&
-          !fitsBelow &&
-          scrollPosition != null &&
-          scrollPosition.axis == Axis.vertical) {
+      if (!fitsAbove && !fitsBelow && hasVerticalScroll) {
         if (preferAbove) {
-          fitsBelow = (size.height + scrollPosition.extentAfter) -
+          fitsBelow = (size.height + scrollPosition!.extentAfter) -
                   bottomTargetEdge -
                   margin.bottom >=
               childAndOffsetHeight;
         } else {
           fitsAbove =
-              (topTargetEdge + scrollPosition.extentBefore) - margin.top >=
+              (topTargetEdge + scrollPosition!.extentBefore) - margin.top >=
                   childAndOffsetHeight;
         }
       }

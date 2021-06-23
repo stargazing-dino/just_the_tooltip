@@ -1,4 +1,7 @@
-## [0.0.3+3] - Jun 19, 2021
+## [0.0.3+4] - Jun 23, 2021
+Accounts for margin when getting child's intrinsic size
+
+## [0.0.3+3] - Jun 23, 2021
 Uses optional scroll position to better position tooltip
 
 ## [0.0.3+2] - Jun 19, 2021
