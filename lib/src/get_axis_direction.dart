@@ -20,21 +20,28 @@ AxisDirection getAxisDirection({
       final targetWidthRadius = targetSize.width / 2;
       final rightTargetEdge = target.dx + targetWidthRadius;
       final leftTargetEdge = target.dx - targetWidthRadius;
-      var spaceAvailableLeft = leftTargetEdge;
-      var spaceAvailableRight = size.width - rightTargetEdge;
-
-      if (scrollPosition != null && scrollPosition.axis == Axis.horizontal) {
-        spaceAvailableLeft += scrollPosition.extentBefore;
-        spaceAvailableRight += scrollPosition.extentAfter;
-      }
+      final spaceAvailableLeft = leftTargetEdge - margin.left;
+      final spaceAvailableRight = size.width - rightTargetEdge - margin.right;
 
       // LTE = leftTargetEdge
       // |margin.L          child+offset            LTE                           |
-      var fitsLeft = spaceAvailableLeft - margin.left >= childAndOffsetWidth;
+      var fitsLeft = spaceAvailableLeft >= childAndOffsetWidth;
 
       //                                   size.width
       // |              RTE                      child+offset             margin.R|
-      var fitsRight = spaceAvailableRight - margin.right >= childAndOffsetWidth;
+      var fitsRight = spaceAvailableRight >= childAndOffsetWidth;
+
+      // It it doesn't fit in either direction, let's check again adding to fact
+      // that we have the scroll space not included in the viewport
+      if (!fitsLeft &&
+          !fitsRight &&
+          scrollPosition != null &&
+          scrollPosition.axis == Axis.horizontal) {
+        fitsLeft = spaceAvailableLeft + scrollPosition.extentBefore >=
+            childAndOffsetWidth;
+        fitsRight = spaceAvailableRight + scrollPosition.extentAfter >=
+            childAndOffsetWidth;
+      }
 
       final tooltipLeft =
           preferLeft ? fitsLeft || !fitsRight : !(fitsRight || !fitsLeft);
@@ -48,17 +55,22 @@ AxisDirection getAxisDirection({
       final targetHeightRadius = targetSize.height / 2;
       final bottomTargetEdge = target.dy + targetHeightRadius;
       final topTargetEdge = target.dy - targetHeightRadius;
-      var spaceAvailableAbove = topTargetEdge;
-      var spaceAvailableBelow = size.height - bottomTargetEdge;
+      final spaceAvailableAbove = topTargetEdge - margin.top;
+      final spaceAvailableBelow =
+          size.height - bottomTargetEdge - margin.bottom;
 
-      if (scrollPosition != null && scrollPosition.axis == Axis.vertical) {
-        spaceAvailableAbove += scrollPosition.extentBefore;
-        spaceAvailableBelow += scrollPosition.extentAfter;
+      var fitsAbove = spaceAvailableAbove >= childAndOffsetHeight;
+      var fitsBelow = spaceAvailableBelow >= childAndOffsetHeight;
+
+      if (!fitsAbove &&
+          !fitsBelow &&
+          scrollPosition != null &&
+          scrollPosition.axis == Axis.vertical) {
+        fitsBelow = spaceAvailableBelow + scrollPosition.extentAfter >=
+            childAndOffsetHeight;
+        fitsAbove = spaceAvailableAbove + scrollPosition.extentBefore >=
+            childAndOffsetHeight;
       }
-
-      var fitsAbove = spaceAvailableAbove - margin.top >= childAndOffsetHeight;
-      var fitsBelow =
-          spaceAvailableBelow - margin.bottom >= childAndOffsetHeight;
 
       final tooltipAbove =
           preferAbove ? fitsAbove || !fitsBelow : !(fitsBelow || !fitsAbove);
