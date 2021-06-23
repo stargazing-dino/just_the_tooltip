@@ -1,3 +1,7 @@
+## [0.0.3+1] - Jun 19, 2021
+Added `computeDryLayout` method to overlay
+
+
 ## [0.0.3] - Jun 19, 2021
 Added `JustTheTooltipArea` for users who need to insert their tooltips into the tree more precisely.
 

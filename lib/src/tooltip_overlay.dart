@@ -265,6 +265,81 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   @override
   BoxConstraints get constraints => super.constraints.loosen();
 
+  /// Constrains where the box is allowed to take space by
+  /// conditionally squishing it against an axis.
+  BoxConstraints getQuadrantConstraints(
+    BoxConstraints constraints,
+    AxisDirection direction,
+  ) {
+    final targetHeightRadius = targetSize.height / 2;
+    final targetWidthRadius = targetSize.width / 2;
+
+    switch (direction) {
+      case AxisDirection.up:
+        return constraints.copyWith(
+          maxWidth: constraints.maxWidth - margin.horizontal,
+          maxHeight:
+              target.dy - targetHeightRadius - offsetAndTailLength - margin.top,
+        );
+
+      case AxisDirection.down:
+        return constraints.copyWith(
+          maxWidth: constraints.maxWidth - margin.horizontal,
+          maxHeight: constraints.maxHeight -
+              target.dy -
+              targetHeightRadius -
+              offsetAndTailLength -
+              margin.bottom,
+        );
+
+      case AxisDirection.left:
+        return constraints.copyWith(
+          maxHeight: constraints.maxHeight - margin.vertical,
+          maxWidth:
+              target.dx - margin.left - targetWidthRadius - offsetAndTailLength,
+        );
+
+      case AxisDirection.right:
+        return constraints.copyWith(
+          maxHeight: constraints.maxHeight - margin.vertical,
+          maxWidth: constraints.maxWidth -
+              target.dx -
+              margin.right -
+              targetWidthRadius -
+              offsetAndTailLength,
+        );
+    }
+  }
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    final _child = child;
+
+    if (_child == null) {
+      return constraints.constrain(margin.collapsedSize);
+    }
+
+    final childSize = _child.getDryLayout(constraints.deflate(margin));
+    final _axisDirection = getAxisDirection(
+      targetSize: targetSize,
+      target: target,
+      preferredDirection: preferredDirection,
+      offset: offsetAndTailLength,
+      margin: margin,
+      size: constraints.biggest,
+      childSize: childSize,
+    );
+    final quadrantConstraints = getQuadrantConstraints(
+      constraints,
+      _axisDirection,
+    );
+
+    // TODO: I want the ability to not overflow if we have space below... Almost
+    // like I should pass in extentBefore and extentAfter Aghh!!
+
+    return _child.getDryLayout(quadrantConstraints);
+  }
+
   @override
   void performLayout() {
     final _child = child;
@@ -284,65 +359,26 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       size: constraints.biggest,
       childSize: childSize,
     );
-    final targetHeightRadius = targetSize.height / 2;
-    final targetWidthRadius = targetSize.width / 2;
     final childParentData = _child.parentData as BoxParentData;
 
-    // We further constrain where the box is allowed to take space by
-    // conditionally squishing it against an axis.
-    BoxConstraints quadrantConstrained;
-
-    switch (axisDirection) {
-      case AxisDirection.up:
-        quadrantConstrained = constraints.copyWith(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight:
-              target.dy - targetHeightRadius - offsetAndTailLength - margin.top,
-        );
-        break;
-      case AxisDirection.down:
-        quadrantConstrained = constraints.copyWith(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight: constraints.maxHeight -
-              target.dy -
-              targetHeightRadius -
-              offsetAndTailLength -
-              margin.bottom,
-        );
-        break;
-      case AxisDirection.left:
-        quadrantConstrained = constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.vertical,
-          maxWidth:
-              target.dx - margin.left - targetWidthRadius - offsetAndTailLength,
-        );
-        break;
-      case AxisDirection.right:
-        quadrantConstrained = constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.vertical,
-          maxWidth: constraints.maxWidth -
-              target.dx -
-              margin.right -
-              targetWidthRadius -
-              offsetAndTailLength,
-        );
-        break;
-    }
-
-    // TODO: I want the ability to not overflow if we have space below... Almost
-    // like I should pass in extentBefore and extentAfter Aghh!!
-
-    _child.layout(
-      quadrantConstrained,
-      parentUsesSize: true,
+    final quadrantConstraints = getQuadrantConstraints(
+      constraints,
+      axisDirection,
     );
 
-    // Once you get the size
-    // Now that we've done real layout, child is actual size
+    // TODO: I want the ability to not overflow if we have space below... Almost
+    // like I should pass in extentBefore and extentAfter
+
+    _child.layout(
+      quadrantConstraints,
+      parentUsesSize: true,
+    );
 
     final shrinkWrapWidth = constraints.maxWidth == double.infinity;
     final shrinkWrapHeight = constraints.maxHeight == double.infinity;
 
+    // Once you get the size
+    // Now that we've done real layout, child is actual size
     size = constraints.constrain(
       Size(
         shrinkWrapWidth ? _child.size.width : double.infinity,
