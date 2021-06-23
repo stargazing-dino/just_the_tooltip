@@ -265,50 +265,56 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   @override
   BoxConstraints get constraints => super.constraints.loosen();
 
-  /// Constrains where the box is allowed to take space by
-  /// conditionally squishing it against an axis.
-  BoxConstraints getQuadrantConstraints(
-    BoxConstraints constraints,
-    AxisDirection direction,
-  ) {
-    final targetHeightRadius = targetSize.height / 2;
-    final targetWidthRadius = targetSize.width / 2;
-
-    switch (direction) {
-      case AxisDirection.up:
-        return constraints.copyWith(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight:
-              target.dy - targetHeightRadius - offsetAndTailLength - margin.top,
-        );
-
-      case AxisDirection.down:
-        return constraints.copyWith(
-          maxWidth: constraints.maxWidth - margin.horizontal,
-          maxHeight: constraints.maxHeight -
-              target.dy -
-              targetHeightRadius -
-              offsetAndTailLength -
-              margin.bottom,
-        );
-
-      case AxisDirection.left:
-        return constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.vertical,
-          maxWidth:
-              target.dx - margin.left - targetWidthRadius - offsetAndTailLength,
-        );
-
-      case AxisDirection.right:
-        return constraints.copyWith(
-          maxHeight: constraints.maxHeight - margin.vertical,
-          maxWidth: constraints.maxWidth -
-              target.dx -
-              margin.right -
-              targetWidthRadius -
-              offsetAndTailLength,
-        );
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    // next line relies on double.infinity absorption
+    if (child != null) {
+      return child!.getMinIntrinsicWidth(
+            math.max(0.0, height - margin.vertical),
+          ) +
+          margin.horizontal;
     }
+
+    return margin.horizontal;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    // next line relies on double.infinity absorption
+    if (child != null) {
+      return child!.getMaxIntrinsicWidth(
+            math.max(0.0, height - margin.vertical),
+          ) +
+          margin.horizontal;
+    }
+
+    return margin.horizontal;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    // next line relies on double.infinity absorption
+    if (child != null) {
+      return child!.getMinIntrinsicHeight(
+            math.max(0.0, width - margin.horizontal),
+          ) +
+          margin.vertical;
+    }
+
+    return margin.vertical;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    // next line relies on double.infinity absorption
+    if (child != null) {
+      return child!.getMaxIntrinsicHeight(
+            math.max(0.0, width - margin.horizontal),
+          ) +
+          margin.vertical;
+    }
+
+    return margin.vertical;
   }
 
   @override
@@ -329,7 +335,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       size: constraints.biggest,
       childSize: childSize,
     );
-    final quadrantConstraints = getQuadrantConstraints(
+    final quadrantConstraints = _getQuadrantConstraints(
       constraints,
       _axisDirection,
     );
@@ -349,7 +355,15 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       return;
     }
 
-    final childSize = _child.getDryLayout(constraints.deflate(margin));
+    // TODO:
+    // final childSize = _child.getDryLayout(constraints.deflate(margin));
+    // Until https://github.com/flutter/flutter/issues/71687 is fixed, we must
+    // get child size via intrinsics :
+
+    final width = _child.computeMinIntrinsicWidth(constraints.maxHeight);
+    final height = _child.computeMinIntrinsicHeight(constraints.maxWidth);
+    final childSize = Size(width, height);
+
     axisDirection = getAxisDirection(
       targetSize: targetSize,
       target: target,
@@ -360,8 +374,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       childSize: childSize,
     );
     final childParentData = _child.parentData as BoxParentData;
-
-    final quadrantConstraints = getQuadrantConstraints(
+    final quadrantConstraints = _getQuadrantConstraints(
       constraints,
       axisDirection,
     );
@@ -377,8 +390,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final shrinkWrapWidth = constraints.maxWidth == double.infinity;
     final shrinkWrapHeight = constraints.maxHeight == double.infinity;
 
-    // Once you get the size
-    // Now that we've done real layout, child is actual size
     size = constraints.constrain(
       Size(
         shrinkWrapWidth ? _child.size.width : double.infinity,
@@ -447,6 +458,52 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     }
 
     super.paint(context, offset);
+  }
+
+  /// Constrains where the box is allowed to take space by
+  /// conditionally squishing it against an axis.
+  BoxConstraints _getQuadrantConstraints(
+    BoxConstraints constraints,
+    AxisDirection direction,
+  ) {
+    final targetHeightRadius = targetSize.height / 2;
+    final targetWidthRadius = targetSize.width / 2;
+
+    switch (direction) {
+      case AxisDirection.up:
+        return constraints.copyWith(
+          maxWidth: constraints.maxWidth - margin.horizontal,
+          maxHeight:
+              target.dy - targetHeightRadius - offsetAndTailLength - margin.top,
+        );
+
+      case AxisDirection.down:
+        return constraints.copyWith(
+          maxWidth: constraints.maxWidth - margin.horizontal,
+          maxHeight: constraints.maxHeight -
+              target.dy -
+              targetHeightRadius -
+              offsetAndTailLength -
+              margin.bottom,
+        );
+
+      case AxisDirection.left:
+        return constraints.copyWith(
+          maxHeight: constraints.maxHeight - margin.vertical,
+          maxWidth:
+              target.dx - margin.left - targetWidthRadius - offsetAndTailLength,
+        );
+
+      case AxisDirection.right:
+        return constraints.copyWith(
+          maxHeight: constraints.maxHeight - margin.vertical,
+          maxWidth: constraints.maxWidth -
+              target.dx -
+              margin.right -
+              targetWidthRadius -
+              offsetAndTailLength,
+        );
+    }
   }
 
   Path _paintTail({

@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const TooltipAreaExamplePage(),
+      home: const DefaultPageExample(),
     );
   }
 }
@@ -20,7 +20,7 @@ class DefaultPageExample extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const margin = EdgeInsets.all(0.0);
+    const margin = EdgeInsets.all(16.0);
 
     return Scaffold(
       body: SizedBox.expand(
@@ -28,7 +28,7 @@ class DefaultPageExample extends StatelessWidget {
           alignment: Alignment.center,
           child: JustTheTooltip(
             tailLength: 20.0,
-            preferredDirection: AxisDirection.up,
+            preferredDirection: AxisDirection.right,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),
             offset: 0,
@@ -108,27 +108,8 @@ class ScrollExamplePage extends StatelessWidget {
   }
 }
 
-class TooltipAreaExamplePage extends StatefulWidget {
+class TooltipAreaExamplePage extends StatelessWidget {
   const TooltipAreaExamplePage({Key? key}) : super(key: key);
-
-  @override
-  State<TooltipAreaExamplePage> createState() => _TooltipAreaExamplePageState();
-}
-
-class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
-  late final TextEditingController controller;
-
-  @override
-  void initState() {
-    controller = TextEditingController(text: 'hello');
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -145,39 +126,36 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                   (index) {
                     if (index == 15) {
                       return JustTheTooltipEntry(
-                          tailLength: 10.0,
-                          preferredDirection: AxisDirection.up,
-                          margin: const EdgeInsets.all(16.0),
-                          child: const Material(
-                            color: Colors.blue,
-                            shape: CircleBorder(),
-                            elevation: 4.0,
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(
-                                Icons.touch_app,
-                                color: Colors.white,
-                              ),
+                        tailLength: 10.0,
+                        preferredDirection: AxisDirection.up,
+                        margin: const EdgeInsets.all(16.0),
+                        child: const Material(
+                          color: Colors.blue,
+                          shape: CircleBorder(),
+                          elevation: 4.0,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Icon(
+                              Icons.touch_app,
+                              color: Colors.white,
                             ),
                           ),
-                          // This is necessary as otherwise the column would only be
-                          // constrained by the amount of vertical space
-                          content: TextField(controller: controller)
-                          // content: Column(
-                          //   mainAxisSize: MainAxisSize.min,
-                          //   children: [
-                          //     Container(
-                          //       height: 40,
-                          //       color: Colors.blue,
-                          //       width: double.infinity,
-                          //     ),
-                          //     const SizedBox(height: 8),
-                          //     const Text(
-                          //       'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
-                          //     ),
-                          //   ],
-                          // ),
-                          );
+                        ),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              height: 40,
+                              color: Colors.blue,
+                              width: double.infinity,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
+                            ),
+                          ],
+                        ),
+                      );
                     }
 
                     return ListTile(title: Text('Item $index'));
@@ -186,11 +164,6 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
               ),
               if (scrim != null) scrim,
               if (tooltip != null) tooltip,
-              // IntrinsicWidth(
-              //   child: TextField(
-              //     controller: controller,
-              //   ),
-              // )
             ],
           );
         },

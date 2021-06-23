@@ -1,6 +1,6 @@
 name: just_the_tooltip
 description: The components for tooltips to be used in custom implementions.
-version: 0.0.3+1
+version: 0.0.3+2
 homepage: https://github.com/Nolence/just_the_tooltip
 
 environment:
