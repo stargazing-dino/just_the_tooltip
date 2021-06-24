@@ -114,8 +114,12 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
     );
   }
 
-  void _showTooltip() {
+  Future<void> _showTooltip() async {
     final tooltipArea = JustTheTooltipArea.of(context);
+    if (tooltipArea.tooltipVisible) {
+      await tooltipArea.hideTooltip(immediately: true);
+    }
+
     final targetInformation = getTargetInformation(context);
     final theme = Theme.of(context);
     final defaultShadow = Shadow(

@@ -93,6 +93,9 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea>
   }
 
   @override
+  bool get tooltipVisible => _entry != null;
+
+  @override
   Future<void> hideTooltip({bool immediately = false}) async {
     if (!immediately) {
       await _animationController.reverse();

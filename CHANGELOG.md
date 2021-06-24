@@ -1,3 +1,6 @@
+## [0.0.3+6] - Jun 24, 2021
+Hides tooltip if it's already visible with tooltip entry
+
 ## [0.0.3+5] - Jun 23, 2021
 Accounts for scrollable space in both axis directions
 

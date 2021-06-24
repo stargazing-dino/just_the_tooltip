@@ -6,6 +6,8 @@ mixin JustTheHandler<T extends StatefulWidget> on State<T> {
   Future<void> hideTooltip({bool immediately = false});
 
   Future<void> showTooltip({bool immediately = false});
+
+  bool get tooltipVisible;
 }
 
 // This assumes the caller itself is the target

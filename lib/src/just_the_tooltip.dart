@@ -177,6 +177,9 @@ class _SimpleTooltipState extends State<JustTheTooltip>
   }
 
   @override
+  bool get tooltipVisible => _entry != null;
+
+  @override
   Future<void> hideTooltip({bool immediately = false}) async {
     debugCheck();
     if (!immediately) {
