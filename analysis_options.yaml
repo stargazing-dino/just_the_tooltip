@@ -8,8 +8,8 @@ analyzer:
 linter:
   rules:
     # - public_member_api_docs
+    # - require_trailing_commas
     - parameter_assignments
-    - require_trailing_commas
     - only_throw_errors
     - always_use_package_imports
     - avoid_dynamic_calls
