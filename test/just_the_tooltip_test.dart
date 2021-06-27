@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -51,6 +53,19 @@ class SimplePage extends StatelessWidget {
 }
 
 void main() {
+  return GoldenToolkit.runWithConfiguration(
+    () async => await testMain(),
+    config: GoldenToolkitConfiguration(
+      // Currently, goldens are not generated/validated in CI for this repo.
+      // We have settled on the goldens for this package being
+      // captured/validated by developers running on MacOSX. We may revisit this
+      // in the future if there is a reason to invest in more sophistication
+      skipGoldenAssertion: () => !Platform.isMacOS,
+    ),
+  );
+}
+
+Future<void> testMain() async {
   const smallText = Text('hello');
   const largeText = Text(
     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec ut auctor mi. Ut eros orci, rhoncus in cursus ut, mollis vel velit. Curabitur in finibus massa. Sed posuere placerat lectus non finibus. Quisque ultricies aliquet felis, sit amet semper nisi tempor at. Integer auctor quam neque. Nulla mollis justo ac ex vulputate, in mollis sem fringilla.',
