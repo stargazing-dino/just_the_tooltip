@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
-// ignore: use_key_in_widget_constructors
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -28,7 +29,7 @@ class DefaultPageExample extends StatelessWidget {
           alignment: Alignment.center,
           child: JustTheTooltip(
             tailLength: 20.0,
-            preferredDirection: AxisDirection.down,
+            preferredDirection: AxisDirection.up,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),
             offset: 0,
@@ -44,12 +45,17 @@ class DefaultPageExample extends StatelessWidget {
                 ),
               ),
             ),
-            content: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                'Bacon ipsum dolor amet kevin turducken brisket pastrami, salami ribeye spare ribs tri-tip sirloin shoulder venison shank burgdoggen chicken pork belly. ',
-              ),
+            content: Container(
+              color: Colors.green,
+              width: 100.0,
+              height: 100.0,
             ),
+            // content: const Padding(
+            //   padding: EdgeInsets.all(8.0),
+            //   child: Text(
+            //     'Bacon ipsum dolor amet kevin turducken brisket pastrami, salami ribeye spare ribs tri-tip sirloin shoulder venison shank burgdoggen chicken pork belly. ',
+            //   ),
+            // ),
           ),
         ),
       ),

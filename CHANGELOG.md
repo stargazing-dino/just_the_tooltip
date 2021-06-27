@@ -1,3 +1,6 @@
+## [0.0.3+7] - Jun 26, 2021
+Adds naive golden tests
+
 ## [0.0.3+6] - Jun 24, 2021
 Hides tooltip if it's already visible with tooltip entry
 
