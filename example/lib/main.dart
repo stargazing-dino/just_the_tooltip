@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const DefaultPageExample(),
+      home: const TooltipAreaExamplePage(),
     );
   }
 }
@@ -29,7 +29,8 @@ class DefaultPageExample extends StatelessWidget {
           alignment: Alignment.center,
           child: JustTheTooltip(
             tailLength: 20.0,
-            preferredDirection: AxisDirection.up,
+            isModal: true,
+            preferredDirection: AxisDirection.down,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),
             offset: 0,
@@ -152,13 +153,14 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
               ListView(
                 controller: scrollController,
                 children: List.generate(
-                  30,
+                  40,
                   (index) {
                     if (index == 15) {
                       return JustTheTooltipEntry(
                         scrollController: scrollController,
+                        isModal: false,
                         tailLength: 20.0,
-                        preferredDirection: AxisDirection.down,
+                        preferredDirection: AxisDirection.right,
                         margin: const EdgeInsets.all(16.0),
                         child: const Material(
                           color: Colors.blue,
@@ -200,7 +202,7 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                                       shape: const StadiumBorder(),
                                     ),
                                     onPressed: () {},
-                                    child: const Text('overlayExercies'),
+                                    child: const Text('exercises'),
                                   ),
                                 ),
                                 const SizedBox(width: 16.0),
@@ -210,7 +212,7 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                                       shape: const StadiumBorder(),
                                     ),
                                     onPressed: () {},
-                                    child: const Text('overlayCourse'),
+                                    child: const Text('course'),
                                   ),
                                 ),
                               ],

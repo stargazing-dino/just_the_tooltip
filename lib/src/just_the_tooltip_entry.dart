@@ -1,15 +1,29 @@
+import 'dart:async';
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/src/just_the_tooltip_area.dart';
 import 'package:just_the_tooltip/src/models/just_the_handler.dart';
-import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
-class JustTheTooltipEntry extends StatefulWidget with JustTheInterface {
+class JustTheTooltipEntry extends StatefulWithInterface {
   @override
   final Widget content;
 
   @override
   final Widget child;
+
+  @override
+  final bool isModal;
+
+  @override
+  final Duration waitDuration;
+
+  @override
+  final Duration showDuration;
+
+  @override
+  final Duration hoverShowDuration;
 
   @override
   final AxisDirection preferredDirection;
@@ -77,9 +91,13 @@ class JustTheTooltipEntry extends StatefulWidget with JustTheInterface {
     Key? key,
     required this.content,
     required this.child,
-    this.preferredDirection = AxisDirection.down,
+    this.isModal = false,
+    this.waitDuration = const Duration(milliseconds: 0),
+    this.showDuration = const Duration(milliseconds: 1500),
+    this.hoverShowDuration = const Duration(milliseconds: 100),
     this.fadeInDuration = const Duration(milliseconds: 150),
-    this.fadeOutDuration = const Duration(milliseconds: 0),
+    this.fadeOutDuration = const Duration(milliseconds: 75),
+    this.preferredDirection = AxisDirection.down,
     this.curve = Curves.easeInOut,
     this.padding = const EdgeInsets.all(8.0),
     this.margin = const EdgeInsets.all(8.0),
@@ -100,26 +118,89 @@ class JustTheTooltipEntry extends StatefulWidget with JustTheInterface {
   State<JustTheTooltipEntry> createState() => _JustTheTooltipEntryState();
 }
 
-class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
+// TODO: Do I need to deal with Deactivate?
+class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
+    with JustTheHandler, SingleTickerProviderStateMixin {
+  Widget? get entry => JustTheTooltipArea.of(context).entry;
+  Widget? get skrim => JustTheTooltipArea.of(context).skrim;
   final _layerLink = LayerLink();
 
   @override
+  void initState() {
+    animationController = AnimationController(
+      duration: widget.fadeInDuration,
+      reverseDuration: widget.fadeOutDuration,
+      vsync: this,
+    )..addStatusListener(handleStatusChanged);
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    animationController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // TODO: This looks like the same builder over at just_the_tooltip.
+    // Can we DRY?
     return CompositedTransformTarget(
       link: _layerLink,
-      child: GestureDetector(
-        onTap: _showTooltip,
-        child: widget.child,
+      child: Builder(
+        builder: (context) {
+          if (mouseIsConnected) {
+            return MouseRegion(
+              onEnter: (PointerEnterEvent event) => showTooltip(),
+              onExit: (PointerExitEvent event) => hideTooltip(),
+              child: widget.child,
+            );
+          } else {
+            return GestureDetector(
+              onTap: entry == null ? showTooltip : null,
+              child: widget.child,
+            );
+          }
+        },
       ),
     );
   }
 
-  Future<void> _showTooltip() async {
-    final tooltipArea = JustTheTooltipArea.of(context);
-    if (tooltipArea.tooltipVisible) {
-      await tooltipArea.hideTooltip(immediately: true);
+  @override
+  void handlePointerEvent(PointerEvent event) {
+    if (entry == null) {
+      return;
     }
 
+    super.handlePointerEvent(event);
+  }
+
+  /// Shows the tooltip if it is not already visible.
+  ///
+  /// Returns `false` when the tooltip was already visible or if the context has
+  /// become null.
+  ///
+  /// Copied from Tooltip
+  @override
+  bool ensureTooltipVisible() {
+    showTimer?.cancel();
+    showTimer = null;
+    if (entry != null) {
+      // Stop trying to hide, if we were.
+      hideTimer?.cancel();
+      hideTimer = null;
+      animationController.forward();
+      return false; // Already visible.
+    }
+    createEntries();
+    animationController.forward();
+    return true;
+  }
+
+  @override
+  Future<void> createEntries() async {
+    final tooltipArea = JustTheTooltipArea.of(context);
     final targetInformation = getTargetInformation(context);
     final theme = Theme.of(context);
     final defaultShadow = Shadow(
@@ -128,9 +209,9 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
       color: theme.shadowColor,
     );
 
-    tooltipArea.buildChild(
-      withAnimation: (animationController) {
-        return CompositedTransformFollower(
+    tooltipArea.setState(
+      () {
+        tooltipArea.entry = CompositedTransformFollower(
           showWhenUnlinked: widget.showWhenUnlinked,
           offset: targetInformation.offsetToTarget,
           link: _layerLink,
@@ -203,16 +284,29 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry> {
             ),
           ),
         );
+        if (widget.isModal) {
+          tooltipArea.skrim = GestureDetector(
+            child: const SizedBox.expand(),
+            behavior: HitTestBehavior.translucent,
+            onTap: hideTooltip,
+          );
+        }
       },
-      skrim: GestureDetector(
-        child: const SizedBox.expand(),
-        behavior: HitTestBehavior.translucent,
-        onTap: tooltipArea.hideTooltip,
-      ),
-      duration: widget.fadeInDuration,
-      reverseDuration: widget.fadeOutDuration,
     );
+  }
 
-    tooltipArea.showTooltip();
+  @override
+  void removeEntries() {
+    hideTimer?.cancel();
+    hideTimer = null;
+    showTimer?.cancel();
+    showTimer = null;
+
+    final tooltipArea = JustTheTooltipArea.of(context);
+
+    tooltipArea.setState(() {
+      tooltipArea.entry = null;
+      tooltipArea.skrim = null;
+    });
   }
 }
