@@ -10,7 +10,7 @@ install it
     just_the_tooltip: <latest_version>
 ```
 
-Tooltip can be set to prefer any axis but will try to fit in opposite axis if the space is not big enough. This tooltip sizes itself to fit the size of its child.
+`just_the_tooltip` gives you more flexibility over the the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands their single axis layout algorithm to fix 4 axes. The tooltip can be positioned along any axis and will fallback to the opposite side if there is no space for the size of the content.
 
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true"/>
@@ -39,13 +39,19 @@ JustTheTooltip(
 )
 ```
 
-The child will be wrapped with a gesture detector that is responsible for showing the content.
+The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` that is responsible for showing and hiding the content. (There is an open issue for allowing `controller` access to the state of the tooltip.) You can further define how a `Tooltip` will show by defining the `isModal` property. A modal will only open through clicking on the `child` and close by clicking on the background area (referred to as the `skrim` here). A non-modal (the default) is a more traditional tooltip opens and closes on hovers.
+
+*** Note, phone emulators do not implement mouse controls. To test hover states, use a browser.
+
+The fallback used when no mouse region is present but `isModal` is false is to rely on tap behavior.
 
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true"/>
 </p>
 
-The tooltip should also work in lists and follow the target through scrolling.
+** ListViews
+
+The tooltip should also work in lists and follow the target through scrolling. For even more consideration of the available space in ListViews, a `ScrollController` may be passed to the `just_the_tooltip` to give the layout algorithm a hint as to how much space is before and after the scroll axis. This allows tooltips that would otherwise overflow to use up space offscreen in one of the scroll directions.
 
 For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltipArea`:
 
@@ -64,6 +70,7 @@ Scaffold(
                 return JustTheTooltipEntry(
                   tailLength: 10.0,
                   preferredDirection: AxisDirection.down,
+                  isModal: true,
                   margin: const EdgeInsets.all(20.0),
                   child: const Material(
                     color: Colors.blue,
@@ -108,6 +115,6 @@ Scaffold(
 
 This will give you the positioned tooltip and scrim (an empty gesture detector that catches tap events and closes the tooltip) for you to enter into the tree however you like. By doing this, you can make tooltips that are visually "under" other parts of the UI such as the appbar in the above example.
 
-Notice the use of `JustTheTooltipEntry`. It replaces the traditional widget as it no longer is in charge of the animation itself but delegates it to the parent widget area.
+Notice the use of `JustTheTooltipEntry`. It replaces the traditional widget as it no longer is in charge of overlays itself but delegates it to the parent widget area to create the widgets and return them via the builder.
 
 Issues and PRs welcome. API subject to change
