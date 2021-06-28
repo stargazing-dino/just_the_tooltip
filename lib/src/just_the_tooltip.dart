@@ -168,6 +168,15 @@ class _SimpleTooltipState extends State<JustTheTooltip>
   }
 
   @override
+  void deactivate() {
+    if (entry != null) {
+      hideTooltip(immediately: true);
+    }
+    showTimer?.cancel();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     entry?.remove();
     skrim?.remove();

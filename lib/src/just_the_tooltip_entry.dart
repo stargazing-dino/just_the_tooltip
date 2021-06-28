@@ -139,6 +139,15 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
   }
 
   @override
+  void deactivate() {
+    if (entry != null) {
+      hideTooltip(immediately: true);
+    }
+    showTimer?.cancel();
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
     animationController.dispose();
     super.dispose();

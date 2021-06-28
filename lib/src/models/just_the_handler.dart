@@ -33,6 +33,16 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    GestureBinding.instance!.pointerRouter
+        .removeGlobalRoute(handlePointerEvent);
+    RendererBinding.instance!.mouseTracker
+        .removeListener(handleMouseTrackerChange);
+    removeEntries();
+    super.dispose();
+  }
+
   // TODO: This thing needs to update when oldWidget.isDialog changes
   // everything needs to close too.
   //
@@ -52,7 +62,7 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
     mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker
-        .addListener(_handleMouseTrackerChange);
+        .addListener(handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance!.pointerRouter.addGlobalRoute(handlePointerEvent);
@@ -62,7 +72,7 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
     mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker
-        .removeListener(_handleMouseTrackerChange);
+        .removeListener(handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
     GestureBinding.instance!.pointerRouter
@@ -84,7 +94,7 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
     }
   }
 
-  void _handleMouseTrackerChange() {
+  void handleMouseTrackerChange() {
     if (!mounted) {
       return;
     }
