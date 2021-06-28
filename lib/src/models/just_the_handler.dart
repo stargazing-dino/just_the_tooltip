@@ -35,10 +35,7 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
 
   @override
   void dispose() {
-    GestureBinding.instance!.pointerRouter
-        .removeGlobalRoute(handlePointerEvent);
-    RendererBinding.instance!.mouseTracker
-        .removeListener(handleMouseTrackerChange);
+    removeGestureListeners();
     removeEntries();
     super.dispose();
   }
@@ -59,7 +56,6 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
   }
 
   void addGestureListeners() {
-    mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker
         .addListener(handleMouseTrackerChange);
@@ -69,13 +65,9 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
   }
 
   void removeGestureListeners() {
-    mouseIsConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
-    // Listen to see when a mouse is added.
-    RendererBinding.instance!.mouseTracker
+    RendererBinding.instance?.mouseTracker
         .removeListener(handleMouseTrackerChange);
-    // Listen to global pointer events so that we can hide a tooltip immediately
-    // if some other control is clicked on.
-    GestureBinding.instance!.pointerRouter
+    GestureBinding.instance?.pointerRouter
         .removeGlobalRoute(handlePointerEvent);
   }
 
