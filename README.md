@@ -13,7 +13,7 @@ install it
 `just_the_tooltip` gives you more flexibility over the the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands their single axis layout algorithm to fix 4 axes. The tooltip can be positioned along any axis and will fallback to the opposite side if there is no space for the size of the content.
 
 <p>  
- <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true"/>
+ <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true" width="320" height="568"/>
 </p>
 
 ```dart
@@ -46,7 +46,7 @@ The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` tha
 The fallback used when no mouse region is present but `isModal` is false is to rely on tap behavior.
 
 <p>  
- <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true"/>
+ <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true" width="320" height="568"/>
 </p>
 
 ** ListViews
