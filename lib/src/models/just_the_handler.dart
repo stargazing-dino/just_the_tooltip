@@ -58,6 +58,12 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
         addGestureListeners();
       }
     }
+
+    if (oldWidget.scrollController != widget.scrollController) {
+      removeEntries();
+      createEntries();
+    }
+
     super.didUpdateWidget(oldWidget);
   }
 
