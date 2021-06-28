@@ -123,6 +123,8 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
     with JustTheHandler, SingleTickerProviderStateMixin {
   Widget? get entry => JustTheTooltipArea.of(context).entry;
   Widget? get skrim => JustTheTooltipArea.of(context).skrim;
+  Key get entryKey => Key('__entry_${widget.key}__');
+  Key get scrimKey => Key('__skrim_${widget.key}__');
   final _layerLink = LayerLink();
 
   @override
@@ -191,12 +193,20 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
   bool ensureTooltipVisible() {
     showTimer?.cancel();
     showTimer = null;
-    if (entry != null) {
+    final _entry = entry;
+    if (_entry != null) {
       // Stop trying to hide, if we were.
       hideTimer?.cancel();
       hideTimer = null;
-      animationController.forward();
-      return false; // Already visible.
+
+      if (_entry.key == entryKey) {
+        animationController.forward();
+        return false; // Already visible.
+
+      } else {
+        animationController.reset();
+        return true; // Wrong tooltip was visible
+      }
     }
     createEntries();
     animationController.forward();
@@ -217,6 +227,7 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
     tooltipArea.setState(
       () {
         tooltipArea.entry = CompositedTransformFollower(
+          key: entryKey,
           showWhenUnlinked: widget.showWhenUnlinked,
           offset: targetInformation.offsetToTarget,
           link: _layerLink,
@@ -291,6 +302,7 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
         );
         if (widget.isModal) {
           tooltipArea.skrim = GestureDetector(
+            key: scrimKey,
             child: const SizedBox.expand(),
             behavior: HitTestBehavior.translucent,
             onTap: hideTooltip,

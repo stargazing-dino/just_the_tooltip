@@ -1,3 +1,6 @@
+## [0.0.4+1] - Jun 28, 2021
+Adds key check for just_the_tooltip_entry
+
 ## [0.0.4] - Jun 28, 2021
 Added a `isModal` property that defines how the tooltip is handled.
 
