@@ -42,7 +42,12 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
     if (hasListeners) {
       removeGestureListeners();
     }
-    removeEntries();
+
+    hideTimer?.cancel();
+    hideTimer = null;
+    showTimer?.cancel();
+    showTimer = null;
+
     super.dispose();
   }
 
