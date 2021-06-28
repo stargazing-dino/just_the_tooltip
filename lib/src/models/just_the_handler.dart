@@ -11,6 +11,9 @@ abstract class StatefulWithInterface extends StatefulWidget
   const StatefulWithInterface({Key? key}) : super(key: key);
 }
 
+/// To not repeate code, this handler manages all the stateful events around
+/// timers, gestures and box coordination. This mixin is used in both
+/// [just_the_tooltip] and [just_the_tooltip_entry].
 mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
   late final AnimationController animationController;
   Timer? hideTimer;
