@@ -123,12 +123,20 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
     if (longPressActivated) {
       hideTimer ??= Timer(
         widget.showDuration,
-        animationController.reverse,
+        () {
+          if (mounted) {
+            animationController.reverse();
+          }
+        },
       );
     } else {
       hideTimer ??= Timer(
         widget.hoverShowDuration,
-        animationController.reverse,
+        () {
+          if (mounted) {
+            animationController.reverse();
+          }
+        },
       );
     }
     longPressActivated = false;

@@ -356,15 +356,15 @@ class _SimpleTooltipState extends State<JustTheTooltip>
     hideTimer = null;
     showTimer?.cancel();
     showTimer = null;
-    entry?.remove();
-    entry = null;
 
-    if (widget.isModal) {
-      assert(skrim != null);
-      skrim?.remove();
-      skrim = null;
-    }
+    setState(() {
+      entry?.remove();
+      entry = null;
 
-    setState(() {});
+      if (widget.isModal) {
+        skrim?.remove();
+        skrim = null;
+      }
+    });
   }
 }
