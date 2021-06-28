@@ -24,18 +24,24 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
   // late Duration waitDuration;
   late bool mouseIsConnected = false;
   bool longPressActivated = false;
+  late bool hasListeners;
 
   @override
   void initState() {
     if (!widget.isModal) {
+      hasListeners = true;
       addGestureListeners();
+    } else {
+      hasListeners = false;
     }
     super.initState();
   }
 
   @override
   void dispose() {
-    removeGestureListeners();
+    if (hasListeners) {
+      removeGestureListeners();
+    }
     removeEntries();
     super.dispose();
   }
@@ -56,6 +62,7 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
   }
 
   void addGestureListeners() {
+    if (!hasListeners) hasListeners = true;
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker
         .addListener(handleMouseTrackerChange);
@@ -65,6 +72,7 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
   }
 
   void removeGestureListeners() {
+    if (hasListeners) hasListeners = false;
     RendererBinding.instance?.mouseTracker
         .removeListener(handleMouseTrackerChange);
     GestureBinding.instance?.pointerRouter
