@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:just_the_tooltip/src/models/just_the_handler.dart';
 
 /// The interface for a tooltip builder. This is useful when the user wants to
 /// insert the tooltip into a stack rather than an overlay
@@ -8,7 +7,8 @@ typedef TooltipBuilder = Widget Function(
   Widget? tooltip,
 
   /// This widget should be placed behind the tooltip. When tapped, it will
-  /// collapse the tooltip.
+  /// collapse the tooltip. When, isModal is set to true, this will always be
+  /// null
   Widget? scrim,
 );
 
@@ -61,24 +61,9 @@ class JustTheTooltipArea extends StatefulWidget {
   State<JustTheTooltipArea> createState() => _JustTheTooltipAreaState();
 }
 
-class _JustTheTooltipAreaState extends State<JustTheTooltipArea>
-    with SingleTickerProviderStateMixin, JustTheHandler {
-  late final AnimationController _animationController;
-  Widget? _entry;
-  Widget? _skrim;
-
-  @override
-  void initState() {
-    _animationController = AnimationController(vsync: this);
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _animationController.dispose();
-    super.dispose();
-  }
+class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
+  Widget? entry;
+  Widget? skrim;
 
   @override
   Widget build(BuildContext context) {
@@ -86,53 +71,11 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea>
       data: this,
       child: widget.builder(
         context,
-        _entry,
-        _skrim,
+        entry,
+        skrim,
       ),
     );
   }
 
-  @override
-  bool get tooltipVisible => _entry != null;
-
-  @override
-  Future<void> hideTooltip({bool immediately = false}) async {
-    if (!immediately) {
-      await _animationController.reverse();
-    }
-
-    setState(() {
-      _entry = null;
-      _skrim = null;
-    });
-  }
-
-  // This is to be called by children.
-  @override
-  Future<void> showTooltip({
-    // TODO: This is somehow required? But i can't break the contract
-    RenderBox? targetBox,
-    bool immediately = false,
-  }) async {
-    assert(_entry != null);
-    assert(_skrim != null);
-
-    await _animationController.forward();
-  }
-
-  void buildChild({
-    required Widget Function(AnimationController animationController)
-        withAnimation,
-    required Widget skrim,
-    required Duration duration,
-    required Duration reverseDuration,
-  }) {
-    _animationController.duration = duration;
-    _animationController.reverseDuration = reverseDuration;
-
-    setState(() {
-      _entry = withAnimation(_animationController);
-      _skrim = skrim;
-    });
-  }
+  bool get tooltipVisible => entry != null;
 }

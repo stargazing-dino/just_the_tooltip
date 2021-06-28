@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:golden_toolkit/golden_toolkit.dart';
@@ -12,10 +13,13 @@ class SimplePage extends StatelessWidget {
 
   final AxisDirection preferredDirection;
 
+  final bool isModal;
+
   const SimplePage({
     Key? key,
     required this.content,
     required this.preferredDirection,
+    required this.isModal,
     this.alignment = Alignment.center,
   }) : super(key: key);
 
@@ -28,6 +32,7 @@ class SimplePage extends StatelessWidget {
           child: Align(
             alignment: alignment,
             child: JustTheTooltip(
+              isModal: isModal,
               fadeInDuration: Duration.zero,
               fadeOutDuration: Duration.zero,
               preferredDirection: preferredDirection,
@@ -86,6 +91,133 @@ Future<void> testMain() async {
     await tester.pumpAndSettle();
   }
 
+  Future<TestGesture> hoverOnAddButton(WidgetTester tester) async {
+    final icon = find.byIcon(Icons.add);
+
+    expect(icon, findsOneWidget);
+    final gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: Offset.zero);
+    addTearDown(gesture.removePointer);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(icon));
+    await tester.pumpAndSettle();
+
+    return gesture;
+  }
+
+  Future<void> hoverOutOfAddButton(
+    WidgetTester tester,
+    TestGesture gesture,
+  ) async {
+    await gesture.moveTo(Offset.zero);
+    await tester.pumpAndSettle();
+  }
+
+  group(
+    'Non-modal goldens small phone - small text',
+    () {
+      testGoldens(
+        'PreferredDirection up',
+        (tester) async {
+          await tester.pumpWidgetBuilder(
+            const SimplePage(
+              content: smallText,
+              preferredDirection: AxisDirection.up,
+              isModal: false,
+            ),
+            surfaceSize: Device.phone.size,
+          );
+
+          final gesture = await hoverOnAddButton(tester);
+          await screenMatchesGolden(
+            tester,
+            'hover_in_sm_preferred_direction_up_sm_text',
+          );
+          await hoverOutOfAddButton(tester, gesture);
+          await screenMatchesGolden(
+            tester,
+            'hover_out_sm_preferred_direction_up_sm_text',
+          );
+        },
+      );
+
+      testGoldens(
+        'PreferredDirection down',
+        (tester) async {
+          await tester.pumpWidgetBuilder(
+            const SimplePage(
+              content: smallText,
+              preferredDirection: AxisDirection.down,
+              isModal: false,
+            ),
+            surfaceSize: Device.phone.size,
+          );
+
+          final gesture = await hoverOnAddButton(tester);
+          await screenMatchesGolden(
+            tester,
+            'hover_in_sm_preferred_direction_down_sm_text',
+          );
+          await hoverOutOfAddButton(tester, gesture);
+          await screenMatchesGolden(
+            tester,
+            'hover_out_sm_preferred_direction_down_sm_text',
+          );
+        },
+      );
+
+      testGoldens(
+        'PreferredDirection left',
+        (tester) async {
+          await tester.pumpWidgetBuilder(
+            const SimplePage(
+              content: smallText,
+              preferredDirection: AxisDirection.left,
+              isModal: false,
+            ),
+            surfaceSize: Device.phone.size,
+          );
+
+          final gesture = await hoverOnAddButton(tester);
+          await screenMatchesGolden(
+            tester,
+            'hover_in_sm_preferred_direction_left_sm_text',
+          );
+          await hoverOutOfAddButton(tester, gesture);
+          await screenMatchesGolden(
+            tester,
+            'hover_out_sm_preferred_direction_left_sm_text',
+          );
+        },
+      );
+
+      testGoldens(
+        'PreferredDirection right',
+        (tester) async {
+          await tester.pumpWidgetBuilder(
+            const SimplePage(
+              content: smallText,
+              preferredDirection: AxisDirection.right,
+              isModal: false,
+            ),
+            surfaceSize: Device.phone.size,
+          );
+
+          final gesture = await hoverOnAddButton(tester);
+          await screenMatchesGolden(
+            tester,
+            'hover_in_sm_preferred_direction_right_sm_text',
+          );
+          await hoverOutOfAddButton(tester, gesture);
+          await screenMatchesGolden(
+            tester,
+            'hover_out_sm_preferred_direction_right_sm_text',
+          );
+        },
+      );
+    },
+  );
+
   group(
     'Goldens small phone - small text',
     () {
@@ -96,6 +228,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.up,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -116,6 +249,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.down,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -136,6 +270,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.left,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -156,6 +291,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.right,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -181,6 +317,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.up,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -201,6 +338,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.down,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -221,6 +359,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.left,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -241,6 +380,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.right,
+              isModal: true,
             ),
             surfaceSize: Device.phone.size,
           );
@@ -266,6 +406,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.up,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -286,6 +427,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.down,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -306,6 +448,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.left,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -326,6 +469,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: smallText,
               preferredDirection: AxisDirection.right,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -351,6 +495,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.up,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -371,6 +516,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.down,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -391,6 +537,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.left,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -411,6 +558,7 @@ Future<void> testMain() async {
             const SimplePage(
               content: largeText,
               preferredDirection: AxisDirection.right,
+              isModal: true,
             ),
             surfaceSize: Device.tabletLandscape.size,
           );
@@ -432,6 +580,7 @@ Future<void> testMain() async {
         const SimplePage(
           content: smallText,
           preferredDirection: AxisDirection.up,
+          isModal: true,
         ),
       );
 

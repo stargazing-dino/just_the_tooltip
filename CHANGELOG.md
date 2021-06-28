@@ -1,3 +1,6 @@
+## [0.0.4] - Jun 28, 2021
+Added a `isModal` property that defines how the tooltip is handled.
+
 ## [0.0.3+7] - Jun 26, 2021
 Adds naive golden tests
 
