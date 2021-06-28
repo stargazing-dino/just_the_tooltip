@@ -158,7 +158,12 @@ class _JustTheTooltipEntryState extends State<JustTheTooltipEntry>
             );
           } else {
             return GestureDetector(
-              onTap: entry == null ? showTooltip : null,
+              onLongPress: widget.isModal ? null : handleLongPress,
+              onTap: widget.isModal
+                  ? entry == null
+                      ? showTooltip
+                      : null
+                  : null,
               child: widget.child,
             );
           }

@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const DefaultPageExample(),
+      home: const TooltipAreaExamplePage(),
     );
   }
 }
@@ -51,12 +51,6 @@ class DefaultPageExample extends StatelessWidget {
               width: 100.0,
               height: 100.0,
             ),
-            // content: const Padding(
-            //   padding: EdgeInsets.all(8.0),
-            //   child: Text(
-            //     'Bacon ipsum dolor amet kevin turducken brisket pastrami, salami ribeye spare ribs tri-tip sirloin shoulder venison shank burgdoggen chicken pork belly. ',
-            //   ),
-            // ),
           ),
         ),
       ),
@@ -158,9 +152,9 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                     if (index == 15) {
                       return JustTheTooltipEntry(
                         scrollController: scrollController,
-                        isModal: false,
+                        isModal: true,
                         tailLength: 20.0,
-                        preferredDirection: AxisDirection.right,
+                        preferredDirection: AxisDirection.down,
                         margin: const EdgeInsets.all(16.0),
                         child: const Material(
                           color: Colors.blue,

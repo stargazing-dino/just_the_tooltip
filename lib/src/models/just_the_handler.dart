@@ -69,6 +69,15 @@ mixin JustTheHandler<T extends StatefulWithInterface> on State<T> {
         .removeGlobalRoute(handlePointerEvent);
   }
 
+  void handleLongPress() {
+    longPressActivated = true;
+    final tooltipCreated = ensureTooltipVisible();
+
+    if (tooltipCreated) {
+      Feedback.forLongPress(context);
+    }
+  }
+
   void handleStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.dismissed) {
       hideTooltip(immediately: true);
