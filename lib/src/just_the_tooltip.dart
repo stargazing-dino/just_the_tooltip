@@ -212,6 +212,13 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+    // if (widget.controller != oldWidget.controller) {
+    //   if (oldWidget.controller != null) {
+    //     // The user provided a controller, let's dispose ours
+    //     oldWidget.controller.dispose();
+    //   }
+    // }
+
     if (oldWidget.isModal != widget.isModal) {
       if (widget.isModal) {
         _removeGestureListeners();
