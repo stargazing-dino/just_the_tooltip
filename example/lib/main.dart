@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const DefaultPageExample(),
+      home: const TooltipAreaExamplePage(),
     );
   }
 }
@@ -29,7 +29,7 @@ class DefaultPageExample extends StatelessWidget {
           alignment: Alignment.center,
           child: JustTheTooltip(
             tailLength: 20.0,
-            isModal: false,
+            isModal: true,
             preferredDirection: AxisDirection.right,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),
@@ -150,7 +150,7 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                   40,
                   (index) {
                     if (index == 15) {
-                      return JustTheTooltipEntry(
+                      return JustTheTooltip.entry(
                         scrollController: scrollController,
                         isModal: true,
                         tailLength: 20.0,
@@ -168,50 +168,56 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                             ),
                           ),
                         ),
-                        content: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              maxLines: null,
-                              keyboardType: TextInputType.text,
-                              textCapitalization: TextCapitalization.sentences,
-                              style: Theme.of(context).textTheme.headline6,
-                              controller: titleController,
-                            ),
-                            const SizedBox(height: 12.0),
-                            TextField(
-                              controller: descriptionController,
-                              maxLines: null,
-                              keyboardType: TextInputType.multiline,
-                              textCapitalization: TextCapitalization.sentences,
-                              style: Theme.of(context).textTheme.subtitle1,
-                            ),
-                            const SizedBox(height: 16.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Expanded(
-                                  child: OutlinedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      shape: const StadiumBorder(),
+                        content: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextField(
+                                maxLines: null,
+                                keyboardType: TextInputType.text,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                style: Theme.of(context).textTheme.headline6,
+                                controller: titleController,
+                              ),
+                              const SizedBox(height: 12.0),
+                              TextField(
+                                controller: descriptionController,
+                                maxLines: null,
+                                keyboardType: TextInputType.multiline,
+                                textCapitalization:
+                                    TextCapitalization.sentences,
+                                style: Theme.of(context).textTheme.subtitle1,
+                              ),
+                              const SizedBox(height: 16.0),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      onPressed: () {},
+                                      child: const Text('exercises'),
                                     ),
-                                    onPressed: () {},
-                                    child: const Text('exercises'),
                                   ),
-                                ),
-                                const SizedBox(width: 16.0),
-                                Expanded(
-                                  child: OutlinedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      shape: const StadiumBorder(),
+                                  const SizedBox(width: 16.0),
+                                  Expanded(
+                                    child: OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        shape: const StadiumBorder(),
+                                      ),
+                                      onPressed: () {},
+                                      child: const Text('course'),
                                     ),
-                                    onPressed: () {},
-                                    child: const Text('course'),
                                   ),
-                                ),
-                              ],
-                            )
-                          ],
+                                ],
+                              )
+                            ],
+                          ),
                         ),
                       );
                     }
