@@ -1,16 +1,16 @@
 # just_the_tooltip
 
-A package that is just the tooltip.
+A nice, small package for when you need a tooltip.
 
 ## Getting Started
 
-install it
+Insert this into your yaml:
 
 ```yaml
     just_the_tooltip: <latest_version>
 ```
 
-`just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands their single axis layout algorithm to fit 4 axes. The tooltip can be positioned along any axis and will fallback to the opposite side if there is no space for the size of the content.
+`just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands upon their single axis layout algorithm to fit both vertically and horizontally. The tooltip can be positioned along any axis and will fall back to the opposite side if overflowed.
 
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true" width="320" height="568"/>
@@ -41,7 +41,7 @@ JustTheTooltip(
 
 The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` that is responsible for showing and hiding the content. (There is an open issue for allowing `controller` access to the state of the tooltip.) You can further define how a `Tooltip` will show by defining the `isModal` property. A modal will only open through clicking on the `child` and close by clicking on the background area (referred to as the `skrim` here). A non-modal (the default) is a more traditional tooltip opens and closes on hovers.
 
-*** Note, phone emulators do not implement mouse controls. To test hover states, use a browser.
+__Note, phone emulators do not implement mouse controls. To test hover states, use a browser.__
 
 The fallback used when no mouse region is present but `isModal` is false is to rely on tap behavior.
 
@@ -49,7 +49,7 @@ The fallback used when no mouse region is present but `isModal` is false is to r
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true" width="320" height="568"/>
 </p>
 
-** ListViews
+## ListViews
 
 The tooltip should also work in lists and follow the target through scrolling. For even more consideration of the available space in ListViews, a `ScrollController` may be passed to the `just_the_tooltip` to give the layout algorithm a hint as to how much space is before and after the scroll axis. This allows tooltips that would otherwise overflow to use up space offscreen in one of the scroll directions.
 
@@ -113,12 +113,12 @@ Scaffold(
 );
 ```
 
+This will give you the positioned tooltip and scrim (an empty gesture detector that catches tap events and closes the tooltip) for you to enter into the tree however you like. By doing this, you can make tooltips that are visually "under" other parts of the UI such as the appbar in the above example.
+
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/scrolling_example.gif?raw=true" width="320" height="568"/>
 </p>
 
-This will give you the positioned tooltip and scrim (an empty gesture detector that catches tap events and closes the tooltip) for you to enter into the tree however you like. By doing this, you can make tooltips that are visually "under" other parts of the UI such as the appbar in the above example.
-
 Notice the use of `JustTheTooltip.entry`. This factory ensures the area above is in charge of the widgets and returns them via the builder of that widget.
 
-Issues and PRs welcome. API subject to change
+Issues and PRs welcome. API subject to change.
