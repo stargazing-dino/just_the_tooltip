@@ -53,7 +53,7 @@ The fallback used when no mouse region is present but `isModal` is false is to r
 
 The tooltip should also work in lists and follow the target through scrolling. For even more consideration of the available space in ListViews, a `ScrollController` may be passed to the `just_the_tooltip` to give the layout algorithm a hint as to how much space is before and after the scroll axis. This allows tooltips that would otherwise overflow to use up space offscreen in one of the scroll directions.
 
-For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltipArea`:
+For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltip.entry`:
 
 ```dart
 Scaffold(
@@ -67,7 +67,7 @@ Scaffold(
             itemCount: 30,
             itemBuilder: (context, index) {
               if (index == 15) {
-                return JustTheTooltipEntry(
+                return JustTheTooltip.entry(
                   tailLength: 10.0,
                   preferredDirection: AxisDirection.down,
                   isModal: true,
@@ -115,6 +115,6 @@ Scaffold(
 
 This will give you the positioned tooltip and scrim (an empty gesture detector that catches tap events and closes the tooltip) for you to enter into the tree however you like. By doing this, you can make tooltips that are visually "under" other parts of the UI such as the appbar in the above example.
 
-Notice the use of `JustTheTooltipEntry`. It replaces the traditional widget as it no longer is in charge of overlays itself but delegates it to the parent widget area to create the widgets and return them via the builder.
+Notice the use of `JustTheTooltip.entry`. This factory ensures the area above is in charge of the widgets and returns them via the builder of that widget.
 
 Issues and PRs welcome. API subject to change

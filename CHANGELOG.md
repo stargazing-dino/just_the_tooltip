@@ -1,3 +1,6 @@
+## [0.0.5] - Jun 30, 2021
+Much cleaner implementation. No longer JustTheTooltipEntry. Rather, that's been replaced with a `JustTheTooltip.entry` factory constructor.
+
 ## [0.0.4+1] - Jun 28, 2021
 Adds key check for just_the_tooltip_entry
 

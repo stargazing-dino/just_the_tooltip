@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:just_the_tooltip/src/models/just_the_delegate.dart';
 
-abstract class JustTheInterface {
+abstract class JustTheInterface extends StatefulWidget {
+  /// Responsible for how the layout will occur
+  final JustTheDelegate delegate;
+
   /// The content of the tooltip. Content must be collapsed so it does not
   /// exceed it's constraints. The content's intrinsics `size` is used to first
   /// to get the quadrant of the tooltip. It is then layed out with those
@@ -13,7 +18,7 @@ abstract class JustTheInterface {
   ///
   /// If a [scrollController] is provided, the layout algorithm will add
   /// `extentBefore` or `extentAfter` to the constraints calculations.
-  Widget get content;
+  final Widget content;
 
   /// The child widget the tooltip will hover over. This widget does not need
   /// any event handling logic as it will be wrapped necessary handlers.
@@ -21,12 +26,12 @@ abstract class JustTheInterface {
   /// This widget will trigger the tooltip either through an `onTap` in the
   /// `isModal` is true case or through a mouse enter event with a `MouseRegion`
   /// in the `isModal` is false case.
-  Widget get child;
+  final Widget child;
 
   /// If true, once the tooltip is opened, it will not close after a set
   /// duration. It will instead instead stay on the screen until either the
   /// `scrim` is clicked or it is forcibly closed
-  bool get isModal;
+  final bool isModal;
 
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
@@ -34,7 +39,7 @@ abstract class JustTheInterface {
   /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   ///
   /// Copied from [Tooltip]
-  Duration get waitDuration;
+  final Duration waitDuration;
 
   /// The length of time that the tooltip will be shown after a long press
   /// is released or mouse pointer exits the widget.
@@ -43,79 +48,107 @@ abstract class JustTheInterface {
   /// pointer exits the widget.
   ///
   /// Copied from [Tooltip]
-  Duration get showDuration;
+  final Duration showDuration;
 
   /// The amount of time before the tooltip is shown in the hover state.
   // FIXME: This happens in the non-hover (i.e. isModal) case as well.
-  Duration get hoverShowDuration;
+  final Duration hoverShowDuration;
 
   /// An axis that you hope you to place the tooltip along. Note that if there
   /// is not enough space on that axis, the layout algorithm might decide to
   /// place it along the opposite axis. If not enough space exists on both
   /// sides, a constraints error will be thrown.
-  AxisDirection get preferredDirection;
+  final AxisDirection preferredDirection;
 
   /// The amount of time the tooltip takes to fade into view after a hover in or
   /// tap event respective of `isModal`.
-  Duration get fadeInDuration;
+  final Duration fadeInDuration;
 
   /// The amount of time the tooltip takes to fade out of view after a hover out
   /// or a tapping of a skrim respective of `isModal`.
-  Duration get fadeOutDuration;
+  final Duration fadeOutDuration;
 
   /// The curve of the fade animation.
-  Curve get curve;
+  final Curve curve;
 
   /// The padding around the content of the tooltip.
-  EdgeInsets get padding;
+  final EdgeInsets padding;
 
   /// The margin the tooltip keeps around edges of its box constraints.
-  EdgeInsets get margin;
+  final EdgeInsets margin;
 
   /// The vertical or horizontal offset from the base of the [content] to the
   /// tip of the tail of the tooltip.
-  double get offset;
+  final double offset;
 
-  double get elevation;
+  final double elevation;
 
   /// The border radius of the tooltip
-  BorderRadiusGeometry get borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   /// The length of the tail or the amount of space from the tooltip
   /// target + [offset] to the nearest edge of the tooltip.
-  double get tailLength;
+  final double tailLength;
 
   /// The base length of the tooltip on the edge of the tooltip
-  double get tailBaseWidth;
+  final double tailBaseWidth;
 
   /// A customizable builder that can be used to define the transition the
   /// tooltip uses when animating into view
-  AnimatedTransitionBuilder get animatedTransitionBuilder;
+  final AnimatedTransitionBuilder animatedTransitionBuilder;
 
   /// The background color of the tooltip. This includes the tail.
   // TODO: The tail should be able to be colored a different color but should
   // default to this color.
-  Color? get backgroundColor;
+  final Color? backgroundColor;
 
   /// The text direction that will `resolve` the [content] of the tooltip.
-  TextDirection get textDirection;
+  final TextDirection textDirection;
 
   /// A custom shadow that can be used to add behind the tooltip
-  Shadow? get shadow;
+  final Shadow? shadow;
 
   /// When the target of the tooltip, the [child], goes out of the viewport
   /// whether the content dissapears along with it is determined by this
   /// property.
-  bool get showWhenUnlinked;
+  final bool showWhenUnlinked;
 
   /// If passed, this will no longer bound the tooltip to the immediate
   /// viewport but to the space allotted by the ScrollView it is in. For
   /// example, if the tooltip happens to go beyond its quadrant but there is
   /// scroll space beneath it the bounds will accomadate it.
-  ScrollController? get scrollController;
-}
+  final ScrollController? scrollController;
 
-abstract class JustTheStatefulInterface extends StatefulWidget
-    with JustTheInterface {
-  const JustTheStatefulInterface({Key? key}) : super(key: key);
+  const JustTheInterface({
+    Key? key,
+    required this.delegate,
+    required this.content,
+    required this.child,
+    required this.isModal,
+    required this.waitDuration,
+    required this.showDuration,
+    required this.hoverShowDuration,
+    required this.fadeInDuration,
+    required this.fadeOutDuration,
+    required this.preferredDirection,
+    required this.curve,
+    required this.padding,
+    required this.margin,
+    required this.offset,
+    required this.elevation,
+    required this.borderRadius,
+    required this.tailLength,
+    required this.tailBaseWidth,
+    required this.animatedTransitionBuilder,
+    required this.backgroundColor,
+    required this.textDirection,
+    required this.shadow,
+    required this.showWhenUnlinked,
+    required this.scrollController,
+    // TODO:
+    // this.minWidth,
+    // this.minHeight,
+    // this.maxWidth,
+    // this.maxHeight,
+  }) : super(key: key);
 }
