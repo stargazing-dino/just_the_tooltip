@@ -22,7 +22,8 @@ class InheritedTooltipArea extends InheritedWidget {
   }) : super(key: key, child: child);
 
   @override
-  bool updateShouldNotify(covariant InheritedWidget oldWidget) => true;
+  bool updateShouldNotify(covariant InheritedTooltipArea oldWidget) =>
+      data != oldWidget.data;
 }
 
 class JustTheTooltipArea extends StatefulWidget {
@@ -63,7 +64,19 @@ class JustTheTooltipArea extends StatefulWidget {
 
 class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
   Widget? entry;
+
   Widget? skrim;
+
+  void removeEntries() {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          entry = null;
+          skrim = null;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +89,4 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
       ),
     );
   }
-
-  bool get tooltipVisible => entry != null;
 }

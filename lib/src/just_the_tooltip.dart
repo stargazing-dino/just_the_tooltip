@@ -148,6 +148,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   late bool _mouseIsConnected = false;
   bool _longPressActivated = false;
   late bool hasListeners;
+  late InheritedTooltipArea area;
 
   /// This is a bit of suckery as I cannot find a good way to refresh the state
   /// of the overlay. Entry does not need this as it is inside a builder and not
@@ -179,6 +180,12 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    area = context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>()!;
+    super.didChangeDependencies();
+  }
+
   // TODO: This thing needs to update when oldWidget.isDialog changes
   // everything needs to close too.
   @override
@@ -192,22 +199,26 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
 
     if (oldWidget.scrollController != widget.scrollController) {
-      Future<void>.delayed(Duration.zero).then((_) {
-        removeEntries();
-        _createNewEntries();
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        if (mounted) {
+          removeEntries();
+          _createNewEntries();
+        }
       });
     }
 
     final _delegate = delegate;
 
     if (_delegate is JustTheOverlayDelegate) {
-      Future<void>.delayed(Duration.zero).then((_) {
-        setState(() {
-          _key++;
-          _key %= 2;
-        });
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _key++;
+            _key %= 2;
+          });
 
-        _delegate.markNeedsBuild();
+          _delegate.markNeedsBuild();
+        }
       });
     }
 
@@ -250,14 +261,14 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
-  void _hideTooltip({bool immediately = false}) {
-    _showTimer?.cancel();
-    _showTimer = null;
-
+  void _hideTooltip({bool immediately = false, bool deactivated = false}) {
     if (immediately) {
-      removeEntries();
+      removeEntries(deactivated: deactivated);
       return;
     }
+
+    _showTimer?.cancel();
+    _showTimer = null;
 
     if (_longPressActivated) {
       _hideTimer ??= Timer(widget.showDuration, _controller.reverse);
@@ -361,38 +372,46 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
-  void removeEntries() {
+  void removeEntries({bool deactivated = false}) {
     _hideTimer?.cancel();
     _hideTimer = null;
     _showTimer?.cancel();
     _showTimer = null;
 
-    if (!mounted) return;
-
     final _delegate = delegate;
 
     if (_delegate is JustTheEntryDelegate) {
-      final tooltipArea = JustTheTooltipArea.of(context);
+      // TODO: Following logic shuld all be inside _delegate no?
+      if (!deactivated) {
+        final tooltipArea = JustTheTooltipArea.of(context);
 
-      tooltipArea.setState(() {
-        tooltipArea.entry = null;
-        tooltipArea.skrim = null;
-      });
+        tooltipArea.setState(() {
+          tooltipArea.entry = null;
+          tooltipArea.skrim = null;
+        });
+      } else {
+        area.data.removeEntries();
+      }
     } else if (_delegate is JustTheOverlayDelegate) {
       _delegate.entry?.remove();
 
-      setState(
-        () {
-          delegate = _delegate..entry = null;
+      if (widget.isModal) {
+        _delegate.skrim?.remove();
+      }
 
-          if (widget.isModal) {
-            _delegate.skrim?.remove();
-            delegate = _delegate
-              ..entry = null
-              ..skrim = null;
-          }
-        },
-      );
+      if (mounted) {
+        setState(
+          () {
+            delegate = _delegate..entry = null;
+
+            if (widget.isModal) {
+              delegate = _delegate
+                ..entry = null
+                ..skrim = null;
+            }
+          },
+        );
+      }
     }
   }
 
@@ -406,15 +425,15 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
-  @override
-  void deactivate() {
-    if (delegate.hasEntry) {
-      _hideTooltip(immediately: true);
-    }
+  // @override
+  // void deactivate() {
+  //   if (delegate.hasEntry) {
+  //     _hideTooltip(immediately: true, deactivated: true);
+  //   }
 
-    _showTimer?.cancel();
-    super.deactivate();
-  }
+  //   _showTimer?.cancel();
+  //   super.deactivate();
+  // }
 
   @override
   void dispose() {
@@ -422,9 +441,8 @@ class _JustTheTooltipState extends State<JustTheTooltip>
       _removeGestureListeners();
     }
 
-    removeEntries();
+    removeEntries(deactivated: true);
     _controller.dispose();
-
     super.dispose();
   }
 
