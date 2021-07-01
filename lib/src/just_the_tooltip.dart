@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
+import 'package:just_the_tooltip/src/models/just_the_controller.dart';
 import 'package:just_the_tooltip/src/models/just_the_delegate.dart';
 import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/models/target_information.dart';
@@ -15,6 +16,7 @@ class JustTheTooltip extends JustTheInterface {
     Key? key,
     required Widget content,
     required Widget child,
+    JustTheController? controller,
     bool isModal = false,
     Duration waitDuration = const Duration(milliseconds: 0),
     Duration showDuration = const Duration(milliseconds: 1500),
@@ -39,6 +41,7 @@ class JustTheTooltip extends JustTheInterface {
     ScrollController? scrollController,
   }) : super(
           key: key,
+          controller: controller,
           delegate: JustTheOverlayDelegate(),
           content: content,
           child: child,
@@ -69,6 +72,7 @@ class JustTheTooltip extends JustTheInterface {
     Key? key,
     required Widget content,
     required Widget child,
+    JustTheController? controller,
     bool isModal = false,
     Duration waitDuration = const Duration(milliseconds: 0),
     Duration showDuration = const Duration(milliseconds: 1500),
@@ -93,6 +97,7 @@ class JustTheTooltip extends JustTheInterface {
     ScrollController? scrollController,
   }) : super(
           key: key,
+          controller: controller,
           delegate: JustTheEntryDelegate(key: key, context: null),
           content: content,
           child: child,
@@ -138,13 +143,18 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     with SingleTickerProviderStateMixin {
   late JustTheDelegate delegate;
   final _layerLink = LayerLink();
-  late final AnimationController _controller;
+  late final AnimationController _animationController;
+  late final bool _mustDisposeController;
+  late final JustTheController _controller;
   Timer? _hideTimer;
   Timer? _showTimer;
-  // TODO: These were late because they were intitialized from theme likely
+
+  // TODO: In the original tooltip api, these were late because they were
+  // intitialized from theme likely:
   // late Duration showDuration;
   // late Duration hoverShowDuration;
   // late Duration waitDuration;
+
   late bool _mouseIsConnected = false;
   bool _longPressActivated = false;
   late bool hasListeners;
@@ -156,6 +166,17 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void initState() {
+    final _widgetController = widget.controller;
+    if (_widgetController == null) {
+      _mustDisposeController = true;
+      _controller = JustTheController();
+    } else {
+      _mustDisposeController = false;
+      _controller = _widgetController;
+    }
+
+    _controller.addListener(_handleControllerChanges);
+
     final _delegate = widget.delegate;
     if (_delegate is JustTheEntryDelegate) {
       delegate = _delegate..context = context;
@@ -163,7 +184,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
       delegate = _delegate;
     }
 
-    _controller = AnimationController(
+    _animationController = AnimationController(
       duration: widget.fadeInDuration,
       reverseDuration: widget.fadeOutDuration,
       vsync: this,
@@ -189,8 +210,6 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     super.didChangeDependencies();
   }
 
-  // TODO: This thing needs to update when oldWidget.isDialog changes
-  // everything needs to close too.
   @override
   void didUpdateWidget(covariant JustTheTooltip oldWidget) {
     if (oldWidget.isModal != widget.isModal) {
@@ -246,6 +265,10 @@ class _JustTheTooltipState extends State<JustTheTooltip>
         .removeGlobalRoute(_handlePointerEvent);
   }
 
+  void _handleControllerChanges() {
+    if (_controller.isShowing) {}
+  }
+
   void _handleMouseTrackerChange() {
     if (!mounted) return;
 
@@ -264,36 +287,56 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
-  void _hideTooltip({bool immediately = false, bool deactivated = false}) {
+  Future<void> _hideTooltip({
+    bool immediately = false,
+    bool deactivated = false,
+  }) async {
+    final completer = Completer<void>();
     if (immediately) {
       removeEntries(deactivated: deactivated);
-      return;
+      completer.complete();
+      return completer.future;
     }
 
     _showTimer?.cancel();
     _showTimer = null;
 
     if (_longPressActivated) {
-      _hideTimer ??= Timer(widget.showDuration, _controller.reverse);
+      _hideTimer ??= Timer(widget.showDuration, () async {
+        await _animationController.reverse();
+        completer.complete();
+      });
     } else {
       _hideTimer ??= Timer(
         widget.hoverShowDuration,
-        _controller.reverse,
+        () async {
+          await _animationController.reverse();
+          completer.complete();
+        },
       );
     }
     _longPressActivated = false;
+
+    return completer.future;
   }
 
-  void _showTooltip({bool immediately = false}) {
+  Future<void> _showTooltip({bool immediately = false}) async {
+    final completer = Completer<void>();
     _hideTimer?.cancel();
     _hideTimer = null;
 
     if (immediately) {
-      ensureTooltipVisible();
-      return;
+      await ensureTooltipVisible();
+      completer.complete();
+      return completer.future;
     }
 
-    _showTimer ??= Timer(widget.waitDuration, ensureTooltipVisible);
+    _showTimer ??= Timer(widget.waitDuration, () async {
+      await ensureTooltipVisible();
+      completer.complete();
+    });
+
+    return completer.future;
   }
 
   /// Shows the tooltip if it is not already visible.
@@ -302,7 +345,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   /// become null.
   ///
   /// Copied from Tooltip
-  bool ensureTooltipVisible() {
+  Future<bool> ensureTooltipVisible() async {
     final _delegate = delegate;
 
     _showTimer?.cancel();
@@ -316,21 +359,21 @@ class _JustTheTooltipState extends State<JustTheTooltip>
         // This checks if the current entry and the entry from the area are the
         // same
         if (_delegate.entry!.key == _delegate.entryKey) {
-          _controller.forward();
+          await _animationController.forward();
           return false; // Already visible.
 
         } else {
-          _controller.reset();
+          _animationController.reset();
           return true; // Wrong tooltip was visible
         }
       } else {
-        _controller.forward();
+        await _animationController.forward();
         return false; // Already visible.
       }
     }
 
     _createNewEntries();
-    _controller.forward();
+    await _animationController.forward();
     return true;
   }
 
@@ -428,6 +471,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
+  // FIXME: This breaks stuff... So fix it
   // @override
   // void deactivate() {
   //   if (delegate.hasEntry) {
@@ -440,18 +484,23 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void dispose() {
+    _controller.removeListener(_handleControllerChanges);
+    if (_mustDisposeController) {
+      _controller.dispose();
+    }
+
     if (hasListeners) {
       _removeGestureListeners();
     }
 
     removeEntries(deactivated: true);
-    _controller.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  void _handleLongPress() {
+  Future<void> _handleLongPress() async {
     _longPressActivated = true;
-    final tooltipCreated = ensureTooltipVisible();
+    final tooltipCreated = await ensureTooltipVisible();
 
     if (tooltipCreated) {
       Feedback.forLongPress(context);
@@ -513,7 +562,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
       link: _layerLink,
       child: FadeTransition(
         opacity: CurvedAnimation(
-          parent: _controller,
+          parent: _animationController,
           curve: widget.curve,
         ),
         child: Directionality(

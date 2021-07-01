@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:just_the_tooltip/src/get_axis_direction.dart';
-import 'package:just_the_tooltip/src/position_dependent_offset.dart';
+import 'package:just_the_tooltip/src/utils/get_axis_direction.dart';
+import 'package:just_the_tooltip/src/utils/get_position_dependent_offset.dart';
 
 /// Getting the intrinsic size of the child was from [Align] and
 /// [RenderPositionedBox]
@@ -367,7 +367,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       ),
     );
 
-    final quadrantOffset = positionDependentOffset(
+    final quadrantOffset = getPositionDependentOffset(
       axisDirection: axisDirection,
       childSize: _child.size,
       margin: margin,

@@ -37,7 +37,7 @@ import 'package:flutter/painting.dart';
 /// Used by [Tooltip] to position a tooltip relative to its parent.
 ///
 /// The arguments must not be null.
-Offset positionDependentOffset({
+Offset getPositionDependentOffset({
   required Size size,
   required Size targetSize,
   required Size childSize,

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:just_the_tooltip/src/models/just_the_controller.dart';
 import 'package:just_the_tooltip/src/models/just_the_delegate.dart';
 
 abstract class JustTheInterface extends StatefulWidget {
-  /// Responsible for how the layout will occur
+  /// Imperitive controller for handling the state the interface is in. If one
+  /// is not provided a controller will be made.
+  final JustTheController? controller;
+
+  /// Responsible for how the entries will be placed onto the screen
   final JustTheDelegate delegate;
 
   /// The content of the tooltip. Content must be collapsed so it does not
@@ -121,6 +126,7 @@ abstract class JustTheInterface extends StatefulWidget {
 
   const JustTheInterface({
     Key? key,
+    required this.controller,
     required this.delegate,
     required this.content,
     required this.child,

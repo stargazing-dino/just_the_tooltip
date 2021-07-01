@@ -1,3 +1,6 @@
+## [0.0.5+1] - Jul 1, 2021
+Make calls async in prep for controller migration.
+
 ## [0.0.5] - Jun 30, 2021
 Much cleaner implementation. No longer JustTheTooltipEntry. Rather, that's been replaced with a `JustTheTooltip.entry` factory constructor.
 
