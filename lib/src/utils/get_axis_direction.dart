@@ -24,11 +24,11 @@ AxisDirection getAxisDirection({
       final spaceAvailableRight = size.width - rightTargetEdge - margin.right;
 
       // LTE = leftTargetEdge
-      // |margin.L          child+offset            LTE                           |
+      // |margin.L          child+offset            LTE                        |
       var fitsLeft = spaceAvailableLeft >= childAndOffsetWidth;
 
       //                                   size.width
-      // |              RTE                      child+offset             margin.R|
+      // |              RTE                      child+offset          margin.R|
       var fitsRight = spaceAvailableRight >= childAndOffsetWidth;
 
       // It it doesn't fit in either direction, let's check again adding to fact

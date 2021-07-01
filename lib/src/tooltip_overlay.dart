@@ -5,6 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/utils/get_axis_direction.dart';
 import 'package:just_the_tooltip/src/utils/get_position_dependent_offset.dart';
 
+// TODO: Possibly rename as it's not always a "real" overlay
+
 /// Getting the intrinsic size of the child was from [Align] and
 /// [RenderPositionedBox]
 class TooltipOverlay extends SingleChildRenderObjectWidget {
