@@ -40,8 +40,11 @@ class JustTheEntryDelegate extends JustTheDelegate {
 
   BuildContext? context;
 
+  InheritedTooltipArea? area;
+
   JustTheEntryDelegate({
     required this.context,
+    this.area,
     Key? key,
   }) : super(key: key);
 }

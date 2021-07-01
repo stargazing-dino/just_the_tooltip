@@ -148,7 +148,6 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   late bool _mouseIsConnected = false;
   bool _longPressActivated = false;
   late bool hasListeners;
-  late InheritedTooltipArea area;
 
   /// This is a bit of suckery as I cannot find a good way to refresh the state
   /// of the overlay. Entry does not need this as it is inside a builder and not
@@ -182,7 +181,11 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void didChangeDependencies() {
-    area = context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>()!;
+    final _delegate = delegate;
+    if (_delegate is JustTheEntryDelegate) {
+      _delegate.area =
+          context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>()!;
+    }
     super.didChangeDependencies();
   }
 
@@ -390,7 +393,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
           tooltipArea.skrim = null;
         });
       } else {
-        area.data.removeEntries();
+        _delegate.area!.data.removeEntries();
       }
     } else if (_delegate is JustTheOverlayDelegate) {
       _delegate.entry?.remove();
@@ -399,7 +402,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
         _delegate.skrim?.remove();
       }
 
-      if (mounted) {
+      if (mounted && !deactivated) {
         setState(
           () {
             delegate = _delegate..entry = null;
