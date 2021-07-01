@@ -114,7 +114,7 @@ Scaffold(
 ```
 
 <p>  
- <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/scroll_example.gif?raw=true" width="320" height="568"/>
+ <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/scrolling_example.gif?raw=true" width="320" height="568"/>
 </p>
 
 This will give you the positioned tooltip and scrim (an empty gesture detector that catches tap events and closes the tooltip) for you to enter into the tree however you like. By doing this, you can make tooltips that are visually "under" other parts of the UI such as the appbar in the above example.
