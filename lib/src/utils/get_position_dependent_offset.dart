@@ -7,8 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
-/// Position a child box within a container box, either above or below a target
-/// point.
+/// Position a child box within a container box.
 ///
 /// The container's size is described by `size`.
 ///
@@ -20,10 +19,6 @@ import 'package:flutter/painting.dart';
 /// The return value is the suggested distance from the top left of the
 /// container box to the top left of the child box.
 ///
-/// The suggested position will be above the target point if `preferBelow` is
-/// false, and below the target point if it is true, unless it wouldn't fit on
-/// the preferred side but would fit on the other side.
-///
 /// The suggested position will place the nearest side of the child to the
 /// target point `verticalOffset` from the target point (even if it cannot fit
 /// given that constraint).
@@ -34,9 +29,6 @@ import 'package:flutter/painting.dart';
 /// the container given the margin, then the child will be centered in the
 /// container.
 ///
-/// Used by [Tooltip] to position a tooltip relative to its parent.
-///
-/// The arguments must not be null.
 Offset getPositionDependentOffset({
   required Size size,
   required Size targetSize,

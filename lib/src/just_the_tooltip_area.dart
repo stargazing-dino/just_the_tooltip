@@ -7,7 +7,7 @@ typedef TooltipBuilder = Widget Function(
   Widget? tooltip,
 
   /// This widget should be placed behind the tooltip. When tapped, it will
-  /// collapse the tooltip. When, isModal is set to true, this will always be
+  /// collapse the tooltip. When, isModal is set to false, this will always be
   /// null
   Widget? scrim,
 );
@@ -42,7 +42,7 @@ class JustTheTooltipArea extends StatefulWidget {
           throw FlutterError(
             'JustTheTooltipArea operation requested with a context that does not '
             'include a JustTheTooltipArea.\n Make sure you wrapped your'
-            'JustTheTooltip children inside a JustTheTooltipArea',
+            'JustTheTooltip.entry children inside a JustTheTooltipArea',
           );
         }
         return true;

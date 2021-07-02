@@ -169,13 +169,11 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     final _widgetController = widget.controller;
     if (_widgetController == null) {
       _mustDisposeController = true;
-      _controller = JustTheController();
+      // _controller = JustTheController();
     } else {
       _mustDisposeController = false;
       _controller = _widgetController;
     }
-
-    _controller.addListener(_handleControllerChanges);
 
     final _delegate = widget.delegate;
     if (_delegate is JustTheEntryDelegate) {
@@ -272,10 +270,6 @@ class _JustTheTooltipState extends State<JustTheTooltip>
         .removeGlobalRoute(_handlePointerEvent);
   }
 
-  void _handleControllerChanges() {
-    if (_controller.isShowing) {}
-  }
-
   void _handleMouseTrackerChange() {
     if (!mounted) return;
 
@@ -296,6 +290,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   Future<void> _hideTooltip({
     bool immediately = false,
+    // FIXME: I don't want to have to pass this in.
     bool deactivated = false,
   }) async {
     final completer = Completer<void>();
@@ -491,7 +486,6 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void dispose() {
-    _controller.removeListener(_handleControllerChanges);
     if (_mustDisposeController) {
       _controller.dispose();
     }

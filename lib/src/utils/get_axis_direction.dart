@@ -31,8 +31,8 @@ AxisDirection getAxisDirection({
       // |              RTE                      child+offset          margin.R|
       var fitsRight = spaceAvailableRight >= childAndOffsetWidth;
 
-      // It it doesn't fit in either direction, let's check again adding to fact
-      // that we have the scroll space not included in the viewport
+      // It it doesn't fit in either direction, let's check again adding to the
+      // fact that we have the scroll space not included in the viewport
       if (!fitsLeft &&
           !fitsRight &&
           scrollPosition != null &&
