@@ -169,7 +169,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     final _widgetController = widget.controller;
     if (_widgetController == null) {
       _mustDisposeController = true;
-      // _controller = JustTheController();
+      _controller = JustTheController();
     } else {
       _mustDisposeController = false;
       _controller = _widgetController;
