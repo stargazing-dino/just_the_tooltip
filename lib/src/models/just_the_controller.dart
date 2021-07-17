@@ -39,9 +39,18 @@ class ControllerState {
   }
 }
 
+/// This controller provides basic controls over the Tooltip widget.
 class JustTheController extends ValueNotifier<ControllerState> {
   JustTheController({ControllerState? value})
       : super(value ?? ControllerState.empty());
+
+  bool get isShowing => value.status == AnimationStatus.completed;
+
+  bool get isHidden => value.status == AnimationStatus.dismissed;
+
+  bool get isAnimating =>
+      value.status == AnimationStatus.forward ||
+      value.status == AnimationStatus.reverse;
 
   /// Shows the tooltip. Completes when the tooltip is fully visible.
   Future<void> showTooltip() async {
