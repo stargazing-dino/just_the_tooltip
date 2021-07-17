@@ -1,3 +1,6 @@
+## [0.0.6-dev] - Jul 17, 2021
+Add controller for showing and hiding the tooltip
+
 ## [0.0.5+1] - Jul 1, 2021
 Make calls async in prep for controller migration.
 

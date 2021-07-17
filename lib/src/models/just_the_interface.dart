@@ -127,8 +127,8 @@ abstract class JustTheInterface extends StatefulWidget {
   const JustTheInterface({
     Key? key,
     required this.controller,
-    required this.delegate,
     required this.content,
+    required this.delegate,
     required this.child,
     required this.isModal,
     required this.waitDuration,

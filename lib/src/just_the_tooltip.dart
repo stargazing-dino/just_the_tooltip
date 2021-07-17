@@ -10,7 +10,6 @@ import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/models/target_information.dart';
 import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
-// TODO: Add a controller
 class JustTheTooltip extends JustTheInterface {
   JustTheTooltip({
     Key? key,
@@ -144,10 +143,11 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   late JustTheDelegate delegate;
   final _layerLink = LayerLink();
   late final AnimationController _animationController;
-  late final bool _mustDisposeController;
   late final JustTheController _controller;
   Timer? _hideTimer;
   Timer? _showTimer;
+
+  ControllerAction? previousAction;
 
   // TODO: In the original tooltip api, these were late because they were
   // intitialized from theme likely:
@@ -167,13 +167,10 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   @override
   void initState() {
     final _widgetController = widget.controller;
-    if (_widgetController == null) {
-      _mustDisposeController = true;
-      _controller = JustTheController();
-    } else {
-      _mustDisposeController = false;
-      _controller = _widgetController;
-    }
+
+    _controller = _widgetController ?? JustTheController();
+
+    _controller.addListener(_controllerListener);
 
     final _delegate = widget.delegate;
     if (_delegate is JustTheEntryDelegate) {
@@ -250,6 +247,53 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
 
     super.didUpdateWidget(oldWidget);
+  }
+
+  Future<void> _controllerListener() async {
+    final controllerState = _controller.value;
+    final completer = controllerState.completer;
+    final _previousAction = previousAction;
+
+    if (_previousAction == null || _previousAction != controllerState.action) {
+      previousAction = controllerState.action;
+
+      switch (controllerState.action) {
+        case ControllerAction.none:
+          assert(completer == null);
+          _controller.value = controllerState.copyWith(
+            status: AnimationStatus.dismissed,
+          );
+          break;
+
+        case ControllerAction.show:
+          _controller.value = controllerState.copyWith(
+            status: AnimationStatus.forward,
+          );
+
+          _showTooltip().then((_) {
+            completer!.complete();
+            _controller.value = controllerState.copyWith(
+              action: ControllerAction.none,
+              setCompleterToNull: true,
+              status: AnimationStatus.completed,
+            );
+          });
+          break;
+        case ControllerAction.hide:
+          _controller.value = controllerState.copyWith(
+            status: AnimationStatus.reverse,
+          );
+          _hideTooltip().then((value) {
+            completer!.complete();
+            _controller.value = controllerState.copyWith(
+              action: ControllerAction.none,
+              setCompleterToNull: true,
+              status: AnimationStatus.completed,
+            );
+          });
+          break;
+      }
+    }
   }
 
   void _addGestureListeners() {
@@ -486,7 +530,9 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void dispose() {
-    if (_mustDisposeController) {
+    _controller.removeListener(_controllerListener);
+
+    if (widget.controller == null) {
       _controller.dispose();
     }
 

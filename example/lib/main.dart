@@ -16,18 +16,43 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class DefaultPageExample extends StatelessWidget {
+class DefaultPageExample extends StatefulWidget {
   const DefaultPageExample({Key? key}) : super(key: key);
+
+  @override
+  State<DefaultPageExample> createState() => _DefaultPageExampleState();
+}
+
+class _DefaultPageExampleState extends State<DefaultPageExample> {
+  final tooltipController = JustTheController();
 
   @override
   Widget build(BuildContext context) {
     const margin = EdgeInsets.all(16.0);
 
     return Scaffold(
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            child: const Icon(Icons.add),
+            onPressed: () {
+              tooltipController.showTooltip();
+            },
+          ),
+          FloatingActionButton(
+            child: const Icon(Icons.remove),
+            onPressed: () {
+              tooltipController.hideTooltip();
+            },
+          ),
+        ],
+      ),
       body: SizedBox.expand(
         child: Align(
           alignment: Alignment.center,
           child: JustTheTooltip(
+            controller: tooltipController,
             tailLength: 20.0,
             isModal: false,
             preferredDirection: AxisDirection.left,
@@ -82,22 +107,19 @@ class ScrollExamplePage extends StatelessWidget {
                   ),
                 ),
               ),
-              // This is necessary as otherwise the column would only be
-              // constrained by the amount of vertical space
-              content: IntrinsicHeight(
-                child: Column(
-                  children: [
-                    Container(
-                      height: 120,
-                      color: Colors.blue,
-                      width: double.infinity,
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
-                    ),
-                  ],
-                ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    height: 120,
+                    color: Colors.blue,
+                    width: double.infinity,
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Quia ducimus eius magni voluptatibus ut veniam ducimus. Ullam ab qui voluptatibus quos est in. Maiores eos ab magni tempora praesentium libero. Voluptate architecto rerum vel sapiente ducimus aut cumque quibusdam. Consequatur illo et quos vel cupiditate quis dolores at.',
+                  ),
+                ],
               ),
             );
           }
