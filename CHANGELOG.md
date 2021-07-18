@@ -1,3 +1,6 @@
+## [0.0.6-dev+1] - Jul 17, 2021
+Controller is now reset to normal state when the cancelShowTimer is canceled. This avoids weird states.
+
 ## [0.0.6-dev] - Jul 17, 2021
 Add controller for showing and hiding the tooltip
 

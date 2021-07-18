@@ -44,7 +44,7 @@ abstract class JustTheInterface extends StatefulWidget {
   /// Defaults to 0 milliseconds (tooltips are shown immediately upon hover).
   ///
   /// Copied from [Tooltip]
-  final Duration waitDuration;
+  final Duration? waitDuration;
 
   /// The length of time that the tooltip will be shown after a long press
   /// is released or mouse pointer exits the widget.
@@ -53,11 +53,11 @@ abstract class JustTheInterface extends StatefulWidget {
   /// pointer exits the widget.
   ///
   /// Copied from [Tooltip]
-  final Duration showDuration;
+  final Duration? showDuration;
 
   /// The amount of time before the tooltip is shown in the hover state.
   // FIXME: This happens in the non-hover (i.e. isModal) case as well.
-  final Duration hoverShowDuration;
+  final Duration? hoverShowDuration;
 
   /// An axis that you hope you to place the tooltip along. Note that if there
   /// is not enough space on that axis, the layout algorithm might decide to

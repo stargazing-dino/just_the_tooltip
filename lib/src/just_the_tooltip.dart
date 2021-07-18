@@ -17,9 +17,9 @@ class JustTheTooltip extends JustTheInterface {
     required Widget child,
     JustTheController? controller,
     bool isModal = false,
-    Duration waitDuration = const Duration(milliseconds: 0),
-    Duration showDuration = const Duration(milliseconds: 1500),
-    Duration hoverShowDuration = const Duration(milliseconds: 100),
+    Duration? waitDuration,
+    Duration? showDuration,
+    Duration? hoverShowDuration,
     Duration fadeInDuration = const Duration(milliseconds: 150),
     Duration fadeOutDuration = const Duration(milliseconds: 75),
     AxisDirection preferredDirection = AxisDirection.down,
@@ -73,9 +73,9 @@ class JustTheTooltip extends JustTheInterface {
     required Widget child,
     JustTheController? controller,
     bool isModal = false,
-    Duration waitDuration = const Duration(milliseconds: 0),
-    Duration showDuration = const Duration(milliseconds: 1500),
-    Duration hoverShowDuration = const Duration(milliseconds: 100),
+    Duration? waitDuration,
+    Duration? showDuration,
+    Duration? hoverShowDuration,
     Duration fadeInDuration = const Duration(milliseconds: 150),
     Duration fadeOutDuration = const Duration(milliseconds: 75),
     AxisDirection preferredDirection = AxisDirection.down,
@@ -140,24 +140,23 @@ class JustTheTooltip extends JustTheInterface {
 
 class _JustTheTooltipState extends State<JustTheTooltip>
     with SingleTickerProviderStateMixin {
+  static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
+  static const Duration _defaultHoverShowDuration = Duration(milliseconds: 100);
+  static const Duration _defaultWaitDuration = Duration.zero;
+
   late JustTheDelegate delegate;
   final _layerLink = LayerLink();
   late final AnimationController _animationController;
   late final JustTheController _controller;
   Timer? _hideTimer;
   Timer? _showTimer;
-
-  ControllerAction? previousAction;
-
-  // TODO: In the original tooltip api, these were late because they were
-  // intitialized from theme likely:
-  // late Duration showDuration;
-  // late Duration hoverShowDuration;
-  // late Duration waitDuration;
-
+  ControllerAction? _previousAction;
+  late Duration showDuration;
+  late Duration hoverShowDuration;
+  late Duration waitDuration;
   late bool _mouseIsConnected = false;
   bool _longPressActivated = false;
-  late bool hasListeners;
+  late bool _hasBindingListeners;
 
   /// This is a bit of suckery as I cannot find a good way to refresh the state
   /// of the overlay. Entry does not need this as it is inside a builder and not
@@ -166,17 +165,12 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void initState() {
-    final _widgetController = widget.controller;
-
-    _controller = _widgetController ?? JustTheController();
-
-    _controller.addListener(_controllerListener);
-
-    final _delegate = widget.delegate;
-    if (_delegate is JustTheEntryDelegate) {
-      delegate = _delegate..context = context;
-    } else if (_delegate is JustTheOverlayDelegate) {
-      delegate = _delegate;
+    // Handles mouse connection and global tap gestures.
+    if (!widget.isModal) {
+      _hasBindingListeners = true;
+      _addBindingListeners();
+    } else {
+      _hasBindingListeners = false;
     }
 
     _animationController = AnimationController(
@@ -185,11 +179,15 @@ class _JustTheTooltipState extends State<JustTheTooltip>
       vsync: this,
     )..addStatusListener(_handleStatusChanged);
 
-    if (!widget.isModal) {
-      hasListeners = true;
-      _addGestureListeners();
-    } else {
-      hasListeners = false;
+    _controller = widget.controller ?? JustTheController();
+    _controller.addListener(_controllerListener);
+
+    final _delegate = widget.delegate;
+    if (_delegate is JustTheEntryDelegate) {
+      // TODO: I don't want to do this. It looks anti-pattern.
+      delegate = _delegate..context = context;
+    } else if (_delegate is JustTheOverlayDelegate) {
+      delegate = _delegate;
     }
 
     super.initState();
@@ -207,18 +205,29 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-    // if (widget.controller != oldWidget.controller) {
-    //   if (oldWidget.controller != null) {
-    //     // The user provided a controller, let's dispose ours
-    //     oldWidget.controller.dispose();
-    //   }
-    // }
+    final _oldController = oldWidget.controller;
+    final _newController = widget.controller;
+
+    // If we did not have a controller before, we created one that must now be
+    // disposed. The user must also have passed in a controller or else we
+    // won't do anything. If the user passes in a different instance of a
+    // controller it is their responsibility to dispose of it.
+    if (_oldController == null && _oldController != _newController) {
+      // The user provided a controller, let's dispose ours
+      _controller.removeListener(_controllerListener);
+      _controller.dispose();
+    }
+
+    if (_newController != _oldController) {
+      _controller = _newController ?? JustTheController();
+      _controller.addListener(_controllerListener);
+    }
 
     if (oldWidget.isModal != widget.isModal) {
       if (widget.isModal) {
-        _removeGestureListeners();
+        _removeBindingListeners();
       } else {
-        _addGestureListeners();
+        _addBindingListeners();
       }
     }
 
@@ -252,10 +261,11 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   Future<void> _controllerListener() async {
     final controllerState = _controller.value;
     final completer = controllerState.completer;
-    final _previousAction = previousAction;
+    final immediately = controllerState.immediately;
+    final previousAction = _previousAction;
 
-    if (_previousAction == null || _previousAction != controllerState.action) {
-      previousAction = controllerState.action;
+    if (previousAction == null || previousAction != controllerState.action) {
+      _previousAction = controllerState.action;
 
       switch (controllerState.action) {
         case ControllerAction.none:
@@ -270,7 +280,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
             status: AnimationStatus.forward,
           );
 
-          _showTooltip().then((_) {
+          _showTooltip(immediately: immediately).then((_) {
             completer!.complete();
             _controller.value = controllerState.copyWith(
               action: ControllerAction.none,
@@ -283,7 +293,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
           _controller.value = controllerState.copyWith(
             status: AnimationStatus.reverse,
           );
-          _hideTooltip().then((value) {
+          _hideTooltip(immediately: immediately).then((value) {
             completer!.complete();
             _controller.value = controllerState.copyWith(
               action: ControllerAction.none,
@@ -296,8 +306,8 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
-  void _addGestureListeners() {
-    if (!hasListeners) hasListeners = true;
+  void _addBindingListeners() {
+    if (!_hasBindingListeners) _hasBindingListeners = true;
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker
         .addListener(_handleMouseTrackerChange);
@@ -306,8 +316,8 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
-  void _removeGestureListeners() {
-    if (hasListeners) hasListeners = false;
+  void _removeBindingListeners() {
+    if (_hasBindingListeners) _hasBindingListeners = false;
     RendererBinding.instance?.mouseTracker
         .removeListener(_handleMouseTrackerChange);
     GestureBinding.instance?.pointerRouter
@@ -315,7 +325,9 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   }
 
   void _handleMouseTrackerChange() {
-    if (!mounted) return;
+    if (!mounted) {
+      return;
+    }
 
     final isConnected = RendererBinding.instance!.mouseTracker.mouseIsConnected;
 
@@ -338,23 +350,23 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     bool deactivated = false,
   }) async {
     final completer = Completer<void>();
+
+    cancelShowTimer();
+
     if (immediately) {
       removeEntries(deactivated: deactivated);
       completer.complete();
       return completer.future;
     }
 
-    _showTimer?.cancel();
-    _showTimer = null;
-
     if (_longPressActivated) {
-      _hideTimer ??= Timer(widget.showDuration, () async {
+      _hideTimer ??= Timer(showDuration, () async {
         await _animationController.reverse();
         completer.complete();
       });
     } else {
       _hideTimer ??= Timer(
-        widget.hoverShowDuration,
+        hoverShowDuration,
         () async {
           await _animationController.reverse();
           completer.complete();
@@ -368,8 +380,8 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   Future<void> _showTooltip({bool immediately = false}) async {
     final completer = Completer<void>();
-    _hideTimer?.cancel();
-    _hideTimer = null;
+
+    cancelHideTimer();
 
     if (immediately) {
       await ensureTooltipVisible();
@@ -377,7 +389,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
       return completer.future;
     }
 
-    _showTimer ??= Timer(widget.waitDuration, () async {
+    _showTimer ??= Timer(waitDuration, () async {
       await ensureTooltipVisible();
       completer.complete();
     });
@@ -385,21 +397,37 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     return completer.future;
   }
 
+  void cancelShowTimer() {
+    if (_controller.value.action != ControllerAction.none) {
+      _controller.value = _controller.value.copyWith(
+        action: ControllerAction.none,
+        setCompleterToNull: true,
+        status: AnimationStatus.dismissed,
+      );
+    }
+
+    _showTimer?.cancel();
+    _showTimer = null;
+  }
+
+  void cancelHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = null;
+  }
+
   /// Shows the tooltip if it is not already visible.
   ///
   /// Returns `false` when the tooltip was already visible or if the context has
   /// become null.
   ///
-  /// Copied from Tooltip
+  /// Copied from [Tooltip]
   Future<bool> ensureTooltipVisible() async {
+    cancelShowTimer();
+
     final _delegate = delegate;
 
-    _showTimer?.cancel();
-    _showTimer = null;
-
     if (_delegate.hasEntry) {
-      _hideTimer?.cancel();
-      _hideTimer = null;
+      cancelHideTimer();
 
       if (_delegate is JustTheEntryDelegate) {
         // This checks if the current entry and the entry from the area are the
@@ -425,13 +453,13 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   void _createNewEntries() {
     final _delegate = delegate;
-
     final entry = _createEntry();
     final skrim = _createSkrim();
 
     if (_delegate is JustTheEntryDelegate) {
       final tooltipArea = JustTheTooltipArea.of(context);
 
+      // TODO: This looks anti-pattern.
       tooltipArea.setState(() {
         tooltipArea.skrim = skrim;
         tooltipArea.entry = entry;
@@ -447,6 +475,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
       setState(
         () {
+          // In the case of a modal, we enter a skrim overlay to catch taps
           if (widget.isModal) {
             delegate = _delegate
               ..entry = entryOverlay
@@ -464,11 +493,10 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     }
   }
 
+  // Remove deactivated parameters
   void removeEntries({bool deactivated = false}) {
-    _hideTimer?.cancel();
-    _hideTimer = null;
-    _showTimer?.cancel();
-    _showTimer = null;
+    cancelHideTimer();
+    cancelShowTimer();
 
     final _delegate = delegate;
 
@@ -482,6 +510,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
           tooltipArea.skrim = null;
         });
       } else {
+        // TODO: Wat? This calls setState internally but with a mounted check.
         _delegate.area!.data.removeEntries();
       }
     } else if (_delegate is JustTheOverlayDelegate) {
@@ -497,6 +526,9 @@ class _JustTheTooltipState extends State<JustTheTooltip>
             delegate = _delegate..entry = null;
 
             if (widget.isModal) {
+              // TODO: I want copyWiths. This pattern is dangerous and doesn't
+              // always work to notify of updates. (Here is an exception due to
+              // setState.)
               delegate = _delegate
                 ..entry = null
                 ..skrim = null;
@@ -530,18 +562,18 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   void dispose() {
-    _controller.removeListener(_controllerListener);
+    if (_hasBindingListeners) {
+      _removeBindingListeners();
+    }
+
+    removeEntries(deactivated: true);
+
+    _animationController.dispose();
 
     if (widget.controller == null) {
       _controller.dispose();
     }
 
-    if (hasListeners) {
-      _removeGestureListeners();
-    }
-
-    removeEntries(deactivated: true);
-    _animationController.dispose();
     super.dispose();
   }
 
@@ -556,6 +588,22 @@ class _JustTheTooltipState extends State<JustTheTooltip>
 
   @override
   Widget build(BuildContext context) {
+    if (delegate is JustTheOverlayDelegate) {
+      assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    }
+
+    final tooltipTheme = TooltipTheme.of(context);
+
+    waitDuration = widget.waitDuration ??
+        tooltipTheme.waitDuration ??
+        _defaultWaitDuration;
+    showDuration = widget.showDuration ??
+        tooltipTheme.showDuration ??
+        _defaultShowDuration;
+    hoverShowDuration = widget.showDuration ??
+        tooltipTheme.showDuration ??
+        _defaultHoverShowDuration;
+
     return CompositedTransformTarget(
       link: _layerLink,
       child: Builder(
@@ -568,8 +616,9 @@ class _JustTheTooltipState extends State<JustTheTooltip>
             );
           } else {
             return GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onLongPress: widget.isModal ? null : _handleLongPress,
-              onTap: !delegate.hasEntry ? _showTooltip : null,
+              onTap: widget.isModal ? _showTooltip : null,
               child: widget.child,
             );
           }

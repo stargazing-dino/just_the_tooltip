@@ -37,7 +37,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           FloatingActionButton(
             child: const Icon(Icons.add),
             onPressed: () {
-              tooltipController.showTooltip();
+              tooltipController.showTooltip(immediately: true);
             },
           ),
           FloatingActionButton(
@@ -53,8 +53,9 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           alignment: Alignment.center,
           child: JustTheTooltip(
             controller: tooltipController,
+            fadeInDuration: const Duration(seconds: 4),
             tailLength: 20.0,
-            isModal: false,
+            isModal: true,
             preferredDirection: AxisDirection.left,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),

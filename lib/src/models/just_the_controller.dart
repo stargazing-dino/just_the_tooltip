@@ -11,10 +11,13 @@ class ControllerState {
 
   final Completer<void>? completer;
 
+  final bool immediately;
+
   const ControllerState({
     required this.status,
     required this.action,
     required this.completer,
+    required this.immediately,
   });
 
   factory ControllerState.empty() {
@@ -22,6 +25,7 @@ class ControllerState {
       status: AnimationStatus.dismissed,
       action: ControllerAction.none,
       completer: null,
+      immediately: false,
     );
   }
 
@@ -29,11 +33,17 @@ class ControllerState {
     AnimationStatus? status,
     ControllerAction? action,
     Completer<void>? completer,
+    bool? immediately,
+
+    /// You cannot set something to null using a copyWith constructor. `Freezed`
+    /// gets around this limitation but I rather not depend on it for that small
+    /// reason.
     bool setCompleterToNull = false,
   }) {
     return ControllerState(
       status: status ?? this.status,
       action: action ?? this.action,
+      immediately: immediately ?? this.immediately,
       completer: setCompleterToNull ? null : completer ?? this.completer,
     );
   }
@@ -53,7 +63,7 @@ class JustTheController extends ValueNotifier<ControllerState> {
       value.status == AnimationStatus.reverse;
 
   /// Shows the tooltip. Completes when the tooltip is fully visible.
-  Future<void> showTooltip() async {
+  Future<void> showTooltip({bool immediately = false}) async {
     if (value.action == ControllerAction.show) return;
 
     final completer = Completer<void>();
@@ -61,13 +71,14 @@ class JustTheController extends ValueNotifier<ControllerState> {
     value = value.copyWith(
       action: ControllerAction.show,
       completer: completer,
+      immediately: immediately,
     );
 
     return completer.future;
   }
 
   /// Hides the tooltip. Completes when the tooltip is fully hidden.
-  Future<void> hideTooltip() async {
+  Future<void> hideTooltip({bool immediately = false}) async {
     if (value.action == ControllerAction.hide) return;
 
     final completer = Completer<void>();
@@ -75,6 +86,7 @@ class JustTheController extends ValueNotifier<ControllerState> {
     value = value.copyWith(
       action: ControllerAction.hide,
       completer: completer,
+      immediately: immediately,
     );
 
     return completer.future;

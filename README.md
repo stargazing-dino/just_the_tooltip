@@ -39,15 +39,33 @@ JustTheTooltip(
 )
 ```
 
-The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` that is responsible for showing and hiding the content. (There is an open issue for allowing `controller` access to the state of the tooltip.) You can further define how a `Tooltip` will show by defining the `isModal` property. A modal will only open through clicking on the `child` and close by clicking on the background area (referred to as the `skrim` here). A non-modal (the default) is a more traditional tooltip opens and closes on hovers.
+The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` that is responsible for showing and hiding the content. You can further define how a `Tooltip` will show by defining the `isModal` property. A modal will only open through clicking on the `child` and close by clicking on the background area (referred to as the `skrim` here). A non-modal (the default) is a more traditional tooltip opens and closes on hovers.
 
 __Note, phone emulators do not implement mouse controls. To test hover states, use a browser.__
 
-The fallback used when no mouse region is present but `isModal` is false is to rely on tap behavior.
+The fallback used when no mouse region is present but `isModal` is false is to only open when long pressed.
 
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true" width="320" height="568"/>
 </p>
+
+
+If you'd like to create a controller to manage the state of the tooltip, you can do so by defining an instance of a `JustTheController` and pass it through to constructor.
+
+```dart
+final tooltipController = JustTheController();
+
+child: JustTheTooltip(
+  controller: tooltipController,
+  // ...
+)
+
+void showTooltip() {
+  if (controller.isHidden) {
+    controller.showTooltip();
+  }
+}
+```
 
 ## ListViews
 
