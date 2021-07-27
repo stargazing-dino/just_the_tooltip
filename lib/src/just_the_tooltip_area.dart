@@ -82,10 +82,16 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
   Widget build(BuildContext context) {
     return InheritedTooltipArea(
       data: this,
-      child: widget.builder(
-        context,
-        entry,
-        skrim,
+      // This Builder allows direct children to call `JustTheTooltipArea.of`
+      // without requiring a builder themselves.
+      child: Builder(
+        builder: (context) {
+          return widget.builder(
+            context,
+            entry,
+            skrim,
+          );
+        },
       ),
     );
   }

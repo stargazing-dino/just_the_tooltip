@@ -1,3 +1,6 @@
+## [0.0.7+1] - Jun 18, 2021
+Added a builder around `JustTheTooltipArea` build function
+
 ## [0.0.7] - Jul 17, 2021
 Added controller for managing the state of the tooltip.
 
