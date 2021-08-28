@@ -80,7 +80,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.7+1"
+    version: "0.0.7+2"
   lints:
     dependency: transitive
     description:
@@ -155,7 +155,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.2"
   typed_data:
     dependency: transitive
     description:

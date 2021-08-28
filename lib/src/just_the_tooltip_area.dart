@@ -62,6 +62,9 @@ class JustTheTooltipArea extends StatefulWidget {
   State<JustTheTooltipArea> createState() => _JustTheTooltipAreaState();
 }
 
+// FIXME: This is a very flawed idea to be able to get the state of this
+// widget by calling `JustTheTooltipArea.of(context)`. It shouldn't be possible
+// or there should be a layer of abstraction between.
 class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
   Widget? entry;
 

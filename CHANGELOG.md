@@ -1,3 +1,6 @@
+## [0.0.7+2] - Jun 18, 2021
+Adds a longer description so I get them 130 points
+
 ## [0.0.7+1] - Jun 18, 2021
 Added a builder around `JustTheTooltipArea` build function
 
