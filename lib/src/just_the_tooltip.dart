@@ -167,6 +167,12 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   void initState() {
     // Handles mouse connection and global tap gestures.
     if (!widget.isModal) {
+      // RendererBinding.instance!.mouseTracker.addListener seems to have a bug
+      // if you move the mouse as the page is loading, the listener never gets call
+      // set mouseConnected here as a work around
+      _mouseIsConnected =
+          RendererBinding.instance!.mouseTracker.mouseIsConnected;
+
       _addBindingListeners();
     }
 
