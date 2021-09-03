@@ -53,9 +53,11 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           alignment: Alignment.center,
           child: JustTheTooltip(
             controller: tooltipController,
-            fadeInDuration: const Duration(seconds: 4),
+            // fadeOutDuration: const Duration(seconds: 4),
+            // fadeInDuration: const Duration(seconds: 4),
             tailLength: 20.0,
-            isModal: true,
+            // isModal: true,
+            showDuration: const Duration(seconds: 5),
             preferredDirection: AxisDirection.left,
             margin: margin,
             borderRadius: BorderRadius.circular(16.0),

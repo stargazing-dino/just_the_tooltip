@@ -1,3 +1,6 @@
+## [0.0.7+3] - Sep 2, 2021
+Field descriptions are not accessible
+
 ## [0.0.7+2] - Jun 18, 2021
 Adds a longer description so I get them 130 points
 

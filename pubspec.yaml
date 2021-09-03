@@ -1,6 +1,6 @@
 name: just_the_tooltip
 description: A multi directional tooltip used to display any content with inbuilt support for list views
-version: 0.0.7+2
+version: 0.0.7+3
 homepage: https://github.com/Nolence/just_the_tooltip
 
 environment:
