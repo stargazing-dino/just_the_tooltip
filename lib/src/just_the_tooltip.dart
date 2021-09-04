@@ -230,7 +230,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   late Duration waitDuration;
   late bool _mouseIsConnected = false;
   bool _longPressActivated = false;
-  late bool _hasBindingListeners;
+  late bool _hasBindingListeners = false;
 
   /// This is a bit of suckery as I cannot find a good way to refresh the state
   /// of the overlay. Entry does not need this as it is inside a builder and not
@@ -241,10 +241,13 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   void initState() {
     // Handles mouse connection and global tap gestures.
     if (!widget.isModal) {
-      _hasBindingListeners = true;
+      // RendererBinding.instance!.mouseTracker.addListener seems to have a bug
+      // if you move the mouse as the page is loading, the listener never gets call
+      // set mouseConnected here as a work around
+      _mouseIsConnected =
+          RendererBinding.instance!.mouseTracker.mouseIsConnected;
+
       _addBindingListeners();
-    } else {
-      _hasBindingListeners = false;
     }
 
     _animationController = AnimationController(
@@ -381,7 +384,10 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   }
 
   void _addBindingListeners() {
-    if (!_hasBindingListeners) _hasBindingListeners = true;
+    if (_hasBindingListeners) return;
+
+    _hasBindingListeners = true;
+
     // Listen to see when a mouse is added.
     RendererBinding.instance!.mouseTracker
         .addListener(_handleMouseTrackerChange);
