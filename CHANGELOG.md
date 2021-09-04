@@ -1,3 +1,6 @@
+## [0.0.7+4] - Sep 2, 2021
+Fixes the mouse moved at load bug
+
 ## [0.0.7+3] - Sep 2, 2021
 Field descriptions are not accessible
 
