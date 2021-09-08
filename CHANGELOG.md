@@ -1,3 +1,6 @@
+## [0.0.7+6] - Sep 2, 2021
+Avoid another force unwrap error
+
 ## [0.0.7+5] - Sep 2, 2021
 Tooltip area will no longer force unwrap and cause error when its scope is lost
 

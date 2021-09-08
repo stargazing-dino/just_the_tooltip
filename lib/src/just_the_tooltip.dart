@@ -596,7 +596,11 @@ class _JustTheTooltipState extends State<JustTheTooltip>
         });
       } else {
         // TODO: Wat? This calls setState internally but with a mounted check.
-        _delegate.area!.data.removeEntries();
+        final area = _delegate.area;
+
+        if (area != null) {
+          area.data.removeEntries();
+        }
       }
     } else if (_delegate is JustTheOverlayDelegate) {
       _delegate.entry?.remove();
