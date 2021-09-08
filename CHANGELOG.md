@@ -1,3 +1,6 @@
+## [0.0.7+5] - Sep 2, 2021
+Tooltip area will no longer force unwrap and cause error when its scope is lost
+
 ## [0.0.7+4] - Sep 2, 2021
 Fixes the mouse moved at load bug
 

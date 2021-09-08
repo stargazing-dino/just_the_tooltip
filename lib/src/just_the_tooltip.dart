@@ -274,9 +274,14 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   void didChangeDependencies() {
     final _delegate = delegate;
     if (_delegate is JustTheEntryDelegate) {
-      _delegate.area =
-          context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>()!;
+      final area =
+          context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
+
+      if (area != null) {
+        _delegate.area = area;
+      }
     }
+
     super.didChangeDependencies();
   }
 
