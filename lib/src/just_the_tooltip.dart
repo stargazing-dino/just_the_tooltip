@@ -11,8 +11,8 @@ import 'package:just_the_tooltip/src/tooltip_overlay.dart';
 
 /// A widget to display a tooltip over target widget. The tooltip can be
 /// displayed on any axis of the widget and fallback to the opposite axis if
-/// the tooltip does cannot fit its content. The tooltip can will be dismissed
-/// by waiting a specified time or again tapping on the target widger or
+/// the tooltip does cannot fit its content. The tooltip will be dismissed
+/// by waiting a specified time or tapping again on the target widger or
 /// anywhere on the screen.
 ///
 /// Keep in mind there are different behaviours for the tooltip when [isModal]
@@ -88,15 +88,15 @@ class JustTheTooltip extends StatefulWidget {
     );
   }
 
-  /// Imperitive controller for handling the state the interface is in. If one
+  /// Imperitive controller for handling the state the tooltip is in. If one
   /// is not provided a controller will be made.
   final JustTheController? controller;
 
-  /// Responsible for how the entries will be placed onto the screen
+  /// Responsible for how the entries will be placed onto the screen.
   final JustTheDelegate delegate;
 
   /// The content of the tooltip. Content must be collapsed so it does not
-  /// exceed it's constraints. The content's intrinsics `size` is used to first
+  /// exceed it's constraints. The content's intrinsic `size` is used to first
   /// to get the quadrant of the tooltip. It is then layed out with those
   /// quadrant constraints limiting its size.
   ///
@@ -327,6 +327,9 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     if (_delegate is JustTheOverlayDelegate) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         if (mounted) {
+          // _key here is either 0 or 1... Silly. We do this to force the state
+          // of the tooltip to update as calling update entry and co have not
+          // worked for me.
           setState(() {
             _key++;
             _key %= 2;
@@ -340,6 +343,8 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     super.didUpdateWidget(oldWidget);
   }
 
+  // Our controller listener here is like a redux store that listens to the
+  // actions on
   Future<void> _controllerListener() async {
     final controllerState = _controller.value;
     final completer = controllerState.completer;

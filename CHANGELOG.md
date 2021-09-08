@@ -1,3 +1,6 @@
+## [0.0.7+7] - Sep 2, 2021
+Small doc comment improvements
+
 ## [0.0.7+6] - Sep 2, 2021
 Avoid another force unwrap error
 
