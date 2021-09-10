@@ -1,3 +1,7 @@
+## [0.0.8] - Sep 10, 2021
+* Added a `tailBuilder` for users to draw custom tails using their own path. Defaults to a linear implementation.
+* Added pubignore for golden files
+
 ## [0.0.7+6] - Sep 2, 2021
 Avoid another force unwrap error
 

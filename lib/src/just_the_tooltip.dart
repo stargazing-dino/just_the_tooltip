@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:just_the_tooltip/src/models/just_the_controller.dart';
 import 'package:just_the_tooltip/src/models/just_the_delegate.dart';
 import 'package:just_the_tooltip/src/models/target_information.dart';
-import 'package:just_the_tooltip/src/tooltip_overlay.dart';
+import 'package:just_the_tooltip/src/render_tooltip_overlay.dart';
 
 /// A widget to display a tooltip over target widget. The tooltip can be
 /// displayed on any axis of the widget and fallback to the opposite axis if
@@ -39,6 +40,7 @@ class JustTheTooltip extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(6)),
     this.tailLength = 16.0,
     this.tailBaseWidth = 32.0,
+    this.tailBuilder = defaultTailBuilder,
     this.animatedTransitionBuilder = defaultAnimatedTransitionBuilder,
     this.backgroundColor,
     this.textDirection = TextDirection.ltr,
@@ -68,6 +70,7 @@ class JustTheTooltip extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(6)),
     this.tailLength = 16.0,
     this.tailBaseWidth = 32.0,
+    this.tailBuilder = defaultTailBuilder,
     this.animatedTransitionBuilder = defaultAnimatedTransitionBuilder,
     this.backgroundColor,
     this.textDirection = TextDirection.ltr,
@@ -86,6 +89,44 @@ class JustTheTooltip extends StatefulWidget {
       opacity: animation,
       child: child,
     );
+  }
+
+  /// Draws a linear closed triangle path for the tail.
+  static Path defaultTailBuilder(Offset tip, Offset point2, Offset point3) {
+    return Path()
+      ..moveTo(tip.dx, tip.dy)
+      ..lineTo(point2.dx, point2.dy)
+      ..lineTo(point3.dx, point3.dy)
+      ..close();
+  }
+
+  /// Draws a bezier closed triangle path for the tail.
+  static Path defaultBezierTailBuilder(
+    Offset tip,
+    Offset point2,
+    Offset point3,
+  ) {
+    final offsetBetween = Offset(
+      lerpDouble(point2.dx, point3.dx, 0.5)!,
+      lerpDouble(point2.dy, point3.dy, 0.5)!,
+    );
+
+    return Path()
+      ..moveTo(tip.dx, tip.dy)
+      ..quadraticBezierTo(
+        offsetBetween.dx,
+        offsetBetween.dy,
+        point2.dx,
+        point2.dy,
+      )
+      ..lineTo(point3.dx, point3.dy)
+      ..quadraticBezierTo(
+        offsetBetween.dx,
+        offsetBetween.dy,
+        tip.dx,
+        tip.dy,
+      )
+      ..close();
   }
 
   /// Imperitive controller for handling the state the interface is in. If one
@@ -182,6 +223,11 @@ class JustTheTooltip extends StatefulWidget {
   /// The base length of the tooltip on the edge of the tooltip
   final double tailBaseWidth;
 
+  /// Defines how the path of the tail is built. The two options currently
+  /// provided are the static methods [defaultTailBuilder] and
+  /// [defaultBezierTailBuilder], but you may just as easily provide your own.
+  final TailBuilder tailBuilder;
+
   /// A customizable builder that can be used to define the transition the
   /// tooltip uses when animating into view
   final AnimatedTransitionBuilder animatedTransitionBuilder;
@@ -231,11 +277,6 @@ class _JustTheTooltipState extends State<JustTheTooltip>
   late bool _mouseIsConnected = false;
   bool _longPressActivated = false;
   late bool _hasBindingListeners = false;
-
-  /// This is a bit of suckery as I cannot find a good way to refresh the state
-  /// of the overlay. Entry does not need this as it is inside a builder and not
-  /// its own overlay state.
-  var _key = 0;
 
   @override
   void initState() {
@@ -327,11 +368,6 @@ class _JustTheTooltipState extends State<JustTheTooltip>
     if (_delegate is JustTheOverlayDelegate) {
       WidgetsBinding.instance?.addPostFrameCallback((_) {
         if (mounted) {
-          setState(() {
-            _key++;
-            _key %= 2;
-          });
-
           _delegate.markNeedsBuild();
         }
       });
@@ -733,15 +769,8 @@ class _JustTheTooltipState extends State<JustTheTooltip>
       blurRadius: 0.0,
       color: theme.shadowColor,
     );
-    final _delegate = delegate;
-    Key? _widgetKey = delegate.entryKey;
-
-    if (_delegate is JustTheOverlayDelegate) {
-      _widgetKey = ValueKey(_key);
-    }
 
     return CompositedTransformFollower(
-      key: _widgetKey,
       showWhenUnlinked: widget.showWhenUnlinked,
       offset: targetInformation.offsetToTarget,
       link: _layerLink,
@@ -765,7 +794,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
                   animation: scrollController,
                   child: _child,
                   builder: (context, child) {
-                    return TooltipOverlay(
+                    return RenderTooltipOverlay(
                       animatedTransitionBuilder:
                           widget.animatedTransitionBuilder,
                       child: child!,
@@ -779,6 +808,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
                       borderRadius: widget.borderRadius,
                       tailBaseWidth: widget.tailBaseWidth,
                       tailLength: widget.tailLength,
+                      tailBuilder: widget.tailBuilder,
                       backgroundColor:
                           widget.backgroundColor ?? theme.cardColor,
                       textDirection: widget.textDirection,
@@ -790,7 +820,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
                 );
               }
 
-              return TooltipOverlay(
+              return RenderTooltipOverlay(
                 animatedTransitionBuilder: widget.animatedTransitionBuilder,
                 child: _child,
                 padding: widget.padding,
@@ -803,6 +833,7 @@ class _JustTheTooltipState extends State<JustTheTooltip>
                 borderRadius: widget.borderRadius,
                 tailBaseWidth: widget.tailBaseWidth,
                 tailLength: widget.tailLength,
+                tailBuilder: widget.tailBuilder,
                 backgroundColor: widget.backgroundColor ?? theme.cardColor,
                 textDirection: widget.textDirection,
                 shadow: widget.shadow ?? defaultShadow,

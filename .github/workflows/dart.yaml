@@ -14,8 +14,7 @@ jobs:
     strategy:
       matrix:
         channel:
-          # Dev currently adds a breaking change on AnimatedContainer - so no
-          # - dev
+          - dev
           - stable
 
     steps:

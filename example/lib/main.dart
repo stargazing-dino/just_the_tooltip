@@ -11,7 +11,69 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData.dark(),
-      home: const DefaultPageExample(),
+      home: const HomePage(),
+      onGenerateRoute: (RouteSettings settings) {
+        switch (settings.name) {
+          case '':
+          case 'default':
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) => const DefaultPageExample(),
+            );
+          case 'scroll':
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) => const ScrollExamplePage(),
+            );
+          case 'tooltipArea':
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) => const TooltipAreaExamplePage(),
+            );
+          default:
+            throw UnimplementedError();
+        }
+      },
+    );
+  }
+}
+
+class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Example app')),
+      body: SizedBox.expand(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: Colors.amber.shade700),
+              onPressed: () {
+                Navigator.of(context).pushNamed('default');
+              },
+              child: const Text('default'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: Colors.blueGrey),
+              onPressed: () {
+                Navigator.of(context).pushNamed('scroll');
+              },
+              child: const Text('scroll'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: Colors.teal),
+              onPressed: () {
+                Navigator.of(context).pushNamed('tooltipArea');
+              },
+              child: const Text('tooltipArea'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -31,6 +93,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
     const margin = EdgeInsets.all(16.0);
 
     return Scaffold(
+      appBar: AppBar(),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -56,7 +119,8 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
             // fadeOutDuration: const Duration(seconds: 4),
             // fadeInDuration: const Duration(seconds: 4),
             tailLength: 20.0,
-            // isModal: true,
+            tailBaseWidth: 50.0,
+            isModal: true,
             showDuration: const Duration(seconds: 5),
             preferredDirection: AxisDirection.left,
             margin: margin,
@@ -92,6 +156,9 @@ class ScrollExamplePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tooltip follow example'),
+      ),
       body: ListView(
         children: List.generate(30, (index) {
           if (index == 15) {

@@ -5,11 +5,15 @@ import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/utils/get_axis_direction.dart';
 import 'package:just_the_tooltip/src/utils/get_position_dependent_offset.dart';
 
-// TODO: Possibly rename as it's not always a "real" overlay
+typedef TailBuilder = Path Function(
+  Offset point1,
+  Offset point2,
+  Offset point3,
+);
 
 /// Getting the intrinsic size of the child was from [Align] and
 /// [RenderPositionedBox]
-class TooltipOverlay extends SingleChildRenderObjectWidget {
+class RenderTooltipOverlay extends SingleChildRenderObjectWidget {
   final EdgeInsets padding;
 
   final EdgeInsets margin;
@@ -30,6 +34,8 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final double tailLength;
 
+  final TailBuilder tailBuilder;
+
   final AnimatedTransitionBuilder animatedTransitionBuilder;
 
   final TextDirection textDirection;
@@ -42,7 +48,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
 
   final ScrollPosition? scrollPosition;
 
-  const TooltipOverlay({
+  const RenderTooltipOverlay({
     Key? key,
     required Widget child,
     required this.padding,
@@ -55,6 +61,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
     required this.borderRadius,
     required this.tailBaseWidth,
     required this.tailLength,
+    required this.tailBuilder,
     required this.animatedTransitionBuilder,
     required this.textDirection,
     required this.backgroundColor,
@@ -72,6 +79,7 @@ class TooltipOverlay extends SingleChildRenderObjectWidget {
       borderRadius: borderRadius,
       tailLength: tailLength,
       tailBaseWidth: tailBaseWidth,
+      tailBuilder: tailBuilder,
       textDirection: textDirection,
       backgroundColor: backgroundColor,
       preferredDirection: preferredDirection,
@@ -151,6 +159,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     required BorderRadiusGeometry borderRadius,
     required double tailLength,
     required double tailBaseWidth,
+    required TailBuilder tailBuilder,
     required TextDirection textDirection,
     required Color backgroundColor,
     required AxisDirection preferredDirection,
@@ -164,6 +173,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         _borderRadius = borderRadius,
         _tailLength = tailLength,
         _tailBaseWidth = tailBaseWidth,
+        _tailBuilder = tailBuilder,
         _textDirection = textDirection,
         _backgroundColor = backgroundColor,
         _preferredDirection = preferredDirection,
@@ -220,6 +230,14 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   set tailBaseWidth(double value) {
     if (_tailBaseWidth == value) return;
     _tailBaseWidth = tailBaseWidth;
+    markNeedsLayout();
+  }
+
+  TailBuilder get tailBuilder => _tailBuilder;
+  TailBuilder _tailBuilder;
+  set tailBuilder(TailBuilder value) {
+    if (_tailBuilder == value) return;
+    _tailBuilder = tailBuilder;
     markNeedsLayout();
   }
 
@@ -310,9 +328,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       scrollPosition,
       margin,
     );
-
-    // TODO: I want the ability to not overflow if we have space below... Almost
-    // like I should pass in extentBefore and extentAfter Aghh!!
 
     return _child.getDryLayout(quadrantConstraints);
   }
@@ -516,8 +531,6 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     required Rect rect,
     required BorderRadius radius,
   }) {
-    final path = Path();
-
     // Clockwise around the triangle starting at the target center
     // point + offset
     double x = 0, y = 0, x2 = 0, y2 = 0, x3 = 0, y3 = 0;
@@ -639,11 +652,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         break;
     }
 
-    return path
-      ..moveTo(x, y)
-      ..lineTo(x2, y2)
-      ..lineTo(x3, y3)
-      ..close();
+    return tailBuilder(Offset(x, y), Offset(x2, y2), Offset(x3, y3));
   }
 
   @override
