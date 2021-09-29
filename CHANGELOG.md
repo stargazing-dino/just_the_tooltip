@@ -1,4 +1,7 @@
-## [0.0.9] - Sep 10, 2021
+## [0.0.9+1] - Sep 29, 2021
+* Fixed tooltip closing immediately when isModal is set to false and using a controller.
+
+## [0.0.9] - Sep 29, 2021
 * Fixed issue where hot reload would create skrim. Skrim no longer disables back button now.
 * Fixed issue where tooltip would not update correctly from property changes.
 * Added new tooltip property `triggerMode` and `enableFeedback`.

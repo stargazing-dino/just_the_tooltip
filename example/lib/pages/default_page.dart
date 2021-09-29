@@ -44,10 +44,10 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
             // fadeInDuration: const Duration(seconds: 4),
             tailLength: 20.0,
             tailBaseWidth: 50.0,
-            isModal: true,
+            isModal: false,
             preferredDirection: AxisDirection.up,
             margin: margin,
-            borderRadius: BorderRadius.circular(16.0),
+            borderRadius: BorderRadius.circular(8.0),
             offset: 0,
             child: Material(
               color: Colors.grey.shade800,
@@ -61,9 +61,16 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
                 ),
               ),
             ),
-            content: const SizedBox(
-              width: 100.0,
-              height: 100.0,
+            content: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 200),
+                child: const Text(
+                  'Material tooltip has the text alignment set to the left, and it'
+                  ' looks pretty bad imho',
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
         ),

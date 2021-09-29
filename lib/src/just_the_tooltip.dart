@@ -480,8 +480,13 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     final completer = Completer<void>();
 
     if (immediately) {
-      await ensureTooltipVisible();
-      completer.complete();
+      // We add a postFrameCallback here because we need run *after* the global
+      // _handlePointerEvent has been called (which happens after every tap
+      // event).
+      WidgetsBinding.instance?.addPostFrameCallback((_) async {
+        await ensureTooltipVisible();
+        completer.complete();
+      });
 
       return completer.future;
     }
