@@ -72,6 +72,15 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
 
   Widget? skrim;
 
+  void setEntries({required Widget entry, required Widget skrim}) {
+    if (mounted) {
+      setState(() {
+        this.entry = entry;
+        this.skrim = skrim;
+      });
+    }
+  }
+
   void removeEntries() {
     if (mounted) {
       setState(() {

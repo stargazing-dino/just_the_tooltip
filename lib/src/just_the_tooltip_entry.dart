@@ -134,12 +134,9 @@ class _JustTheTooltipEntryState extends _JustTheTooltipState<Widget> {
 
   @override
   void didChangeDependencies() {
-    final _area =
-        context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
-
-    if (_area != null) {
-      area = _area;
-    }
+    // I must save a reference to the ancestor here because this is not callable
+    // in dispose.
+    area = context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
 
     super.didChangeDependencies();
   }
@@ -174,11 +171,7 @@ class _JustTheTooltipEntryState extends _JustTheTooltipState<Widget> {
 
     final tooltipArea = JustTheTooltipArea.of(context);
 
-    // TODO: This looks anti-pattern.
-    tooltipArea.setState(() {
-      tooltipArea.skrim = skrim;
-      tooltipArea.entry = entry;
-    });
+    tooltipArea.setEntries(entry: entry, skrim: skrim);
   }
 
   @override
@@ -186,10 +179,6 @@ class _JustTheTooltipEntryState extends _JustTheTooltipState<Widget> {
     cancelHideTimer();
     cancelShowTimer();
 
-    // TODO: We should instead be sending up events instead of directly
-    // modifying the area's state.
-    final tooltipArea = JustTheTooltipArea.of(context);
-
-    tooltipArea.removeEntries();
+    area?.data.removeEntries();
   }
 }
