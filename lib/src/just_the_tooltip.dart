@@ -715,6 +715,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     );
   }
 
+  // TODO: Change this. We need to get widget size in a better way.
   /// This assumes the caller itself is the target
   TargetInformation _getTargetInformation(BuildContext context) {
     final box = context.findRenderObject() as RenderBox?;
