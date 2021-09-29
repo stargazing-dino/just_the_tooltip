@@ -1,3 +1,11 @@
+## [0.0.9] - Sep 10, 2021
+* Fixed issue where hot reload would create skrim. Skrim no longer disables back button now.
+* Fixed issue where tooltip would not update correctly from property changes.
+* Added new tooltip property `triggerMode` and `enableFeedback`.
+
+**[BREAKING]**
+* Renamed JustTheTooltip.entry named constructor to other class JustTheTooltipEntry. This was necessary as the two methods were different enough to be their own widgets.
+
 ## [0.0.8] - Sep 10, 2021
 * Added a `tailBuilder` for users to draw custom tails using their own path. Defaults to a linear implementation.
 * Added pubignore for golden files

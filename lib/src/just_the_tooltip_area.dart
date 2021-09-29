@@ -34,8 +34,9 @@ class JustTheTooltipArea extends StatefulWidget {
   /// Used to retrieve the scope of the tooltip. This scope is responsible for
   /// managing the children `JustTheTooltip`s
   static _JustTheTooltipAreaState of(BuildContext context) {
-    var scope =
+    final scope =
         context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
+
     assert(
       () {
         if (scope == null) {
@@ -48,11 +49,12 @@ class JustTheTooltipArea extends StatefulWidget {
         return true;
       }(),
     );
+
     return scope!.data;
   }
 
   static _JustTheTooltipAreaState? maybeOf(BuildContext context) {
-    var scope =
+    final scope =
         context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
 
     return scope?.data;
@@ -71,14 +73,12 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
   Widget? skrim;
 
   void removeEntries() {
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      if (mounted) {
-        setState(() {
-          entry = null;
-          skrim = null;
-        });
-      }
-    });
+    if (mounted) {
+      setState(() {
+        entry = null;
+        skrim = null;
+      });
+    }
   }
 
   @override

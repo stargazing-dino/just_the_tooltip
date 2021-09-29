@@ -189,7 +189,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   EdgeInsets _margin;
   set margin(EdgeInsets value) {
     if (_margin == value) return;
-    _margin = margin;
+    _margin = value;
     markNeedsLayout();
   }
 
@@ -197,7 +197,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   double _offset;
   set offset(double value) {
     if (_offset == value) return;
-    _offset = offset;
+    _offset = value;
     markNeedsLayout();
   }
 
@@ -205,7 +205,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   Offset _target;
   set target(Offset value) {
     if (_target == value) return;
-    _target = target;
+    _target = value;
     markNeedsLayout();
   }
 
@@ -213,7 +213,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   BorderRadiusGeometry _borderRadius;
   set borderRadius(BorderRadiusGeometry value) {
     if (_borderRadius == value) return;
-    _borderRadius = borderRadius;
+    _borderRadius = value;
     markNeedsLayout();
   }
 
@@ -221,7 +221,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   double _tailLength;
   set tailLength(double value) {
     if (_tailLength == value) return;
-    _tailLength = tailLength;
+    _tailLength = value;
     markNeedsLayout();
   }
 
@@ -229,7 +229,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   double _tailBaseWidth;
   set tailBaseWidth(double value) {
     if (_tailBaseWidth == value) return;
-    _tailBaseWidth = tailBaseWidth;
+    _tailBaseWidth = value;
     markNeedsLayout();
   }
 
@@ -237,7 +237,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   TailBuilder _tailBuilder;
   set tailBuilder(TailBuilder value) {
     if (_tailBuilder == value) return;
-    _tailBuilder = tailBuilder;
+    _tailBuilder = value;
     markNeedsLayout();
   }
 
@@ -245,8 +245,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value) return;
-    _textDirection = textDirection;
-    // TODO: Does this need layout or repaint?
+    _textDirection = value;
     markNeedsLayout();
   }
 
@@ -254,7 +253,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   Color _backgroundColor;
   set backgroundColor(Color value) {
     if (_backgroundColor == value) return;
-    _backgroundColor = backgroundColor;
+    _backgroundColor = value;
     markNeedsPaint();
   }
 
@@ -262,7 +261,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   AxisDirection _preferredDirection;
   set preferredDirection(AxisDirection value) {
     if (_preferredDirection == value) return;
-    _preferredDirection = preferredDirection;
+    _preferredDirection = value;
     markNeedsLayout();
   }
 
@@ -270,7 +269,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   Size _targetSize;
   set targetSize(Size value) {
     if (_targetSize == value) return;
-    _targetSize = targetSize;
+    _targetSize = value;
     markNeedsLayout();
   }
 
@@ -278,7 +277,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   Shadow _shadow;
   set shadow(Shadow value) {
     if (_shadow == value) return;
-    _shadow = shadow;
+    _shadow = value;
     markNeedsPaint();
   }
 
@@ -286,7 +285,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   double _elevation;
   set elevation(double value) {
     if (_elevation == value) return;
-    _elevation = elevation;
+    _elevation = value;
     markNeedsPaint();
   }
 
@@ -294,7 +293,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   ScrollPosition? _scrollPosition;
   set scrollPosition(ScrollPosition? value) {
     if (_scrollPosition == value) return;
-    _scrollPosition = scrollPosition;
+    _scrollPosition = value;
     markNeedsLayout();
   }
 

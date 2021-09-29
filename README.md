@@ -1,16 +1,16 @@
 # just_the_tooltip
 
-A nice, small package for when you need a tooltip.
+A small package for showing tooltips.
 
 ## Getting Started
 
-Insert this into your yaml:
+Add to your yaml:
 
 ```yaml
     just_the_tooltip: <latest_version>
 ```
 
-`just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands upon their single axis layout algorithm to fit both vertically and horizontally. The tooltip can be positioned along any axis and will fall back to the opposite side if overflowed.
+`just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands on their single axis layout algorithm to fit both vertically and horizontally. The tooltip can be positioned along any axis and will fall back to the opposite side if overflowed.
 
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true" width="320" height="568"/>
