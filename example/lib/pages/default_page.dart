@@ -61,7 +61,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
                 ),
               ),
             ),
-            content: Container(
+            content: const SizedBox(
               width: 100.0,
               height: 100.0,
             ),

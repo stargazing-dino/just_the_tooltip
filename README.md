@@ -10,6 +10,10 @@ Add to your yaml:
     just_the_tooltip: <latest_version>
 ```
 
+## Breaking
+
+* Removed `JustTheTooltip.entry` named constructor in favor of dedicated widget `JustTheTooltipEntry`. This mirrors a change in the code that explicitly differentiates where and how tooltips are shown.
+
 `just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands on their single axis layout algorithm to fit both vertically and horizontally. The tooltip can be positioned along any axis and will fall back to the opposite side if overflowed.
 
 <p>  
@@ -71,7 +75,7 @@ void showTooltip() {
 
 The tooltip should also work in lists and follow the target through scrolling. For even more consideration of the available space in ListViews, a `ScrollController` may be passed to the `just_the_tooltip` to give the layout algorithm a hint as to how much space is before and after the scroll axis. This allows tooltips that would otherwise overflow to use up space offscreen in one of the scroll directions.
 
-For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltip.entry`:
+For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltipEntry`:
 
 ```dart
 Scaffold(
@@ -85,7 +89,7 @@ Scaffold(
             itemCount: 30,
             itemBuilder: (context, index) {
               if (index == 15) {
-                return JustTheTooltip.entry(
+                return JustTheTooltipEntry(
                   tailLength: 10.0,
                   preferredDirection: AxisDirection.down,
                   isModal: true,
@@ -136,7 +140,5 @@ This will give you the positioned tooltip and scrim (an empty gesture detector t
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/scrolling_example.gif?raw=true" width="320" height="568"/>
 </p>
-
-Notice the use of `JustTheTooltip.entry`. This factory ensures the area above is in charge of the widgets and returns them via the builder of that widget.
 
 Issues and PRs welcome. API subject to change.
