@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 /// insert the tooltip into a stack rather than an overlay
 typedef TooltipBuilder = Widget Function(
   BuildContext context,
-  Widget? tooltip,
+  Widget tooltip,
 
   /// This widget should be placed behind the tooltip. When tapped, it will
   /// collapse the tooltip. When, isModal is set to false, this will always be
   /// null
-  Widget? scrim,
+  Widget scrim,
 );
 
 class InheritedTooltipArea extends InheritedWidget {
@@ -64,29 +64,37 @@ class JustTheTooltipArea extends StatefulWidget {
   State<JustTheTooltipArea> createState() => _JustTheTooltipAreaState();
 }
 
-// FIXME: This is a very flawed idea to be able to get the state of this
-// widget by calling `JustTheTooltipArea.of(context)`. It shouldn't be possible
-// or there should be a layer of abstraction between.
+// TODO: Change the logic here eventually to something cleaner.
+/// This parent child works around the fact that the [JustTheTooltipEntry] will
+/// send updates to here and thus manage the state. We must create listenable
+/// wrappers aruond the skrim and entry as otherwise, when we update this parent
+/// from the child, that would trigger a rebuild of the child... Which, without
+/// fancy logic, would cause this parent to rebuild again. To avoid that, we
+/// instead update the listeners and they then only update their state.
 class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
-  Widget? entry;
-
-  Widget? skrim;
+  var entry = ValueNotifier<Widget?>(null);
+  var skrim = ValueNotifier<Widget?>(null);
 
   void setEntries({required Widget entry, required Widget skrim}) {
     if (mounted) {
       setState(() {
-        this.entry = entry;
-        this.skrim = skrim;
+        this.entry.value = entry;
+        this.skrim.value = skrim;
       });
+    }
+  }
+
+  void updateEntries({required Widget entry, required Widget skrim}) {
+    if (mounted) {
+      this.entry.value = entry;
+      this.skrim.value = skrim;
     }
   }
 
   void removeEntries() {
     if (mounted) {
-      setState(() {
-        entry = null;
-        skrim = null;
-      });
+      entry.value = null;
+      skrim.value = null;
     }
   }
 
@@ -100,8 +108,16 @@ class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
         builder: (context) {
           return widget.builder(
             context,
-            entry,
-            skrim,
+            ValueListenableBuilder<Widget?>(
+              valueListenable: entry,
+              builder: (context, widget, child) => widget ?? child!,
+              child: const SizedBox.shrink(),
+            ),
+            ValueListenableBuilder<Widget?>(
+              valueListenable: skrim,
+              builder: (context, widget, child) => widget ?? child!,
+              child: const SizedBox.shrink(),
+            ),
           );
         },
       ),

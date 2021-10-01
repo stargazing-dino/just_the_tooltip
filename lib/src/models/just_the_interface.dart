@@ -2,7 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/src/models/just_the_controller.dart';
-import 'package:just_the_tooltip/src/render_tooltip_overlay.dart';
+import 'package:just_the_tooltip/src/positioned_tooltip.dart';
 
 /// {@template just_the_tooltip.overlay.constructor}
 /// A widget to display a tooltip over target widget. The tooltip can be
@@ -138,7 +138,7 @@ abstract class JustTheInterface extends StatefulWidget {
   /// The amount of time before the tooltip is shown in the hover state.
   Duration? get hoverShowDuration;
 
-  /// An axis that you hope you to place the tooltip along. Note that if there
+  /// An axis that you want to place the tooltip along. Note that if there
   /// is not enough space on that axis, the layout algorithm might decide to
   /// place it along the opposite axis. If not enough space exists on both
   /// sides, a constraints error will be thrown.
@@ -155,11 +155,8 @@ abstract class JustTheInterface extends StatefulWidget {
   /// The curve of the fade animation.
   Curve get curve;
 
-  /// The padding around the content of the tooltip.
-  EdgeInsets get padding;
-
   /// The margin the tooltip keeps around edges of its box constraints.
-  EdgeInsets get margin;
+  EdgeInsetsGeometry get margin;
 
   /// The vertical or horizontal offset from the base of the [content] to the
   /// tip of the tail of the tooltip.

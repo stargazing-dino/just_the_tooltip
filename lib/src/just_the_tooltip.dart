@@ -3,11 +3,12 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:just_the_tooltip/src/models/just_the_controller.dart';
 import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/models/target_information.dart';
-import 'package:just_the_tooltip/src/render_tooltip_overlay.dart';
+import 'package:just_the_tooltip/src/positioned_tooltip.dart';
 
 part 'just_the_tooltip_entry.dart';
 
@@ -31,7 +32,6 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.fadeOutDuration = const Duration(milliseconds: 75),
     this.preferredDirection = AxisDirection.down,
     this.curve = Curves.easeInOut,
-    this.padding = const EdgeInsets.all(8.0),
     this.margin = const EdgeInsets.all(8.0),
     this.offset = 0.0,
     this.elevation = 4.0,
@@ -89,10 +89,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
   final Curve curve;
 
   @override
-  final EdgeInsets padding;
-
-  @override
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   @override
   final double offset;
@@ -167,9 +164,11 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
 
   @override
   void _createNewEntries() {
-    // TODO: use [AnimatedPositioned] to position tooltip so it smoothly
-    // transitions from one position to the next.
-    final entryOverlay = OverlayEntry(builder: (context) => _createEntry());
+    // The builder on these run twice on hot reload and then again from our
+    // didUpdateWidget.
+    final entryOverlay = OverlayEntry(builder: (context) {
+      return _createEntry();
+    });
     final skrimOverlay = OverlayEntry(builder: (context) => _createSkrim());
 
     final overlay = Overlay.of(context);
@@ -214,20 +213,20 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
     }
   }
 
-  @override
-  void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-    super.didUpdateWidget(oldWidget);
+  // @override
+  // void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+  //   super.didUpdateWidget(oldWidget);
 
-    // This adds a post frame callback because otherwise the OverlayEntry
-    // builder would run before the widget has a chance to update with the
-    // newest config.
-    WidgetsBinding.instance?.addPostFrameCallback((_) {
-      if (mounted) {
-        entry?.markNeedsBuild();
-        skrim?.markNeedsBuild();
-      }
-    });
-  }
+  //   // This adds a post frame callback because otherwise the OverlayEntry
+  //   // builder would run before the widget has a chance to update with the
+  //   // newest config.
+  //   WidgetsBinding.instance?.addPostFrameCallback((_) {
+  //     if (mounted) {
+  //       entry?.markNeedsBuild();
+  //       skrim?.markNeedsBuild();
+  //     }
+  //   });
+  // }
 }
 
 /// This is almost a one to one mapping to [Tooltip]'s [_TooltipState] except
@@ -289,6 +288,8 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   late bool enableFeedback;
 
   // These properties are specific to just_the_tooltip
+  static const Curve _defaultAnimateCurve = Curves.linear;
+  static const Duration _defaultAnimateDuration = Duration(milliseconds: 1000);
   late final JustTheController _controller;
   late bool _hasBindingListeners = false;
   ControllerAction? _previousAction;
@@ -630,6 +631,8 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   }
 
   Widget _createEntry() {
+    // This is single use because after we've gotten the size and position,
+    // if that child changes then this information will be stale.
     final targetInformation = _getTargetInformation(context);
     final theme = Theme.of(context);
     final defaultShadow = Shadow(
@@ -662,11 +665,12 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
                   animation: scrollController,
                   child: _child,
                   builder: (context, child) {
-                    return RenderTooltipOverlay(
+                    return PositionedTooltip(
+                      // curve: _defaultAnimateCurve,
+                      // duration: _defaultAnimateDuration,
                       animatedTransitionBuilder:
                           widget.animatedTransitionBuilder,
                       child: child!,
-                      padding: widget.padding,
                       margin: widget.margin,
                       targetSize: targetInformation.size,
                       target: targetInformation.target,
@@ -688,10 +692,11 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
                 );
               }
 
-              return RenderTooltipOverlay(
+              return PositionedTooltip(
+                // curve: _defaultAnimateCurve,
+                // duration: _defaultAnimateDuration,
                 animatedTransitionBuilder: widget.animatedTransitionBuilder,
                 child: _child,
-                padding: widget.padding,
                 margin: widget.margin,
                 targetSize: targetInformation.size,
                 target: targetInformation.target,
@@ -715,7 +720,6 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     );
   }
 
-  // TODO: Change this. We need to get widget size in a better way.
   /// This assumes the caller itself is the target
   TargetInformation _getTargetInformation(BuildContext context) {
     final box = context.findRenderObject() as RenderBox?;
@@ -728,6 +732,9 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
     final targetSize = box.getDryLayout(const BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
+    // TODO: Instead of this, change the alignment on
+    // [CompositedTransformFollower]. That way we can allow a user configurable
+    // alignment on where the tooltip ends up.
     final offsetToTarget = Offset(
       -target.dx + box.size.width / 2,
       -target.dy + box.size.height / 2,

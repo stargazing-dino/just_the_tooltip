@@ -21,7 +21,6 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     this.fadeOutDuration = const Duration(milliseconds: 75),
     this.preferredDirection = AxisDirection.down,
     this.curve = Curves.easeInOut,
-    this.padding = const EdgeInsets.all(8.0),
     this.margin = const EdgeInsets.all(8.0),
     this.offset = 0.0,
     this.elevation = 4.0,
@@ -78,9 +77,6 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
   final Curve curve;
 
   @override
-  final EdgeInsets padding;
-
-  @override
   final EdgeInsets margin;
 
   @override
@@ -123,14 +119,16 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
   _JustTheTooltipEntryState createState() => _JustTheTooltipEntryState();
 }
 
+// TODO: I think I want notifications instead... I'm really not sure
+// https://stackoverflow.com/a/65854697/8213910
 class _JustTheTooltipEntryState extends _JustTheTooltipState<Widget> {
   InheritedTooltipArea? area;
 
   @override
-  Widget? get entry => area?.data.entry;
+  Widget? get entry => area?.data.entry.value;
 
   @override
-  Widget? get skrim => area?.data.skrim;
+  Widget? get skrim => area?.data.skrim.value;
 
   @override
   void didChangeDependencies() {
@@ -174,11 +172,29 @@ class _JustTheTooltipEntryState extends _JustTheTooltipState<Widget> {
     tooltipArea.setEntries(entry: entry, skrim: skrim);
   }
 
+  void _updateEntries() {
+    final entry = _createEntry();
+    final skrim = _createSkrim();
+
+    final tooltipArea = JustTheTooltipArea.of(context);
+
+    tooltipArea.updateEntries(entry: entry, skrim: skrim);
+  }
+
   @override
   void _removeEntries() {
     cancelHideTimer();
     cancelShowTimer();
 
     area?.data.removeEntries();
+  }
+
+  @override
+  void didUpdateWidget(covariant JustTheInterface oldWidget) {
+    WidgetsBinding.instance?.addPostFrameCallback((_) {
+      _updateEntries();
+    });
+
+    super.didUpdateWidget(oldWidget);
   }
 }

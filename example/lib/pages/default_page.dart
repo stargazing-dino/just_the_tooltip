@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 
@@ -10,6 +12,25 @@ class DefaultPageExample extends StatefulWidget {
 
 class _DefaultPageExampleState extends State<DefaultPageExample> {
   final tooltipController = JustTheController();
+  var length = 10.0;
+  var color = Colors.pink;
+  var alignment = Alignment.center;
+
+  @override
+  void initState() {
+    Timer(const Duration(seconds: 5), () {
+      // setState(() {
+      //   color = Colors.green;
+      // });
+      // setState(() {
+      //   length = 30.0;
+      // });
+      setState(() {
+        alignment = Alignment.bottomRight;
+      });
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,15 +57,17 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
         ],
       ),
       body: SizedBox.expand(
-        child: Align(
-          alignment: Alignment.center,
+        child: AnimatedAlign(
+          duration: const Duration(milliseconds: 1500),
+          alignment: alignment,
           child: JustTheTooltip(
+            backgroundColor: color,
             controller: tooltipController,
             // fadeOutDuration: const Duration(seconds: 4),
             // fadeInDuration: const Duration(seconds: 4),
-            tailLength: 20.0,
-            tailBaseWidth: 50.0,
-            isModal: false,
+            tailLength: length,
+            tailBaseWidth: 20.0,
+            isModal: true,
             preferredDirection: AxisDirection.up,
             margin: margin,
             borderRadius: BorderRadius.circular(8.0),
@@ -64,7 +87,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
             content: Padding(
               padding: const EdgeInsets.all(8.0),
               child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 240),
+                constraints: const BoxConstraints(maxWidth: 200.0),
                 child: const Text(
                   'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor.',
                   textAlign: TextAlign.center,

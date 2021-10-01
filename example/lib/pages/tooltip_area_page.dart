@@ -45,9 +45,12 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                       return JustTheTooltipEntry(
                         scrollController: scrollController,
                         isModal: true,
-                        tailLength: 10.0,
+                        tailLength: 20.0,
                         preferredDirection: AxisDirection.down,
                         margin: const EdgeInsets.all(16.0),
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(16.0),
+                        ),
                         child: const Material(
                           color: Colors.blue,
                           shape: CircleBorder(),
@@ -118,8 +121,8 @@ class _TooltipAreaExamplePageState extends State<TooltipAreaExamplePage> {
                   },
                 ),
               ),
-              if (scrim != null) scrim,
-              if (tooltip != null) tooltip,
+              scrim,
+              tooltip,
             ],
           );
         },

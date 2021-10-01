@@ -11,12 +11,29 @@ typedef TailBuilder = Path Function(
   Offset point3,
 );
 
-/// Getting the intrinsic size of the child was from [Align] and
-/// [RenderPositionedBox]
-class RenderTooltipOverlay extends SingleChildRenderObjectWidget {
-  final EdgeInsets padding;
+class PositionedTooltip extends SingleChildRenderObjectWidget {
+  const PositionedTooltip({
+    Key? key,
+    required Widget child,
+    required this.margin,
+    required this.targetSize,
+    required this.target,
+    required this.offset,
+    required this.preferredDirection,
+    required this.offsetToTarget,
+    required this.borderRadius,
+    required this.tailBaseWidth,
+    required this.tailLength,
+    required this.tailBuilder,
+    required this.animatedTransitionBuilder,
+    required this.textDirection,
+    required this.backgroundColor,
+    required this.shadow,
+    required this.elevation,
+    required this.scrollPosition,
+  }) : super(key: key, child: child);
 
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   final Offset target;
 
@@ -48,31 +65,9 @@ class RenderTooltipOverlay extends SingleChildRenderObjectWidget {
 
   final ScrollPosition? scrollPosition;
 
-  const RenderTooltipOverlay({
-    Key? key,
-    required Widget child,
-    required this.padding,
-    required this.margin,
-    required this.targetSize,
-    required this.target,
-    required this.offset,
-    required this.preferredDirection,
-    required this.offsetToTarget,
-    required this.borderRadius,
-    required this.tailBaseWidth,
-    required this.tailLength,
-    required this.tailBuilder,
-    required this.animatedTransitionBuilder,
-    required this.textDirection,
-    required this.backgroundColor,
-    required this.shadow,
-    required this.elevation,
-    required this.scrollPosition,
-  }) : super(key: key, child: child);
-
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderTooltipOverlay(
+    return _RenderPositionedTooltip(
       margin: margin,
       offset: offset,
       target: target,
@@ -93,7 +88,7 @@ class RenderTooltipOverlay extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(
     BuildContext context,
-    _RenderTooltipOverlay renderObject,
+    _RenderPositionedTooltip renderObject,
   ) {
     renderObject
       ..margin = margin
@@ -114,8 +109,7 @@ class RenderTooltipOverlay extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<EdgeInsets>('padding', padding));
-    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin));
     properties.add(DiagnosticsProperty<Offset>('target', target));
     properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
     properties.add(DoubleProperty('offset', offset));
@@ -150,10 +144,11 @@ class RenderTooltipOverlay extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderTooltipOverlay extends RenderShiftedBox {
-  _RenderTooltipOverlay({
+class _RenderPositionedTooltip extends RenderShiftedBox
+    with DebugOverflowIndicatorMixin {
+  _RenderPositionedTooltip({
     RenderBox? child,
-    required EdgeInsets margin,
+    required EdgeInsetsGeometry margin,
     required double offset,
     required Offset target,
     required BorderRadiusGeometry borderRadius,
@@ -185,9 +180,9 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
   late AxisDirection axisDirection;
 
-  EdgeInsets get margin => _margin;
-  EdgeInsets _margin;
-  set margin(EdgeInsets value) {
+  EdgeInsetsGeometry get margin => _margin;
+  EdgeInsetsGeometry _margin;
+  set margin(EdgeInsetsGeometry value) {
     if (_margin == value) return;
     _margin = value;
     markNeedsLayout();
@@ -305,18 +300,19 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   @override
   Size computeDryLayout(BoxConstraints constraints) {
     final _child = child;
+    final _margin = margin.resolve(textDirection);
 
     if (_child == null) {
       return constraints.constrain(margin.collapsedSize);
     }
 
-    final childSize = _child.getDryLayout(constraints.deflate(margin));
+    final childSize = _child.getDryLayout(constraints.deflate(_margin));
     final _axisDirection = getAxisDirection(
       targetSize: targetSize,
       target: target,
       preferredDirection: preferredDirection,
       offsetAndTail: offsetAndTailLength,
-      margin: margin,
+      margin: _margin,
       size: constraints.biggest,
       childSize: childSize,
       scrollPosition: scrollPosition,
@@ -325,7 +321,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       constraints,
       _axisDirection,
       scrollPosition,
-      margin,
+      _margin,
     );
 
     return _child.getDryLayout(quadrantConstraints);
@@ -334,6 +330,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
   @override
   void performLayout() {
     final _child = child;
+    final _margin = margin.resolve(textDirection);
 
     if (_child == null) {
       size = constraints.constrain(margin.collapsedSize);
@@ -345,7 +342,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     // Until https://github.com/flutter/flutter/issues/71687 is fixed, we must
     // get child size via intrinsics :
 
-    final deflated = constraints.deflate(margin);
+    final deflated = constraints.deflate(_margin);
     final width = _child.computeMinIntrinsicWidth(deflated.maxHeight);
     final height = _child.computeMinIntrinsicHeight(deflated.maxWidth);
     final childSize = Size(width, height);
@@ -355,7 +352,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       target: target,
       preferredDirection: preferredDirection,
       offsetAndTail: offsetAndTailLength,
-      margin: margin,
+      margin: _margin,
       size: constraints.biggest,
       childSize: childSize,
       scrollPosition: scrollPosition,
@@ -365,7 +362,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
       constraints,
       axisDirection,
       scrollPosition,
-      margin,
+      _margin,
     );
 
     _child.layout(
@@ -386,7 +383,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
     final quadrantOffset = getPositionDependentOffset(
       axisDirection: axisDirection,
       childSize: _child.size,
-      margin: margin,
+      margin: _margin,
       offsetAndTail: offsetAndTailLength,
       size: size,
       target: target,
@@ -399,6 +396,8 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    // TODO: add debug paint for overflows
+
     final _child = child;
 
     if (_child != null) {
@@ -666,7 +665,7 @@ class _RenderTooltipOverlay extends RenderShiftedBox {
         defaultValue: null,
       ),
     );
-    properties.add(DiagnosticsProperty<EdgeInsets>('margin', margin));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin));
     properties.add(DiagnosticsProperty<Offset>('target', target));
     properties.add(DiagnosticsProperty<Size>('targetSize', targetSize));
     properties.add(DoubleProperty('offset', offset));
