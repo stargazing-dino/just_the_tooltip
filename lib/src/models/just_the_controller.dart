@@ -92,3 +92,7 @@ class JustTheController extends ValueNotifier<ControllerState> {
     return completer.future;
   }
 }
+
+class TooltipStatusNotifier extends ValueNotifier<bool> {
+  TooltipStatusNotifier({bool? value}) : super(value ?? false);
+}

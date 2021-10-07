@@ -19,6 +19,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     required this.content,
     required this.child,
     this.controller,
+    this.statusNotifier,
     // TODO: With the new [triggerMode] field isModal's only function is to keep
     // the tooltip open. But in that case, it seems like we can create a new
     // more narrow field in favor.
@@ -50,6 +51,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final JustTheController? controller;
+
+  @override
+  final TooltipStatusNotifier? statusNotifier;
 
   @override
   final Widget content;
@@ -179,6 +183,7 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
 
     setState(
       () {
+        widget.statusNotifier?.value = true;
         // In the case of a modal, we enter a skrim overlay to catch taps
         if (widget.isModal) {
           entry = entryOverlay;
@@ -201,6 +206,8 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
     cancelShowTimer();
 
     entry?.remove();
+
+    widget.statusNotifier?.value = false;
 
     if (widget.isModal) {
       skrim?.remove();

@@ -71,6 +71,8 @@ abstract class JustTheInterface extends StatefulWidget {
   /// is not provided a controller will be made.
   JustTheController? get controller;
 
+  TooltipStatusNotifier? get statusNotifier;
+
   /// The content of the tooltip. Content must be collapsed so it does not
   /// exceed it's constraints. The content's intrinsics `size` is used to first
   /// to get the quadrant of the tooltip. It is then layed out with those

@@ -12,6 +12,7 @@ class DefaultPageExample extends StatefulWidget {
 
 class _DefaultPageExampleState extends State<DefaultPageExample> {
   final tooltipController = JustTheController();
+  final statusNotifier = TooltipStatusNotifier();
   var length = 10.0;
   var color = Colors.pink;
   var alignment = Alignment.center;
@@ -28,6 +29,10 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
       setState(() {
         alignment = Alignment.bottomRight;
       });
+    });
+
+    statusNotifier.addListener(() {
+      print('isShowing: ${statusNotifier.value}');
     });
     super.initState();
   }
@@ -63,6 +68,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           child: JustTheTooltip(
             backgroundColor: color,
             controller: tooltipController,
+            statusNotifier: statusNotifier,
             // fadeOutDuration: const Duration(seconds: 4),
             // fadeInDuration: const Duration(seconds: 4),
             tailLength: length,

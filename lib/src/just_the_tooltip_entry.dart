@@ -11,6 +11,7 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     required this.content,
     required this.child,
     this.controller,
+    this.statusNotifier,
     this.isModal = false,
     this.waitDuration,
     this.showDuration,
@@ -39,6 +40,9 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
 
   @override
   final JustTheController? controller;
+
+  @override
+  final TooltipStatusNotifier? statusNotifier;
 
   @override
   final Widget content;
