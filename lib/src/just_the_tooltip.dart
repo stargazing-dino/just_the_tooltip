@@ -12,6 +12,14 @@ import 'package:just_the_tooltip/src/positioned_tooltip.dart';
 
 part 'just_the_tooltip_entry.dart';
 
+typedef ShowTooltip = Future<void> Function({
+  bool immediately,
+
+  /// If set to true, this will set the timer for the tooltip to close.
+  bool autoClose,
+});
+typedef HideTooltip = Future<void> Function({bool immediately});
+
 /// {@macro just_the_tooltip.overlay.constructor}
 class JustTheTooltip extends StatefulWidget implements JustTheInterface {
   const JustTheTooltip({
@@ -292,7 +300,6 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   // static const Duration _defaultAnimateDuration = Duration(milliseconds: 1000);
   late final JustTheController _controller;
   late bool _hasBindingListeners = false;
-  ControllerAction? _previousAction;
   final _layerLink = LayerLink();
 
   @override
@@ -316,7 +323,16 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     )..addStatusListener(_handleStatusChanged);
 
     _controller = widget.controller ?? JustTheController();
-    _controller.addListener(_controllerListener);
+    _attachController(_controller);
+  }
+
+  /// This sucker just gives the controller the newest versions of the
+  /// callbacks we have in this state.
+  void _attachController(JustTheController controller) {
+    controller.attach(
+      showTooltip: _showTooltip,
+      hideTooltip: _hideTooltip,
+    );
   }
 
   @override
@@ -326,18 +342,23 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
     // If we did not have a controller before, we created one that must now be
     // disposed. The user must also have passed in a controller or else we
-    // won't do anything. If the user passes in a different instance of a
-    // controller it is their responsibility to dispose of it.
-    if (_oldController == null && _oldController != _newController) {
+    // won't do anything.
+    if (_oldController == null && _newController != null) {
       // The user provided a controller, let's dispose ours
-      _controller.removeListener(_controllerListener);
       _controller.dispose();
+      _controller = _newController;
     }
 
-    if (_newController != _oldController) {
-      _controller = _newController ?? JustTheController();
-      _controller.addListener(_controllerListener);
+    // Update the functions on our controller
+    if (_newController != null && _oldController != null) {
+      if (_newController.value != _oldController.value) {
+        _controller.value = _newController.value;
+      }
     }
+
+    _attachController(_controller);
+
+    // _attachController(_controller);
 
     if (oldWidget.isModal != widget.isModal) {
       if (widget.isModal) {
@@ -348,54 +369,6 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     }
 
     super.didUpdateWidget(oldWidget);
-  }
-
-  Future<void> _controllerListener() async {
-    final controllerState = _controller.value;
-    final completer = controllerState.completer;
-    final immediately = controllerState.immediately;
-    final previousAction = _previousAction;
-
-    if (previousAction == null || previousAction != controllerState.action) {
-      _previousAction = controllerState.action;
-
-      switch (controllerState.action) {
-        case ControllerAction.none:
-          assert(completer == null);
-          _controller.value = controllerState.copyWith(
-            status: AnimationStatus.dismissed,
-          );
-          break;
-
-        case ControllerAction.show:
-          _controller.value = controllerState.copyWith(
-            status: AnimationStatus.forward,
-          );
-
-          _showTooltip(immediately: immediately).then((_) {
-            completer!.complete();
-            _controller.value = controllerState.copyWith(
-              action: ControllerAction.none,
-              setCompleterToNull: true,
-              status: AnimationStatus.completed,
-            );
-          });
-          break;
-        case ControllerAction.hide:
-          _controller.value = controllerState.copyWith(
-            status: AnimationStatus.reverse,
-          );
-          _hideTooltip(immediately: immediately).then((value) {
-            completer!.complete();
-            _controller.value = controllerState.copyWith(
-              action: ControllerAction.none,
-              setCompleterToNull: true,
-              status: AnimationStatus.completed,
-            );
-          });
-          break;
-      }
-    }
   }
 
   void _addBindingListeners() {
@@ -448,11 +421,16 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     cancelShowTimer();
 
     final completer = Completer<void>();
+    final future = completer.future.then((_) {
+      if (mounted) {
+        _controller.value = TooltipStatus.isHidden;
+      }
+    });
 
     if (immediately) {
       _removeEntries();
       completer.complete();
-      return completer.future;
+      return future;
     }
 
     if (_pressActivated) {
@@ -472,13 +450,29 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
     _pressActivated = false;
 
-    return completer.future;
+    return future;
   }
 
-  Future<void> _showTooltip({bool immediately = false}) async {
+  Future<void> _showTooltip({
+    bool immediately = false,
+
+    /// This will usually be only true in the case of a controller requesting
+    /// to show the tooltip as a regular pointer event will cause a pointer up
+    /// event to be fired, which in turn will set a hide timer.
+    bool autoClose = false,
+  }) async {
     cancelHideTimer();
 
     final completer = Completer<void>();
+    final future = completer.future.then((_) {
+      if (mounted) {
+        _controller.value = TooltipStatus.isShowing;
+
+        if (autoClose) {
+          _hideTooltip();
+        }
+      }
+    });
 
     if (immediately) {
       // We add a postFrameCallback here because we need run *after* the global
@@ -489,7 +483,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
         completer.complete();
       });
 
-      return completer.future;
+      return future;
     }
 
     _showTimer ??= Timer(waitDuration, () async {
@@ -497,18 +491,10 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
       completer.complete();
     });
 
-    return completer.future;
+    return future;
   }
 
   void cancelShowTimer() {
-    if (_controller.value.action != ControllerAction.none) {
-      _controller.value = _controller.value.copyWith(
-        action: ControllerAction.none,
-        setCompleterToNull: true,
-        status: AnimationStatus.dismissed,
-      );
-    }
-
     _showTimer?.cancel();
     _showTimer = null;
   }

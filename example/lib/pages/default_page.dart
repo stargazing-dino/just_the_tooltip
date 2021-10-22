@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 
@@ -18,16 +16,12 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
 
   @override
   void initState() {
-    Timer(const Duration(seconds: 5), () {
-      // setState(() {
-      //   color = Colors.green;
-      // });
-      // setState(() {
-      //   length = 30.0;
-      // });
-      setState(() {
-        alignment = Alignment.bottomRight;
-      });
+    Future.delayed(const Duration(seconds: 2), () {
+      tooltipController.showTooltip(immediately: false);
+    });
+
+    tooltipController.addListener(() {
+      print('controller: ${tooltipController.value}');
     });
     super.initState();
   }

@@ -1,3 +1,7 @@
+## [0.0.10-dev] - Oct 21, 2021
+* controller is no longer an event based system. Instead, functions are copied from the state of the widget onto the widget.
+* A field called `autoClose` was also added to the controller to mimic the effect of a pointer up event.
+
 ## [0.0.9+1] - Sep 29, 2021
 * Fixed tooltip closing immediately when isModal is set to false and using a controller.
 

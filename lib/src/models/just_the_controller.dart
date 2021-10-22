@@ -1,94 +1,42 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:just_the_tooltip/just_the_tooltip.dart';
 
-enum ControllerAction { none, show, hide }
-
-class ControllerState {
-  final AnimationStatus status;
-
-  final ControllerAction action;
-
-  final Completer<void>? completer;
-
-  final bool immediately;
-
-  const ControllerState({
-    required this.status,
-    required this.action,
-    required this.completer,
-    required this.immediately,
-  });
-
-  factory ControllerState.empty() {
-    return const ControllerState(
-      status: AnimationStatus.dismissed,
-      action: ControllerAction.none,
-      completer: null,
-      immediately: false,
-    );
-  }
-
-  ControllerState copyWith({
-    AnimationStatus? status,
-    ControllerAction? action,
-    Completer<void>? completer,
-    bool? immediately,
-
-    /// You cannot set something to null using a copyWith constructor. `Freezed`
-    /// gets around this limitation but I rather not depend on it for that small
-    /// reason.
-    bool setCompleterToNull = false,
-  }) {
-    return ControllerState(
-      status: status ?? this.status,
-      action: action ?? this.action,
-      immediately: immediately ?? this.immediately,
-      completer: setCompleterToNull ? null : completer ?? this.completer,
-    );
-  }
-}
+enum TooltipStatus { isShowing, isHidden }
 
 /// This controller provides basic controls over the Tooltip widget.
-class JustTheController extends ValueNotifier<ControllerState> {
-  JustTheController({ControllerState? value})
-      : super(value ?? ControllerState.empty());
+/// It is just a shell class that is given functionality by the
+/// [StatefulWidget]. This idea was copied from a [FocusNode] whose attach
+/// method is called to give the focusNode the context and state of its parent.
+class JustTheController extends ValueNotifier<TooltipStatus> {
+  JustTheController({TooltipStatus? value})
+      : super(value ?? TooltipStatus.isHidden) {
+    showTooltip = defaultShowTooltip;
+    hideTooltip = defaultHideTooltip;
+  }
 
-  bool get isShowing => value.status == AnimationStatus.completed;
+  static Future<void> defaultShowTooltip({
+    bool immediately = false,
+    bool autoClose = false,
+  }) {
+    throw StateError('This controller has not been attached to a tooltip yet.');
+  }
 
-  bool get isHidden => value.status == AnimationStatus.dismissed;
+  static Future<void> defaultHideTooltip({bool immediately = false}) {
+    throw StateError('This controller has not been attached to a tooltip yet.');
+  }
 
-  bool get isAnimating =>
-      value.status == AnimationStatus.forward ||
-      value.status == AnimationStatus.reverse;
+  @mustCallSuper
+  void attach({
+    required ShowTooltip showTooltip,
+    required HideTooltip hideTooltip,
+  }) {
+    this.showTooltip = showTooltip;
+    this.hideTooltip = hideTooltip;
+  }
 
   /// Shows the tooltip. Completes when the tooltip is fully visible.
-  Future<void> showTooltip({bool immediately = false}) async {
-    if (value.action == ControllerAction.show) return;
-
-    final completer = Completer<void>();
-
-    value = value.copyWith(
-      action: ControllerAction.show,
-      completer: completer,
-      immediately: immediately,
-    );
-
-    return completer.future;
-  }
+  late ShowTooltip showTooltip;
 
   /// Hides the tooltip. Completes when the tooltip is fully hidden.
-  Future<void> hideTooltip({bool immediately = false}) async {
-    if (value.action == ControllerAction.hide) return;
-
-    final completer = Completer<void>();
-
-    value = value.copyWith(
-      action: ControllerAction.hide,
-      completer: completer,
-      immediately: immediately,
-    );
-
-    return completer.future;
-  }
+  late HideTooltip hideTooltip;
 }
