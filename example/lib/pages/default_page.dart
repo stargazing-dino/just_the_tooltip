@@ -21,7 +21,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
     });
 
     tooltipController.addListener(() {
-      print('controller: ${tooltipController.value}');
+      // print('controller: ${tooltipController.value}');
     });
     super.initState();
   }
