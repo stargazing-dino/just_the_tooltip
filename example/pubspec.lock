@@ -80,7 +80,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.0.10-dev"
+    version: "0.0.10"
   lints:
     dependency: transitive
     description:
