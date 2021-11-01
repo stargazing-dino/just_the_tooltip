@@ -8,6 +8,7 @@ enum TooltipStatus { isShowing, isHidden }
 /// [StatefulWidget]. This idea was copied from a [FocusNode] whose attach
 /// method is called to give the focusNode the context and state of its parent.
 class JustTheController extends ValueNotifier<TooltipStatus> {
+  // TODO: This value is not refelected in the initial state of the tooltip
   JustTheController({TooltipStatus? value})
       : super(value ?? TooltipStatus.isHidden) {
     showTooltip = defaultShowTooltip;

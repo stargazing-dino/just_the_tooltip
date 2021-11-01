@@ -1,20 +1,12 @@
 # just_the_tooltip
 
-A small package for showing tooltips.
-
-## Getting Started
-
-Add to your yaml:
-
-```yaml
-    just_the_tooltip: <latest_version>
-```
+`just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands on their single axis layout algorithm to fit both vertically and horizontally. The tooltip can be positioned along any axis and will fall back to the opposite side if overflowed.
 
 ## Breaking
 
 * Removed `JustTheTooltip.entry` named constructor in favor of dedicated widget `JustTheTooltipEntry`. This mirrors a change in the code that explicitly differentiates where and how tooltips are shown.
 
-`just_the_tooltip` gives you more flexibility over the Flutter standard `Tooltip` by allowing you to set arbitrary content. It also expands on their single axis layout algorithm to fit both vertically and horizontally. The tooltip can be positioned along any axis and will fall back to the opposite side if overflowed.
+## Getting Started
 
 <p>  
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-3ef406bb2022.gif?raw=true" width="320" height="568"/>
@@ -43,16 +35,7 @@ JustTheTooltip(
 )
 ```
 
-The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` that is responsible for showing and hiding the content. You can further define how a `Tooltip` will show by defining the `isModal` property. A modal will only open through clicking on the `child` and close by clicking on the background area (referred to as the `skrim` here). A non-modal (the default) is a more traditional tooltip opens and closes on hovers.
-
-__Note, phone emulators do not implement mouse controls. To test hover states, use a browser.__
-
-The fallback used when no mouse region is present but `isModal` is false is to only open when long pressed.
-
-<p>  
- <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true" width="320" height="568"/>
-</p>
-
+JustTheTooltip needs two arguments. The direct child widget and the content (of the tooltip).  The `child` widget will be wrapped with a `GestureDetector` or `MouseRegion` that is responsible for showing and hiding the content. Further handling of the tooltip state can be managed explicitly through a controller:
 
 If you'd like to create a controller to manage the state of the tooltip, you can do so by defining an instance of a `JustTheController` and pass it through to constructor.
 
@@ -65,17 +48,65 @@ child: JustTheTooltip(
 )
 
 void showTooltip() {
-  if (controller.isHidden) {
-    controller.showTooltip();
-  }
+  controller.showTooltip();
 }
 ```
 
-## ListViews
+The controller itself is a `ValueNotifier` that carries the open/close state of the tooltip. To listen to these changes, add a listener to your controller.
+
+```dart
+@override
+void initState() {
+  // Programatically display tooltip after two seconds
+  Future.delayed(const Duration(seconds: 2), () {
+    tooltipController.showTooltip(immediately: false);
+  });
+
+  tooltipController.addListener(() {
+    // Prints the enum value of [TooltipStatus.isShowing] or [TooltipStatus.isHiding]
+    print('controller: ${tooltipController.value}');
+  });
+}
+```
+
+## Customization
+
+* Modal
+
+You can further define how a `Tooltip` will show by defining the `isModal` property. A modal will only open through clicking on the `child` and close by clicking on the background area (referred to as the `skrim` here). A non-modal (the default) is a more traditional tooltip opens and closes on hovers.
+
+__Note, phone emulators do not implement mouse controls. To test hover states, use a browser.__
+
+The fallback used when no mouse region is present but `isModal` is false is to only open when long pressed.
+
+<p>  
+ <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/ezgif-2-f7d77a21f161.gif?raw=true" width="320" height="568"/>
+</p>
+
+* Tail Builder
+
+If you'd like a custom tail (the nub on the end dialog bubble) drawn on your tooltip, you can pass through your own tailBuilder. The `JustTheInterface.defaultTailBuilder` (default) shows how to simply draw and return a path for your custom tails:
+
+```dart
+Path defaultTailBuilder(Offset tip, Offset point2, Offset point3) {
+  return Path()
+    ..moveTo(tip.dx, tip.dy)
+    ..lineTo(point2.dx, point2.dy)
+    ..lineTo(point3.dx, point3.dy)
+    ..close();
+}
+```
+
+The library also provides a simple bezier curved tailbuilder `JustTheInterface.defaultBezierTailBuilder`.
+
+
+* ListViews
 
 The tooltip should also work in lists and follow the target through scrolling. For even more consideration of the available space in ListViews, a `ScrollController` may be passed to the `just_the_tooltip` to give the layout algorithm a hint as to how much space is before and after the scroll axis. This allows tooltips that would otherwise overflow to use up space offscreen in one of the scroll directions.
 
-For some use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltipEntry`:
+* Non-Overlay Tooltip
+
+For use cases where the tooltip must be a part the widget tree rather than an overlay there is a `JustTheTooltipEntry`.
 
 ```dart
 Scaffold(
@@ -126,8 +157,10 @@ Scaffold(
               return ListTile(title: Text('Item $index'));
             },
           ),
-          if (scrim != null) scrim,
-          if (tooltip != null) tooltip,
+          // In the case of no scrim showing, this will return an SizedBox.shrink
+          scrim,
+          // In the case of no scrim showing, this will return an SizedBox.shrink
+          tooltip,
         ],
       );
     },
@@ -141,4 +174,8 @@ This will give you the positioned tooltip and scrim (an empty gesture detector t
  <img src="https://github.com/Nolence/just_the_tooltip/blob/main/screenshots/scrolling_example.gif?raw=true" width="320" height="568"/>
 </p>
 
-Issues and PRs welcome. API subject to change.
+API subject to change.
+
+## Contributing
+
+Issues and PRs welcome. Unless otherwise specified, all contributions to this lib will be under MIT license.

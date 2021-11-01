@@ -57,8 +57,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           child: JustTheTooltip(
             backgroundColor: color,
             controller: tooltipController,
-            // fadeOutDuration: const Duration(seconds: 4),
-            // fadeInDuration: const Duration(seconds: 4),
+            tailBuilder: JustTheInterface.defaultBezierTailBuilder,
             tailLength: length,
             tailBaseWidth: 20.0,
             isModal: true,

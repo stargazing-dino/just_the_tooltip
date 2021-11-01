@@ -18,6 +18,7 @@ typedef ShowTooltip = Future<void> Function({
   /// If set to true, this will set the timer for the tooltip to close.
   bool autoClose,
 });
+
 typedef HideTooltip = Future<void> Function({bool immediately});
 
 /// {@macro just_the_tooltip.overlay.constructor}
@@ -40,6 +41,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.fadeOutDuration = const Duration(milliseconds: 75),
     this.preferredDirection = AxisDirection.down,
     this.curve = Curves.easeInOut,
+    this.reverseCurve = Curves.easeInOut,
     this.margin = const EdgeInsets.all(8.0),
     this.offset = 0.0,
     this.elevation = 4.0,
@@ -95,6 +97,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final Curve curve;
+
+  @override
+  final Curve reverseCurve;
 
   @override
   final EdgeInsetsGeometry margin;
@@ -635,6 +640,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
         opacity: CurvedAnimation(
           parent: _animationController,
           curve: widget.curve,
+          reverseCurve: widget.reverseCurve,
         ),
         child: Directionality(
           textDirection: widget.textDirection,

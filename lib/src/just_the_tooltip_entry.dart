@@ -21,6 +21,7 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     this.fadeOutDuration = const Duration(milliseconds: 75),
     this.preferredDirection = AxisDirection.down,
     this.curve = Curves.easeInOut,
+    this.reverseCurve = Curves.easeInOut,
     this.margin = const EdgeInsets.all(8.0),
     this.offset = 0.0,
     this.elevation = 4.0,
@@ -75,6 +76,9 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
 
   @override
   final Curve curve;
+
+  @override
+  final Curve reverseCurve;
 
   @override
   final EdgeInsets margin;

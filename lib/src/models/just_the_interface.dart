@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:just_the_tooltip/src/models/just_the_controller.dart';
 import 'package:just_the_tooltip/src/positioned_tooltip.dart';
 
+typedef ContentBuilder = Widget Function(BuildContext context, Widget content);
+
 /// {@template just_the_tooltip.overlay.constructor}
 /// A widget to display a tooltip over target widget. The tooltip can be
 /// displayed on any axis of the widget and fallback to the opposite axis if
@@ -72,7 +74,7 @@ abstract class JustTheInterface extends StatefulWidget {
   JustTheController? get controller;
 
   /// The content of the tooltip. Content must be collapsed so it does not
-  /// exceed it's constraints. The content's intrinsics `size` is used to first
+  /// exceed it's constraints. The content's intrinsic `size` is used to first
   /// to get the quadrant of the tooltip. It is then layed out with those
   /// quadrant constraints limiting its size.
   ///
@@ -154,6 +156,9 @@ abstract class JustTheInterface extends StatefulWidget {
 
   /// The curve of the fade animation.
   Curve get curve;
+
+  /// The reverse curve of the fade animation.
+  Curve get reverseCurve;
 
   /// The margin the tooltip keeps around edges of its box constraints.
   EdgeInsetsGeometry get margin;
