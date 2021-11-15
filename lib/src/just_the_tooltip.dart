@@ -363,8 +363,6 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
     _attachController(_controller);
 
-    // _attachController(_controller);
-
     if (oldWidget.isModal != widget.isModal) {
       if (widget.isModal) {
         _removeBindingListeners();
@@ -505,8 +503,6 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   }
 
   void cancelHideTimer() {
-    // TODO: Do we need to do anything to the controller state?
-
     _hideTimer?.cancel();
     _hideTimer = null;
   }

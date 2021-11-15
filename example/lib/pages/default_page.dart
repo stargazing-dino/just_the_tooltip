@@ -57,7 +57,6 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           child: JustTheTooltip(
             backgroundColor: color,
             controller: tooltipController,
-            tailBuilder: JustTheInterface.defaultBezierTailBuilder,
             tailLength: length,
             tailBaseWidth: 20.0,
             isModal: true,
