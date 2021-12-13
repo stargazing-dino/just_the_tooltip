@@ -56,10 +56,10 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           alignment: alignment,
           child: JustTheTooltip(
             onShow: () {
-              print('onShow');
+              // print('onShow');
             },
             onDismiss: () {
-              print('onDismiss');
+              // print('onDismiss');
             },
             backgroundColor: color,
             controller: tooltipController,
