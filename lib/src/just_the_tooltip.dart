@@ -35,6 +35,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.waitDuration,
     this.showDuration,
     this.triggerMode,
+    this.barrierDismissible = true,
     this.enableFeedback,
     this.hoverShowDuration,
     this.fadeInDuration = const Duration(milliseconds: 150),
@@ -75,6 +76,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final Duration? showDuration;
+
+  @override
+  final bool barrierDismissible;
 
   @override
   final TooltipTriggerMode? triggerMode;
@@ -299,6 +303,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   bool _pressActivated = false;
   late TooltipTriggerMode triggerMode;
   late bool enableFeedback;
+  late bool barrierDismissible;
 
   // These properties are specific to just_the_tooltip
   // static const Curve _defaultAnimateCurve = Curves.linear;
@@ -578,6 +583,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     enableFeedback = widget.enableFeedback ??
         tooltipTheme.enableFeedback ??
         _defaultEnableFeedback;
+    barrierDismissible = widget.barrierDismissible;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -612,7 +618,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   Widget _createSkrim() {
     return GestureDetector(
       key: skrimKey,
-      behavior: HitTestBehavior.translucent,
+      behavior: barrierDismissible ? HitTestBehavior.translucent : HitTestBehavior.deferToChild,
       onTap: _hideTooltip,
     );
   }

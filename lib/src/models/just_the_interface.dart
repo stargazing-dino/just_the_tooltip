@@ -124,6 +124,14 @@ abstract class JustTheInterface extends StatefulWidget {
   /// [TooltipTriggerMode.longPress].
   TooltipTriggerMode? get triggerMode;
 
+  /// The option to hide the tooltip.
+  ///
+  /// If [barrierDismissible] is true, then tooltip might be hidden
+  /// by clicking outside tooltip. True is default.
+  /// If [barrierDismissible] is false, it can be hidden only manually
+  /// by using [controller.hideTooltip].
+  bool get barrierDismissible;
+
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a
