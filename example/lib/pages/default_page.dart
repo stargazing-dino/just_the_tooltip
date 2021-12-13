@@ -55,6 +55,12 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           duration: const Duration(milliseconds: 1500),
           alignment: alignment,
           child: JustTheTooltip(
+            onShow: () {
+              print('onShow');
+            },
+            onDismiss: () {
+              print('onDismiss');
+            },
             backgroundColor: color,
             controller: tooltipController,
             tailLength: length,

@@ -1,3 +1,7 @@
+## [0.0.11] - Dec 13, 2021
+* Add `onDismiss` and `onShow` callbacks to trigger when the tooltip is shown or hidden.
+* Includes `barrierDismissible` which will override background clicks. This allows the user to handle the state of the scrim programatically. Credit @atarbrest
+
 ## [0.0.10] - Oct 21, 2021
 * Exposes JustTheInterface
 * Updates readme to better reflect library

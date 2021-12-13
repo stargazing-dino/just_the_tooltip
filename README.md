@@ -69,6 +69,21 @@ void initState() {
 }
 ```
 
+If you'd like to simply react to open or close states, you can pass through `onDismiss` or `onShow` callbacks to the default constructor.
+
+```dart
+JustTheTooltip(
+  onDismiss: () {
+    // Maybe continue tutorial?
+  },
+  onShow: () {
+    // Start animation?
+  }
+),
+```
+
+If you'd like to keep the user from dismissing the tooltip by clicking on the barrier, you can change `barrierDismissible` to `true` which means pressing on the scrim area will not immediately hide the tooltip.
+
 ## Customization
 
 * Modal

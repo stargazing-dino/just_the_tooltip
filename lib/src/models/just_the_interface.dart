@@ -95,6 +95,13 @@ abstract class JustTheInterface extends StatefulWidget {
   /// in the `isModal` is false case.
   Widget get child;
 
+  /// Called when the tooltip is dismissed either by waiting the specified
+  /// [duration] or by tapping on the scrim.
+  VoidCallback? get onDismiss;
+
+  /// Called when the tooltip is shown.
+  VoidCallback? get onShow;
+
   /// If true, once the tooltip is opened, it will not close after a set
   /// duration. It will instead instead stay on the screen until either the
   /// `scrim` is clicked or it is forcibly closed

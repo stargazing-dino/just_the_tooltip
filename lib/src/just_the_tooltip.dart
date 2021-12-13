@@ -24,6 +24,8 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     Key? key,
     required this.content,
     required this.child,
+    this.onDismiss,
+    this.onShow,
     this.controller,
     // TODO: With the new [triggerMode] field isModal's only function is to keep
     // the tooltip open. But in that case, it seems like we can create a new
@@ -64,6 +66,12 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final Widget child;
+
+  @override
+  final VoidCallback? onDismiss;
+
+  @override
+  final VoidCallback? onShow;
 
   @override
   final bool isModal;
@@ -426,13 +434,15 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     cancelShowTimer();
 
     final completer = Completer<void>();
-    final future = completer.future.then((_) {
+    final future = completer.future;
+
+    if (immediately) {
+      widget.onDismiss?.call();
+
       if (mounted) {
         _controller.value = TooltipStatus.isHidden;
       }
-    });
 
-    if (immediately) {
       _removeEntries();
       completer.complete();
       return future;
@@ -470,6 +480,8 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
     final completer = Completer<void>();
     final future = completer.future.then((_) {
+      widget.onShow?.call();
+
       if (mounted) {
         _controller.value = TooltipStatus.isShowing;
 

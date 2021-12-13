@@ -10,6 +10,8 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     Key? key,
     required this.content,
     required this.child,
+    this.onDismiss,
+    this.onShow,
     this.controller,
     this.isModal = false,
     this.waitDuration,
@@ -47,6 +49,12 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
 
   @override
   final Widget child;
+
+  @override
+  final VoidCallback? onDismiss;
+
+  @override
+  final VoidCallback? onShow;
 
   @override
   final bool isModal;
