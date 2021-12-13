@@ -5,7 +5,6 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 
 /// Position a child box within a container box.
 ///

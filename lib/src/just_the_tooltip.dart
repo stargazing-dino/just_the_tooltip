@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
-import 'package:just_the_tooltip/src/models/just_the_controller.dart';
-import 'package:just_the_tooltip/src/models/just_the_interface.dart';
 import 'package:just_the_tooltip/src/models/target_information.dart';
 import 'package:just_the_tooltip/src/positioned_tooltip.dart';
 
@@ -618,7 +615,9 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   Widget _createSkrim() {
     return GestureDetector(
       key: skrimKey,
-      behavior: barrierDismissible ? HitTestBehavior.translucent : HitTestBehavior.deferToChild,
+      behavior: barrierDismissible
+          ? HitTestBehavior.translucent
+          : HitTestBehavior.deferToChild,
       onTap: _hideTooltip,
     );
   }
