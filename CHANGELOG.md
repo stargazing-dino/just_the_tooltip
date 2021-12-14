@@ -1,3 +1,6 @@
+## [0.0.11+1] - Dec 14, 2021
+* Controller is no longer `final`, which means it can be set and unset when the user provides their own controller.
+
 ## [0.0.11] - Dec 13, 2021
 * Add `onDismiss` and `onShow` callbacks to trigger when the tooltip is shown or hidden.
 * Includes `barrierDismissible` which will override background clicks. This allows the user to handle the state of the scrim programatically. Credit @atarbrest

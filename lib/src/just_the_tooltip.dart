@@ -313,7 +313,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   // These properties are specific to just_the_tooltip
   // static const Curve _defaultAnimateCurve = Curves.linear;
   // static const Duration _defaultAnimateDuration = Duration(milliseconds: 1000);
-  late final JustTheController _controller;
+  late JustTheController _controller;
   late bool _hasBindingListeners = false;
   final _layerLink = LayerLink();
 
