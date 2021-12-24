@@ -139,6 +139,11 @@ abstract class JustTheInterface extends StatefulWidget {
   /// by using [controller.hideTooltip].
   bool get barrierDismissible;
 
+  /// The color to display between the tooltip and widgets behind the tooltip.
+  ///
+  /// Defaults to [Colors.transparent].
+  Color get barrierColor;
+
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a

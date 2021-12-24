@@ -35,6 +35,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.showDuration,
     this.triggerMode,
     this.barrierDismissible = true,
+    this.barrierColor = Colors.transparent,
     this.enableFeedback,
     this.hoverShowDuration,
     this.fadeInDuration = const Duration(milliseconds: 150),
@@ -84,6 +85,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final bool barrierDismissible;
+
+  @override
+  final Color barrierColor;
 
   @override
   final TooltipTriggerMode? triggerMode;
@@ -309,6 +313,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   late TooltipTriggerMode triggerMode;
   late bool enableFeedback;
   late bool barrierDismissible;
+  late Color barrierColor;
 
   // These properties are specific to just_the_tooltip
   // static const Curve _defaultAnimateCurve = Curves.linear;
@@ -593,6 +598,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
         tooltipTheme.enableFeedback ??
         _defaultEnableFeedback;
     barrierDismissible = widget.barrierDismissible;
+    barrierColor = widget.barrierColor;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -631,6 +637,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
           ? HitTestBehavior.translucent
           : HitTestBehavior.deferToChild,
       onTap: _hideTooltip,
+      child: Container(color: barrierColor),
     );
   }
 
