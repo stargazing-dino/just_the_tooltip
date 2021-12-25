@@ -432,12 +432,12 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   /// this future will complete once the tooltip has been completely hidden.
   Future<void> _hideTooltip({bool immediately = false}) async {
     cancelShowTimer();
+    widget.onDismiss?.call();
 
     final completer = Completer<void>();
     final future = completer.future;
 
     if (immediately) {
-      widget.onDismiss?.call();
 
       if (mounted) {
         _controller.value = TooltipStatus.isHidden;
@@ -477,10 +477,10 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     bool autoClose = false,
   }) async {
     cancelHideTimer();
+    widget.onShow?.call();
 
     final completer = Completer<void>();
     final future = completer.future.then((_) {
-      widget.onShow?.call();
 
       if (mounted) {
         _controller.value = TooltipStatus.isShowing;
