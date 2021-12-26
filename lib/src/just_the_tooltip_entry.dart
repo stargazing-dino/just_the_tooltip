@@ -19,6 +19,7 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     this.triggerMode,
     this.barrierDismissible = true,
     this.barrierColor = Colors.transparent,
+    this.barrierBuilder,
     this.enableFeedback,
     this.hoverShowDuration,
     this.fadeInDuration = const Duration(milliseconds: 150),
@@ -74,6 +75,9 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
 
   @override
   final Color barrierColor;
+
+  @override
+  final Widget Function(BuildContext, VoidCallback)? barrierBuilder;
 
   @override
   final bool? enableFeedback;

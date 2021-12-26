@@ -36,6 +36,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.triggerMode,
     this.barrierDismissible = true,
     this.barrierColor = Colors.transparent,
+    this.barrierBuilder,
     this.enableFeedback,
     this.hoverShowDuration,
     this.fadeInDuration = const Duration(milliseconds: 150),
@@ -94,6 +95,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final bool? enableFeedback;
+
+  @override
+  final Widget Function(BuildContext, VoidCallback)? barrierBuilder;
 
   // FIXME: This happens in the non-hover (i.e. isModal) case as well.
   @override
@@ -314,6 +318,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   late bool enableFeedback;
   late bool barrierDismissible;
   late Color barrierColor;
+  late Widget Function(BuildContext, VoidCallback)? barrierBuilder;
 
   // These properties are specific to just_the_tooltip
   // static const Curve _defaultAnimateCurve = Curves.linear;
@@ -599,6 +604,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
         _defaultEnableFeedback;
     barrierDismissible = widget.barrierDismissible;
     barrierColor = widget.barrierColor;
+    barrierBuilder = widget.barrierBuilder;
 
     Widget result = GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -631,6 +637,12 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   }
 
   Widget _createSkrim() {
+    if (barrierBuilder != null) {
+      return Container(
+        key: skrimKey,
+        child: barrierBuilder!(context, _hideTooltip),
+      );
+    }
     return GestureDetector(
       key: skrimKey,
       behavior: barrierDismissible
