@@ -68,10 +68,10 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
   final Widget child;
 
   @override
-  final VoidCallback? onDismiss;
+  final void Function(Animation<double>)? onDismiss;
 
   @override
-  final VoidCallback? onShow;
+  final void Function(Animation<double>)? onShow;
 
   @override
   final bool isModal;
@@ -235,20 +235,20 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
     }
   }
 
-  // @override
-  // void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
+// @override
+// void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+//   super.didUpdateWidget(oldWidget);
 
-  //   // This adds a post frame callback because otherwise the OverlayEntry
-  //   // builder would run before the widget has a chance to update with the
-  //   // newest config.
-  //   WidgetsBinding.instance?.addPostFrameCallback((_) {
-  //     if (mounted) {
-  //       entry?.markNeedsBuild();
-  //       skrim?.markNeedsBuild();
-  //     }
-  //   });
-  // }
+//   // This adds a post frame callback because otherwise the OverlayEntry
+//   // builder would run before the widget has a chance to update with the
+//   // newest config.
+//   WidgetsBinding.instance?.addPostFrameCallback((_) {
+//     if (mounted) {
+//       entry?.markNeedsBuild();
+//       skrim?.markNeedsBuild();
+//     }
+//   });
+// }
 }
 
 /// This is almost a one to one mapping to [Tooltip]'s [_TooltipState] except
@@ -256,7 +256,7 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
 /// replaced with implementations that are specific to the tooltip type.
 // TODO: This looks more idiomatic as a mixin.
 abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   T? get entry;
 
   T? get skrim;
@@ -431,19 +431,34 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   /// hidden after the current animation completes. In either case,
   /// this future will complete once the tooltip has been completely hidden.
   Future<void> _hideTooltip({bool immediately = false}) async {
+    if (_animationController.isDismissed ||
+        _animationController.status == AnimationStatus.reverse) {
+      // Tooltip is already hiding or animating out, do nothing.
+      return;
+    }
     cancelShowTimer();
-    widget.onDismiss?.call();
+    final AnimationController proxy = AnimationController(
+      value: _animationController.value,
+      vsync: this,
+    );
+    void updateProxy() {
+      proxy.value = _animationController.value;
+    }
+
+    _animationController.addListener(updateProxy);
+    widget.onDismiss?.call(proxy);
 
     final completer = Completer<void>();
-    final future = completer.future;
-
-    if (immediately) {
-
+    final future = completer.future.whenComplete(() {
+      _removeEntries();
       if (mounted) {
         _controller.value = TooltipStatus.isHidden;
       }
+      _animationController.removeListener(updateProxy);
+      proxy.stop();
+    });
 
-      _removeEntries();
+    if (immediately) {
       completer.complete();
       return future;
     }
@@ -476,12 +491,26 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     /// event to be fired, which in turn will set a hide timer.
     bool autoClose = false,
   }) async {
+    if (_animationController.isCompleted ||
+        _animationController.status == AnimationStatus.forward) {
+      // Tooltip is already shown or animating in, do nothing.
+      return;
+    }
     cancelHideTimer();
-    widget.onShow?.call();
+    // Use a proxy that stops animating when the tooltip is finished showing
+    // because the underlying controller runs on every call to show and dismiss.
+    final AnimationController proxy = AnimationController(vsync: this);
+    void updateProxy() {
+      proxy.value = _animationController.value;
+    }
+
+    _animationController.addListener(updateProxy);
+    widget.onShow?.call(proxy);
 
     final completer = Completer<void>();
     final future = completer.future.then((_) {
-
+      _animationController.removeListener(updateProxy);
+      proxy.stop();
       if (mounted) {
         _controller.value = TooltipStatus.isShowing;
 

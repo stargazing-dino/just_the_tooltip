@@ -1,3 +1,4 @@
+import 'package:example/pages/animated_barrier_page.dart';
 import 'package:example/pages/default_page.dart';
 import 'package:example/pages/scroll_page.dart';
 import 'package:example/pages/tooltip_area_page.dart';
@@ -31,6 +32,12 @@ class MyApp extends StatelessWidget {
             return MaterialPageRoute<void>(
               settings: settings,
               builder: (BuildContext context) => const TooltipAreaExamplePage(),
+            );
+          case 'animatedBarrier':
+            return MaterialPageRoute<void>(
+              settings: settings,
+              builder: (BuildContext context) =>
+                  const AnimatedBarrierExamplePage(),
             );
           default:
             throw UnimplementedError();
@@ -72,6 +79,13 @@ class HomePage extends StatelessWidget {
                 Navigator.of(context).pushNamed('tooltipArea');
               },
               child: const Text('tooltipArea'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(primary: Colors.brown),
+              onPressed: () {
+                Navigator.of(context).pushNamed('animatedBarrier');
+              },
+              child: const Text('animatedBarrier'),
             ),
           ],
         ),

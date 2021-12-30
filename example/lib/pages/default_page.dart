@@ -55,10 +55,10 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           duration: const Duration(milliseconds: 1500),
           alignment: alignment,
           child: JustTheTooltip(
-            onShow: () {
+            onShow: (showAnimation) {
               // print('onShow');
             },
-            onDismiss: () {
+            onDismiss: (dismissAnimation) {
               // print('onDismiss');
             },
             backgroundColor: color,

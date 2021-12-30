@@ -51,10 +51,10 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
   final Widget child;
 
   @override
-  final VoidCallback? onDismiss;
+  final void Function(Animation<double>)? onDismiss;
 
   @override
-  final VoidCallback? onShow;
+  final void Function(Animation<double>)? onShow;
 
   @override
   final bool isModal;
