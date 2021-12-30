@@ -26,10 +26,8 @@ class _AnimatedBarrierExamplePageState
       tooltipController.showTooltip(immediately: false);
     });
 
-    print('----');
-    print(tooltipController.value);
     tooltipController.addListener(() {
-      print('controller: ${tooltipController.value}');
+      // print('controller: ${tooltipController.value}');
     });
     super.initState();
   }
@@ -87,22 +85,22 @@ class _AnimatedBarrierExamplePageState
               child: JustTheTooltip(
                 onShow: (showAnimation) {
                   setState(() {
-                    print('Showing tooltip!');
+                    // print('Showing tooltip!');
                     _animation = showAnimation;
                     _animation.addStatusListener((status) {
                       if (status == AnimationStatus.completed) {
-                        print('Tooltip shown!');
+                        // print('Tooltip shown!');
                       }
                     });
                   });
                 },
                 onDismiss: (dismissAnimation) {
-                  print('Dismissing tooltip!');
+                  // print('Dismissing tooltip!');
                   setState(() {
                     _animation = dismissAnimation;
                     _animation.addStatusListener((status) {
                       if (status == AnimationStatus.dismissed) {
-                        print('Tooltip dismissed!');
+                        // print('Tooltip dismissed!');
                       }
                     });
                   });
