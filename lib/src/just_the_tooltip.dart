@@ -437,25 +437,16 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
       return;
     }
     cancelShowTimer();
-    final AnimationController proxy = AnimationController(
-      value: _animationController.value,
-      vsync: this,
-    );
-    void updateProxy() {
-      proxy.value = _animationController.value;
-    }
-
-    _animationController.addListener(updateProxy);
+    final Animation<double> proxy = _createProxy();
     widget.onDismiss?.call(proxy);
 
     final completer = Completer<void>();
     final future = completer.future.whenComplete(() {
       _removeEntries();
+      _disposeProxy(proxy);
       if (mounted) {
         _controller.value = TooltipStatus.isHidden;
       }
-      _animationController.removeListener(updateProxy);
-      proxy.stop();
     });
 
     if (immediately) {
@@ -499,18 +490,12 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     cancelHideTimer();
     // Use a proxy that stops animating when the tooltip is finished showing
     // because the underlying controller runs on every call to show and dismiss.
-    final AnimationController proxy = AnimationController(vsync: this);
-    void updateProxy() {
-      proxy.value = _animationController.value;
-    }
-
-    _animationController.addListener(updateProxy);
+    final Animation<double> proxy = _createProxy();
     widget.onShow?.call(proxy);
 
     final completer = Completer<void>();
     final future = completer.future.then((_) {
-      _animationController.removeListener(updateProxy);
-      proxy.stop();
+      _disposeProxy(proxy);
       if (mounted) {
         _controller.value = TooltipStatus.isShowing;
 
@@ -560,6 +545,30 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     } else if (event is PointerDownEvent) {
       _hideTooltip(immediately: true);
     }
+  }
+
+  // A list of active proxies and the callbacks to dispose of them.
+  final Map<AnimationController, VoidCallback> _proxyRegistry = {};
+
+  Animation<double> _createProxy() {
+    AnimationController proxy = AnimationController(
+      value: _animationController.value,
+      vsync: this,
+    );
+    void updateProxy() {
+      proxy.value = _animationController.value;
+    }
+
+    _animationController.addListener(updateProxy);
+    _proxyRegistry[proxy] = () {
+      _animationController.removeListener(updateProxy);
+    };
+    return proxy;
+  }
+
+  void _disposeProxy(Animation<double> proxy) {
+    _proxyRegistry[proxy]!.call();
+    _proxyRegistry.remove(proxy);
   }
 
   @override
