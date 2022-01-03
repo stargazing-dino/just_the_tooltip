@@ -77,7 +77,8 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
   final Color barrierColor;
 
   @override
-  final Widget Function(BuildContext, VoidCallback)? barrierBuilder;
+  final Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      barrierBuilder;
 
   @override
   final bool? enableFeedback;

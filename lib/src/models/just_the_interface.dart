@@ -164,7 +164,8 @@ abstract class JustTheInterface extends StatefulWidget {
   ///
   /// If barrier builder is null, a default barrier is built according to
   /// [barrierColor] and [barrierDismissible].
-  Widget Function(BuildContext, VoidCallback)? get barrierBuilder;
+  Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      get barrierBuilder;
 
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///

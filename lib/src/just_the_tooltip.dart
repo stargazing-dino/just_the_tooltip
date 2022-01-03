@@ -97,7 +97,8 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
   final bool? enableFeedback;
 
   @override
-  final Widget Function(BuildContext, VoidCallback)? barrierBuilder;
+  final Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      barrierBuilder;
 
   // FIXME: This happens in the non-hover (i.e. isModal) case as well.
   @override
@@ -243,20 +244,20 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
     }
   }
 
-  // @override
-  // void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
+// @override
+// void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+//   super.didUpdateWidget(oldWidget);
 
-  //   // This adds a post frame callback because otherwise the OverlayEntry
-  //   // builder would run before the widget has a chance to update with the
-  //   // newest config.
-  //   WidgetsBinding.instance?.addPostFrameCallback((_) {
-  //     if (mounted) {
-  //       entry?.markNeedsBuild();
-  //       skrim?.markNeedsBuild();
-  //     }
-  //   });
-  // }
+//   // This adds a post frame callback because otherwise the OverlayEntry
+//   // builder would run before the widget has a chance to update with the
+//   // newest config.
+//   WidgetsBinding.instance?.addPostFrameCallback((_) {
+//     if (mounted) {
+//       entry?.markNeedsBuild();
+//       skrim?.markNeedsBuild();
+//     }
+//   });
+// }
 }
 
 /// This is almost a one to one mapping to [Tooltip]'s [_TooltipState] except
@@ -318,7 +319,8 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   late bool enableFeedback;
   late bool barrierDismissible;
   late Color barrierColor;
-  late Widget Function(BuildContext, VoidCallback)? barrierBuilder;
+  late Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      barrierBuilder;
 
   // These properties are specific to just_the_tooltip
   // static const Curve _defaultAnimateCurve = Curves.linear;
@@ -640,7 +642,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     if (barrierBuilder != null) {
       return Container(
         key: skrimKey,
-        child: barrierBuilder!(context, _hideTooltip),
+        child: barrierBuilder!(context, _animationController, _hideTooltip),
       );
     }
     return GestureDetector(
