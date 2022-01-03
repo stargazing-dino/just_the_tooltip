@@ -594,28 +594,34 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
         _defaultEnableFeedback;
     barrierDismissible = widget.barrierDismissible;
 
-    Widget result = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onLongPress: widget.isModal
-          ? null
-          : (triggerMode == TooltipTriggerMode.longPress)
-              ? _handlePress
-              : null,
-      onTap: widget.isModal
-          ? _showTooltip
-          : (triggerMode == TooltipTriggerMode.tap)
-              ? _handlePress
-              : null,
-      excludeFromSemantics: true,
-      child: widget.child,
-    );
+    Widget result;
 
-    if (_mouseIsConnected) {
-      result = MouseRegion(
-        onEnter: (PointerEnterEvent event) => _showTooltip(),
-        onExit: (PointerExitEvent event) => _hideTooltip(),
-        child: result,
+    if (triggerMode == TooltipTriggerMode.manual) {
+      result = widget.child;
+    } else {
+      result = GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onLongPress: widget.isModal
+            ? null
+            : (triggerMode == TooltipTriggerMode.longPress)
+                ? _handlePress
+                : null,
+        onTap: widget.isModal
+            ? _showTooltip
+            : (triggerMode == TooltipTriggerMode.tap)
+                ? _handlePress
+                : null,
+        excludeFromSemantics: true,
+        child: widget.child,
       );
+
+      if (_mouseIsConnected) {
+        result = MouseRegion(
+          onEnter: (PointerEnterEvent event) => _showTooltip(),
+          onExit: (PointerExitEvent event) => _hideTooltip(),
+          child: result,
+        );
+      }
     }
 
     return CompositedTransformTarget(
