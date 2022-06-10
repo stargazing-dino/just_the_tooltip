@@ -326,7 +326,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
       // if you move the mouse as the page is loading, the listener never gets
       // called. Set mouseConnected here as a work around
       _mouseIsConnected =
-          RendererBinding.instance!.mouseTracker.mouseIsConnected;
+          RendererBinding.instance.mouseTracker.mouseIsConnected;
 
       _addBindingListeners();
     }
@@ -390,18 +390,18 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     _hasBindingListeners = true;
 
     // Listen to see when a mouse is added.
-    RendererBinding.instance!.mouseTracker
+    RendererBinding.instance.mouseTracker
         .addListener(_handleMouseTrackerChange);
     // Listen to global pointer events so that we can hide a tooltip immediately
     // if some other control is clicked on.
-    GestureBinding.instance!.pointerRouter.addGlobalRoute(_handlePointerEvent);
+    GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
   }
 
   void _removeBindingListeners() {
     if (_hasBindingListeners) _hasBindingListeners = false;
-    RendererBinding.instance?.mouseTracker
+    RendererBinding.instance.mouseTracker
         .removeListener(_handleMouseTrackerChange);
-    GestureBinding.instance?.pointerRouter
+    GestureBinding.instance.pointerRouter
         .removeGlobalRoute(_handlePointerEvent);
   }
 
@@ -411,7 +411,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     }
 
     final mouseIsConnected =
-        RendererBinding.instance!.mouseTracker.mouseIsConnected;
+        RendererBinding.instance.mouseTracker.mouseIsConnected;
 
     if (mouseIsConnected != _mouseIsConnected) {
       setState(() {
@@ -495,7 +495,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
       // We add a postFrameCallback here because we need run *after* the global
       // _handlePointerEvent has been called (which happens after every tap
       // event).
-      WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
         await ensureTooltipVisible();
         completer.complete();
       });
@@ -535,28 +535,33 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
   @override
   void deactivate() {
-    if (hasEntry) {
-      _hideTooltip(immediately: true);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (hasEntry) {
+        _hideTooltip(immediately: true);
+      }
 
-    cancelShowTimer();
+      cancelShowTimer();
+    });
+
     super.deactivate();
   }
 
   @override
   void dispose() {
-    if (_hasBindingListeners) {
-      _removeBindingListeners();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_hasBindingListeners) {
+        _removeBindingListeners();
+      }
 
-    _removeEntries();
-    _animationController.dispose();
+      _removeEntries();
+      _animationController.dispose();
 
-    /// If we've made our own controller because the user's is null, we need to
-    /// dispose of it.
-    if (widget.controller == null) {
-      _controller.dispose();
-    }
+      /// If we've made our own controller because the user's is null, we need to
+      /// dispose of it.
+      if (widget.controller == null) {
+        _controller.dispose();
+      }
+    });
 
     super.dispose();
   }

@@ -470,7 +470,7 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
         if (direction == AxisDirection.up) {
           final heightAvailable = target.dy +
-              (hasVerticalScroll ? scrollPosition!.extentBefore : 0.0);
+              (hasVerticalScroll ? scrollPosition.extentBefore : 0.0);
 
           return constraints.copyWith(
             maxWidth: maxWidth,
@@ -481,7 +481,7 @@ class _RenderPositionedTooltip extends RenderShiftedBox
           );
         } else {
           final heightAvailable = constraints.maxHeight +
-              (hasVerticalScroll ? scrollPosition!.extentAfter : 0.0);
+              (hasVerticalScroll ? scrollPosition.extentAfter : 0.0);
 
           return constraints.copyWith(
             maxWidth: maxWidth,
@@ -500,7 +500,7 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
         if (direction == AxisDirection.left) {
           final widthAvailable = target.dx +
-              (hasHorizontalScroll ? scrollPosition!.extentBefore : 0.0);
+              (hasHorizontalScroll ? scrollPosition.extentBefore : 0.0);
 
           return constraints.copyWith(
             maxHeight: maxHeight,
@@ -511,7 +511,7 @@ class _RenderPositionedTooltip extends RenderShiftedBox
           );
         } else {
           final widthAvailable = constraints.maxWidth +
-              (hasHorizontalScroll ? scrollPosition!.extentAfter : 0.0);
+              (hasHorizontalScroll ? scrollPosition.extentAfter : 0.0);
 
           return constraints.copyWith(
             maxHeight: maxHeight,
