@@ -95,12 +95,48 @@ abstract class JustTheInterface extends StatefulWidget {
   /// in the `isModal` is false case.
   Widget get child;
 
-  /// Called when the tooltip is dismissed either by waiting the specified
-  /// [duration] or by tapping on the scrim.
-  VoidCallback? get onDismiss;
 
-  /// Called when the tooltip is shown.
-  VoidCallback? get onShow;
+  /// Called when the tooltip begins animating out because it was dismissed
+  /// either by waiting for [waitDuration] to expire, tapping a dismissible
+  /// barrier, or calling [JustTheController.defaultHideTooltip].
+  ///
+  /// The animation used to dismiss the tooltip is passed in to `onDismiss`. It
+  /// animates from 1 to 0.
+  ///
+  /// To execute a callback when the tooltip has finished animating, use a
+  /// status listener on the animation:
+  ///
+  /// ```
+  ///   onDismiss: (animation) {
+  ///     animation.addStatusListener((status) {
+  ///       print('Dismissing tooltip!');
+  ///       if (status == AnimationStatus.dismissed) {
+  ///         print('Tooltip dismissed!');
+  ///       }
+  ///     });
+  ///   },
+  /// ```
+  void Function(Animation<double>)? get onDismiss;
+
+  /// Called when the tooltip begins animating in.
+  ///
+  /// The animation used to show the tooltip is passed in to `onShow`. It
+  /// animates from 0 to 1.
+  ///
+  /// To execute a callback when the tooltip has finished animating, use a
+  /// status listener on the animation:
+  ///
+  /// ```
+  ///   onShow: (animation) {
+  ///     animation.addStatusListener((status) {
+  ///       print('Showing tooltip!');
+  ///       if (status == AnimationStatus.completed) {
+  ///         print('Tooltip shown!');
+  ///       }
+  ///     });
+  ///   },
+  /// ```
+  void Function(Animation<double>)? get onShow;
 
   /// If true, once the tooltip is opened, it will not close after a set
   /// duration. It will instead instead stay on the screen until either the
