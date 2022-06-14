@@ -549,19 +549,21 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
 
   @override
   void dispose() {
+    if (_hasBindingListeners) {
+      _removeBindingListeners();
+    }
+
+    _animationController.dispose();
+
+    /// If we've made our own controller because the user's is null, we need to
+    /// dispose of it.
+    if (widget.controller == null) {
+      _controller.dispose();
+    }
+
+    // Involves setState so we do it in a post frame callback
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_hasBindingListeners) {
-        _removeBindingListeners();
-      }
-
       _removeEntries();
-      _animationController.dispose();
-
-      /// If we've made our own controller because the user's is null, we need to
-      /// dispose of it.
-      if (widget.controller == null) {
-        _controller.dispose();
-      }
     });
 
     super.dispose();
