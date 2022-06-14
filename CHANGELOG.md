@@ -1,5 +1,9 @@
+## [0.1.0] - Jun 14, 2022
+* fix state build when deactive and dispose, and update flutter - Credit @phamconganh.
+* lint errors and update to newest sdk.
+
 ## [0.0.11+2] - Dec 14, 2021
-* Avoid tooltip area gesture detection for manual trigger mode. Credit @Pavel-Sulimau
+* Avoid tooltip area gesture detection for manual trigger mode - Credit @Pavel-Sulimau
 
 ## [0.0.11+1] - Dec 14, 2021
 * Controller is no longer `final`, which means it can be set and unset when the user provides their own controller.

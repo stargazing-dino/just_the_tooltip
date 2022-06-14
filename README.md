@@ -194,3 +194,7 @@ API subject to change.
 ## Contributing
 
 Issues and PRs welcome. Unless otherwise specified, all contributions to this lib will be under MIT license.
+
+## Help wanted
+
+If you're interested in becoming a contributor with push rights please ping me and we can talk about how to get you started ! :)
