@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/utils/get_axis_direction.dart';
@@ -67,7 +68,7 @@ class PositionedTooltip extends SingleChildRenderObjectWidget {
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _RenderPositionedTooltip(
+    return RenderPositionedTooltip(
       margin: margin,
       offset: offset,
       target: target,
@@ -88,7 +89,7 @@ class PositionedTooltip extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(
     BuildContext context,
-    _RenderPositionedTooltip renderObject,
+    RenderPositionedTooltip renderObject,
   ) {
     renderObject
       ..margin = margin
@@ -96,6 +97,7 @@ class PositionedTooltip extends SingleChildRenderObjectWidget {
       ..target = target
       ..borderRadius = borderRadius
       ..tailLength = tailLength
+      ..tailBuilder = tailBuilder
       ..tailBaseWidth = tailBaseWidth
       ..textDirection = textDirection
       ..backgroundColor = backgroundColor
@@ -141,12 +143,14 @@ class PositionedTooltip extends SingleChildRenderObjectWidget {
     properties.add(
       DiagnosticsProperty<ScrollPosition>('scrollPosition', scrollPosition),
     );
+    properties
+        .add(ObjectFlagProperty<TailBuilder>.has('tailBuilder', tailBuilder));
   }
 }
 
-class _RenderPositionedTooltip extends RenderShiftedBox
+class RenderPositionedTooltip extends RenderShiftedBox
     with DebugOverflowIndicatorMixin {
-  _RenderPositionedTooltip({
+  RenderPositionedTooltip({
     RenderBox? child,
     required EdgeInsetsGeometry margin,
     required double offset,
@@ -299,41 +303,42 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
   @override
   Size computeDryLayout(BoxConstraints constraints) {
-    final _child = child;
-    final _margin = margin.resolve(textDirection);
+    final maybeChild = child;
+    final resolvedMargin = margin.resolve(textDirection);
 
-    if (_child == null) {
-      return constraints.constrain(margin.collapsedSize);
+    if (maybeChild == null) {
+      return constraints.constrain(resolvedMargin.collapsedSize);
     }
 
-    final childSize = _child.getDryLayout(constraints.deflate(_margin));
-    final _axisDirection = getAxisDirection(
+    final childSize =
+        maybeChild.getDryLayout(constraints.deflate(resolvedMargin));
+    final newAxisDirection = getAxisDirection(
       targetSize: targetSize,
       target: target,
       preferredDirection: preferredDirection,
       offsetAndTail: offsetAndTailLength,
-      margin: _margin,
+      margin: resolvedMargin,
       size: constraints.biggest,
       childSize: childSize,
       scrollPosition: scrollPosition,
     );
     final quadrantConstraints = _getQuadrantConstraints(
       constraints,
-      _axisDirection,
+      newAxisDirection,
       scrollPosition,
-      _margin,
+      resolvedMargin,
     );
 
-    return _child.getDryLayout(quadrantConstraints);
+    return maybeChild.getDryLayout(quadrantConstraints);
   }
 
   @override
   void performLayout() {
-    final _child = child;
-    final _margin = margin.resolve(textDirection);
+    final maybeChild = child;
+    final resolvedMargin = margin.resolve(textDirection);
 
-    if (_child == null) {
-      size = constraints.constrain(margin.collapsedSize);
+    if (maybeChild == null) {
+      size = constraints.constrain(resolvedMargin.collapsedSize);
       return;
     }
 
@@ -342,9 +347,9 @@ class _RenderPositionedTooltip extends RenderShiftedBox
     // Until https://github.com/flutter/flutter/issues/71687 is fixed, we must
     // get child size via intrinsics :
 
-    final deflated = constraints.deflate(_margin);
-    final width = _child.computeMinIntrinsicWidth(deflated.maxHeight);
-    final height = _child.computeMinIntrinsicHeight(deflated.maxWidth);
+    final deflated = constraints.deflate(resolvedMargin);
+    final width = maybeChild.computeMinIntrinsicWidth(deflated.maxHeight);
+    final height = maybeChild.computeMinIntrinsicHeight(deflated.maxWidth);
     final childSize = Size(width, height);
 
     axisDirection = getAxisDirection(
@@ -352,20 +357,20 @@ class _RenderPositionedTooltip extends RenderShiftedBox
       target: target,
       preferredDirection: preferredDirection,
       offsetAndTail: offsetAndTailLength,
-      margin: _margin,
+      margin: resolvedMargin,
       size: constraints.biggest,
       childSize: childSize,
       scrollPosition: scrollPosition,
     );
-    final childParentData = _child.parentData as BoxParentData;
+    final childParentData = maybeChild.parentData as BoxParentData;
     var quadrantConstraints = _getQuadrantConstraints(
       constraints,
       axisDirection,
       scrollPosition,
-      _margin,
+      resolvedMargin,
     );
 
-    _child.layout(
+    maybeChild.layout(
       quadrantConstraints,
       parentUsesSize: true,
     );
@@ -375,15 +380,15 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
     size = constraints.constrain(
       Size(
-        shrinkWrapWidth ? _child.size.width : double.infinity,
-        shrinkWrapHeight ? _child.size.height : double.infinity,
+        shrinkWrapWidth ? maybeChild.size.width : double.infinity,
+        shrinkWrapHeight ? maybeChild.size.height : double.infinity,
       ),
     );
 
     final quadrantOffset = getPositionDependentOffset(
       axisDirection: axisDirection,
-      childSize: _child.size,
-      margin: _margin,
+      childSize: maybeChild.size,
+      margin: resolvedMargin,
       offsetAndTail: offsetAndTailLength,
       size: size,
       target: target,
@@ -398,17 +403,17 @@ class _RenderPositionedTooltip extends RenderShiftedBox
   void paint(PaintingContext context, Offset offset) {
     // TODO: add debug paint for overflows
 
-    final _child = child;
+    final maybeChild = child;
 
-    if (_child != null) {
-      final childParentData = _child.parentData! as BoxParentData;
-      final _offset = childParentData.offset;
+    if (maybeChild != null) {
+      final childParentData = maybeChild.parentData! as BoxParentData;
+      final parentDataOffset = childParentData.offset;
       final paint = Paint()
         ..color = backgroundColor
         ..style = PaintingStyle.fill;
       final path = Path();
       final radius = borderRadius.resolve(textDirection);
-      final rect = (offset + _offset) & _child.size;
+      final rect = (offset + parentDataOffset) & maybeChild.size;
 
       // TODO:
       // Currently, I don't think this is triggered by an empty child. Dunno
@@ -553,18 +558,18 @@ class _RenderPositionedTooltip extends RenderShiftedBox
           break;
         }
 
-        final _target = target.translate(0, -offset - targetHeightRadius);
+        final offsetTarget = target.translate(0, -offset - targetHeightRadius);
 
         // assert(rect.bottom == _target.dy - tailLength);
 
-        x = _target.dx;
-        y = _target.dy;
+        x = offsetTarget.dx;
+        y = offsetTarget.dy;
 
-        x2 = (math.min(_target.dx, insetRightCorner) - halfBaseLength)
+        x2 = (math.min(offsetTarget.dx, insetRightCorner) - halfBaseLength)
             .clamp(insetLeftCorner, insetRightCorner);
         y2 = rect.bottom;
 
-        x3 = (math.max(_target.dx, insetLeftCorner) + halfBaseLength)
+        x3 = (math.max(offsetTarget.dx, insetLeftCorner) + halfBaseLength)
             .clamp(insetLeftCorner, insetRightCorner);
         y3 = rect.bottom;
         break;
@@ -579,18 +584,18 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
         if (insetLeftCorner > insetRightCorner) break;
 
-        final _target = target.translate(0, offset + targetHeightRadius);
+        final offsetTarget = target.translate(0, offset + targetHeightRadius);
 
-        assert(rect.top == _target.dy + tailLength);
+        assert(rect.top == offsetTarget.dy + tailLength);
 
-        x = _target.dx;
-        y = _target.dy;
+        x = offsetTarget.dx;
+        y = offsetTarget.dy;
 
-        x2 = (math.max(_target.dx, insetLeftCorner) + halfBaseLength)
+        x2 = (math.max(offsetTarget.dx, insetLeftCorner) + halfBaseLength)
             .clamp(insetLeftCorner, insetRightCorner);
         y2 = rect.top;
 
-        x3 = (math.min(_target.dx, insetRightCorner) - halfBaseLength)
+        x3 = (math.min(offsetTarget.dx, insetRightCorner) - halfBaseLength)
             .clamp(insetLeftCorner, insetRightCorner);
         y3 = rect.top;
         break;
@@ -605,19 +610,19 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
         if (insetBottomCorner < insetTopCorner) break;
 
-        final _target = target.translate(-offset - targetWidthRadius, 0.0);
+        final offsetTarget = target.translate(-offset - targetWidthRadius, 0.0);
 
-        assert(rect.right == _target.dx - tailLength);
+        assert(rect.right == offsetTarget.dx - tailLength);
 
-        x = _target.dx;
-        y = _target.dy;
+        x = offsetTarget.dx;
+        y = offsetTarget.dy;
 
         x2 = rect.right;
-        y2 = (math.max(_target.dy, insetTopCorner) + halfBaseLength)
+        y2 = (math.max(offsetTarget.dy, insetTopCorner) + halfBaseLength)
             .clamp(insetTopCorner, insetBottomCorner);
 
         x3 = rect.right;
-        y3 = (math.min(_target.dy, insetBottomCorner) - halfBaseLength)
+        y3 = (math.min(offsetTarget.dy, insetBottomCorner) - halfBaseLength)
             .clamp(insetTopCorner, insetBottomCorner);
 
         break;
@@ -633,19 +638,19 @@ class _RenderPositionedTooltip extends RenderShiftedBox
 
         if (insetBottomCorner < insetTopCorner) break;
 
-        final _target = target.translate(offset + targetWidthRadius, 0.0);
+        final offsetTarget = target.translate(offset + targetWidthRadius, 0.0);
 
-        assert(rect.left == _target.dx + tailLength);
+        assert(rect.left == offsetTarget.dx + tailLength);
 
-        x = _target.dx;
-        y = _target.dy;
+        x = offsetTarget.dx;
+        y = offsetTarget.dy;
 
         x2 = rect.left;
-        y2 = (math.min(_target.dy, insetBottomCorner) - halfBaseLength)
+        y2 = (math.min(offsetTarget.dy, insetBottomCorner) - halfBaseLength)
             .clamp(insetTopCorner, insetBottomCorner);
 
         x3 = rect.left;
-        y3 = (math.max(_target.dy, insetTopCorner) + halfBaseLength)
+        y3 = (math.max(offsetTarget.dy, insetTopCorner) + halfBaseLength)
             .clamp(insetTopCorner, insetBottomCorner);
         break;
     }
@@ -686,5 +691,12 @@ class _RenderPositionedTooltip extends RenderShiftedBox
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<Shadow>('shadow', shadow));
     properties.add(DoubleProperty('elevation', elevation));
+    properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    properties.add(
+      DiagnosticsProperty<ScrollPosition?>('scrollPosition', scrollPosition),
+    );
+    properties
+        .add(ObjectFlagProperty<TailBuilder>.has('tailBuilder', tailBuilder));
+    properties.add(DoubleProperty('offsetAndTailLength', offsetAndTailLength));
   }
 }

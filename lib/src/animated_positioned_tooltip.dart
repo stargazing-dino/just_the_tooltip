@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:just_the_tooltip/src/positioned_tooltip.dart';
 
 class AnimatedTooltip extends ImplicitlyAnimatedWidget {
   const AnimatedTooltip({
-    Key? key,
+    super.key,
     required this.child,
     required this.margin,
     required this.target,
@@ -22,10 +23,10 @@ class AnimatedTooltip extends ImplicitlyAnimatedWidget {
     required this.shadow,
     required this.elevation,
     required this.scrollPosition,
-    Curve curve = Curves.linear,
-    required Duration duration,
-    VoidCallback? onEnd,
-  }) : super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+    super.curve = Curves.linear,
+    required super.duration,
+    super.onEnd,
+  });
 
   final Widget child;
 
@@ -100,6 +101,8 @@ class AnimatedTooltip extends ImplicitlyAnimatedWidget {
     properties.add(
       DiagnosticsProperty<ScrollPosition>('scrollPosition', scrollPosition),
     );
+    properties
+        .add(ObjectFlagProperty<TailBuilder>.has('tailBuilder', tailBuilder));
   }
 }
 
@@ -172,6 +175,7 @@ class _AnimatedTooltipState
 
   @override
   Widget build(BuildContext context) {
+    // FIXME: These non-null casts suck. How do we mark these in linter?
     return PositionedTooltip(
       margin: _margin!.evaluate(animation),
       targetSize: _targetSize!.evaluate(animation)!,

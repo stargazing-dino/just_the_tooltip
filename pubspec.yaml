@@ -1,7 +1,7 @@
 name: just_the_tooltip
 description: A multi directional tooltip used to display any content with
   inbuilt support for list views
-version: 0.0.11+2
+version: 0.1.0
 homepage: https://github.com/Nolence/just_the_tooltip
 
 environment:
@@ -13,8 +13,8 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  flutter_lints: ^1.0.0
-  golden_toolkit: ^0.10.0
+  flutter_lints: ^2.0.0
+  golden_toolkit: ^0.13.0
   flutter_test:
     sdk: flutter
 

@@ -8,7 +8,7 @@ analyzer:
 linter:
   rules:
     # - public_member_api_docs
-    # - require_trailing_commas
+    - require_trailing_commas
     - parameter_assignments
     - only_throw_errors
     - always_use_package_imports
@@ -19,3 +19,4 @@ linter:
     - unnecessary_lambdas
     - unnecessary_const
     - avoid_void_async
+    # - diagnostic_describe_all_properties

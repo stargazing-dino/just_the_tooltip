@@ -150,10 +150,11 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
   final ScrollController? scrollController;
 
   @override
-  _JustTheTooltipOverlayState createState() => _JustTheTooltipOverlayState();
+  JustTheTooltipState<OverlayEntry> createState() =>
+      _JustTheTooltipOverlayState();
 }
 
-class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
+class _JustTheTooltipOverlayState extends JustTheTooltipState<OverlayEntry> {
   @override
   OverlayEntry? entry;
 
@@ -188,9 +189,9 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
   void _createNewEntries() {
     // The builder on these run twice on hot reload and then again from our
     // didUpdateWidget.
-    final entryOverlay = OverlayEntry(builder: (context) {
-      return _createEntry();
-    });
+    final entryOverlay = OverlayEntry(
+      builder: (context) => _createEntry(),
+    );
     final skrimOverlay = OverlayEntry(builder: (context) => _createSkrim());
 
     final overlay = Overlay.of(context);
@@ -255,7 +256,7 @@ class _JustTheTooltipOverlayState extends _JustTheTooltipState<OverlayEntry> {
 /// for the fact it is setup to handle two Tooltip cases. Abstract methods are
 /// replaced with implementations that are specific to the tooltip type.
 // TODO: This looks more idiomatic as a mixin.
-abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
+abstract class JustTheTooltipState<T> extends State<JustTheInterface>
     with SingleTickerProviderStateMixin {
   T? get entry;
 
@@ -281,13 +282,13 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
   bool get hasEntry => entry != null;
 
   Key? get entryKey {
-    final _key = widget.key;
-    return _key == null ? null : ValueKey('__entry_${_key}__');
+    final key = widget.key;
+    return key == null ? null : ValueKey('__entry_${key}__');
   }
 
   Key? get skrimKey {
-    final _key = widget.key;
-    return _key == null ? null : Key('__skrim_${_key}__');
+    final key = widget.key;
+    return key == null ? null : Key('__skrim_${key}__');
   }
 
   // All of these are taken from default tooltip
@@ -352,22 +353,22 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
 
   @override
   void didUpdateWidget(covariant JustTheInterface oldWidget) {
-    final _oldController = oldWidget.controller;
-    final _newController = widget.controller;
+    final oldController = oldWidget.controller;
+    final newController = widget.controller;
 
     // If we did not have a controller before, we created one that must now be
     // disposed. The user must also have passed in a controller or else we
     // won't do anything.
-    if (_oldController == null && _newController != null) {
+    if (oldController == null && newController != null) {
       // The user provided a controller, let's dispose ours
       _controller.dispose();
-      _controller = _newController;
+      _controller = newController;
     }
 
     // Update the functions on our controller
-    if (_newController != null && _oldController != null) {
-      if (_newController.value != _oldController.value) {
-        _controller.value = _newController.value;
+    if (newController != null && oldController != null) {
+      if (newController.value != oldController.value) {
+        _controller.value = newController.value;
       }
     }
 
@@ -571,7 +572,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
     final tooltipCreated = await ensureTooltipVisible();
 
     if (tooltipCreated && enableFeedback) {
-      if (triggerMode == TooltipTriggerMode.longPress) {
+      if (triggerMode == TooltipTriggerMode.longPress && mounted) {
         Feedback.forLongPress(context);
       } else {
         Feedback.forTap(context);
@@ -671,7 +672,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
           child: Builder(
             builder: (context) {
               final scrollController = widget.scrollController;
-              final _child = Material(
+              final wrappedChild = Material(
                 type: MaterialType.transparency,
                 child: widget.content,
               );
@@ -679,14 +680,13 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
               if (scrollController != null) {
                 return AnimatedBuilder(
                   animation: scrollController,
-                  child: _child,
+                  child: wrappedChild,
                   builder: (context, child) {
                     return PositionedTooltip(
                       // curve: _defaultAnimateCurve,
                       // duration: _defaultAnimateDuration,
                       animatedTransitionBuilder:
                           widget.animatedTransitionBuilder,
-                      child: child!,
                       margin: widget.margin,
                       targetSize: targetInformation.size,
                       target: targetInformation.target,
@@ -703,6 +703,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
                       shadow: widget.shadow ?? defaultShadow,
                       elevation: widget.elevation,
                       scrollPosition: scrollController.position,
+                      child: child!,
                     );
                   },
                 );
@@ -712,7 +713,6 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
                 // curve: _defaultAnimateCurve,
                 // duration: _defaultAnimateDuration,
                 animatedTransitionBuilder: widget.animatedTransitionBuilder,
-                child: _child,
                 margin: widget.margin,
                 targetSize: targetInformation.size,
                 target: targetInformation.target,
@@ -728,6 +728,7 @@ abstract class _JustTheTooltipState<T> extends State<JustTheInterface>
                 shadow: widget.shadow ?? defaultShadow,
                 elevation: widget.elevation,
                 scrollPosition: null,
+                child: wrappedChild,
               );
             },
           ),

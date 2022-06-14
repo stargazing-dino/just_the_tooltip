@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 /// The interface for a tooltip builder. This is useful when the user wants to
@@ -13,27 +14,33 @@ typedef TooltipBuilder = Widget Function(
 );
 
 class InheritedTooltipArea extends InheritedWidget {
-  final _JustTheTooltipAreaState data;
+  final JustTheTooltipAreaState data;
 
   const InheritedTooltipArea({
-    Key? key,
+    super.key,
     required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+    required super.child,
+  });
 
   @override
   bool updateShouldNotify(covariant InheritedTooltipArea oldWidget) =>
       data != oldWidget.data;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<JustTheTooltipAreaState>('data', data));
+  }
 }
 
 class JustTheTooltipArea extends StatefulWidget {
   final TooltipBuilder builder;
 
-  const JustTheTooltipArea({Key? key, required this.builder}) : super(key: key);
+  const JustTheTooltipArea({super.key, required this.builder});
 
   /// Used to retrieve the scope of the tooltip. This scope is responsible for
   /// managing the children `JustTheTooltip`s
-  static _JustTheTooltipAreaState of(BuildContext context) {
+  static JustTheTooltipAreaState of(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
 
@@ -53,7 +60,7 @@ class JustTheTooltipArea extends StatefulWidget {
     return scope!.data;
   }
 
-  static _JustTheTooltipAreaState? maybeOf(BuildContext context) {
+  static JustTheTooltipAreaState? maybeOf(BuildContext context) {
     final scope =
         context.dependOnInheritedWidgetOfExactType<InheritedTooltipArea>();
 
@@ -61,7 +68,7 @@ class JustTheTooltipArea extends StatefulWidget {
   }
 
   @override
-  State<JustTheTooltipArea> createState() => _JustTheTooltipAreaState();
+  State<JustTheTooltipArea> createState() => JustTheTooltipAreaState();
 }
 
 // TODO: Change the logic here eventually to something cleaner.
@@ -71,7 +78,7 @@ class JustTheTooltipArea extends StatefulWidget {
 /// from the child, that would trigger a rebuild of the child... Which, without
 /// fancy logic, would cause this parent to rebuild again. To avoid that, we
 /// instead update the listeners and they then only update their state.
-class _JustTheTooltipAreaState extends State<JustTheTooltipArea> {
+class JustTheTooltipAreaState extends State<JustTheTooltipArea> {
   var entry = ValueNotifier<Widget?>(null);
   var skrim = ValueNotifier<Widget?>(null);
 

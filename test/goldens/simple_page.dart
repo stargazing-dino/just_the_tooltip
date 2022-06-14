@@ -31,6 +31,7 @@ class SimplePage extends StatelessWidget {
               fadeInDuration: Duration.zero,
               fadeOutDuration: Duration.zero,
               preferredDirection: preferredDirection,
+              content: content,
               child: Material(
                 color: Colors.grey.shade800,
                 shape: const CircleBorder(),
@@ -43,7 +44,6 @@ class SimplePage extends StatelessWidget {
                   ),
                 ),
               ),
-              content: content,
             ),
           ),
         ),
