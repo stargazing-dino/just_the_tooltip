@@ -1,6 +1,7 @@
-## [0.1.0] - Jun 14, 2022
+## [0.0.12] - Jun 14, 2022
 * fix state build when deactive and dispose, and update flutter - Credit @phamconganh.
 * lint errors and update to newest sdk.
+* memory leak with on dispose
 
 ## [0.0.11+2] - Dec 14, 2021
 * Avoid tooltip area gesture detection for manual trigger mode - Credit @Pavel-Sulimau
