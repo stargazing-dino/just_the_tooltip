@@ -31,6 +31,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     // the tooltip open. But in that case, it seems like we can create a new
     // more narrow field in favor.
     this.isModal = false,
+    this.hasBackdrop = false,
     this.waitDuration,
     this.showDuration,
     this.triggerMode,
@@ -75,6 +76,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final bool isModal;
+
+  @override
+  final bool hasBackdrop;
 
   @override
   final Duration? waitDuration;
@@ -638,6 +642,12 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
     );
   }
 
+  Widget _createBackdrop() {
+    return Container(
+      color: Colors.black.withOpacity(0.3),
+    );
+  }
+
   Widget _createSkrim() {
     return GestureDetector(
       key: skrimKey,
@@ -645,6 +655,7 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
           ? HitTestBehavior.translucent
           : HitTestBehavior.deferToChild,
       onTap: _hideTooltip,
+      child: widget.hasBackdrop ? _createBackdrop() : null,
     );
   }
 

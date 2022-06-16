@@ -14,6 +14,7 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     this.onShow,
     this.controller,
     this.isModal = false,
+    this.hasBackdrop = false,
     this.waitDuration,
     this.showDuration,
     this.triggerMode,
@@ -58,6 +59,9 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
 
   @override
   final bool isModal;
+
+  @override
+  final bool hasBackdrop;
 
   @override
   final Duration? waitDuration;

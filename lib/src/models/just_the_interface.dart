@@ -107,6 +107,9 @@ abstract class JustTheInterface extends StatefulWidget {
   /// `scrim` is clicked or it is forcibly closed
   bool get isModal;
 
+  /// If true, once the tooltip is opened, render the backdrop
+  bool get hasBackdrop;
+
   /// The length of time that a pointer must hover over a tooltip's widget
   /// before the tooltip will be shown.
   ///
