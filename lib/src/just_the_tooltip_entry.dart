@@ -39,6 +39,7 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
     this.shadow,
     this.showWhenUnlinked = false,
     this.scrollController,
+    this.clickableArea,
   });
 
   @override
@@ -130,6 +131,9 @@ class JustTheTooltipEntry extends StatefulWidget implements JustTheInterface {
 
   @override
   final ScrollController? scrollController;
+
+  @override
+  final Rect? clickableArea;
 
   @override
   JustTheTooltipState<Widget> createState() => _JustTheTooltipEntryState();

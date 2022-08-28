@@ -56,6 +56,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.shadow,
     this.showWhenUnlinked = false,
     this.scrollController,
+    this.clickableArea,
   }) : super(key: key);
 
   @override
@@ -148,6 +149,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final ScrollController? scrollController;
+
+  @override
+  final Rect? clickableArea;
 
   @override
   JustTheTooltipState<OverlayEntry> createState() =>
@@ -524,6 +528,11 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
 
   void _handlePointerEvent(PointerEvent event) {
     if (!hasEntry) {
+      return;
+    }
+
+    if (widget.clickableArea != null &&
+        widget.clickableArea!.contains(event.position)) {
       return;
     }
 
