@@ -541,11 +541,11 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
           _tooltipContentKey.currentContext?.findRenderObject() as RenderBox?;
 
       if (box != null) {
-        final targetSize = box.size;
-        final target = box.localToGlobal(Offset.zero);
-        final targetRect = Rect.fromLTWH(
-            target.dx, target.dy, targetSize.width, targetSize.height);
-        if (targetRect.contains(event.position)) {
+        final contentSize = box.size;
+        final contentPos = box.localToGlobal(Offset.zero);
+        final contentRect = Rect.fromLTWH(contentPos.dx, contentPos.dy,
+            contentSize.width, contentSize.height);
+        if (contentRect.contains(event.position)) {
           widget.onClick!();
           return;
         }
