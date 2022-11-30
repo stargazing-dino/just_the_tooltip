@@ -748,9 +748,13 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
         'Cannot find the box for the given object with context $context',
       );
     }
-
+    
+    final navigator = Navigator.of(context);
     final targetSize = box.getDryLayout(const BoxConstraints.tightForFinite());
-    final target = box.localToGlobal(box.size.center(Offset.zero));
+    final target = box.localToGlobal(
+      box.size.center(Offset.zero),
+      ancestor: navigator.context.findRenderObject(),
+    );
     // TODO: Instead of this, change the alignment on
     // [CompositedTransformFollower]. That way we can allow a user configurable
     // alignment on where the tooltip ends up.
