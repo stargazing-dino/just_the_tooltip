@@ -53,7 +53,9 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.amber.shade700),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber.shade700,
+              ),
               onPressed: () {
                 Navigator.of(context).pushNamed('default');
               },
