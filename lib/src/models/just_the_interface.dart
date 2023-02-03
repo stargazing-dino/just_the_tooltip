@@ -139,6 +139,34 @@ abstract class JustTheInterface extends StatefulWidget {
   /// by using [controller.hideTooltip].
   bool get barrierDismissible;
 
+  /// A widget to be displayed between the tooltip and app's content.
+  ///
+  /// Defaults to [Colors.transparent].
+  ///
+  /// If [barrierBuilder] is non-null, barrier color will be ignored.
+  Color get barrierColor;
+
+  /// A widget to be displayed between the tooltip and app's content.
+  ///
+  /// The barrier builder can call the provided void callback to dismiss the
+  /// tooltip.
+  ///
+  /// This is most often a tapable container with a semi-opaque color:
+  ///
+  /// ```
+  ///   barrierBuilder: (context, dismissTooltip) {
+  ///     return GestureDetector(
+  ///       onTap: dismissTooltip,
+  ///       child: Container(color: Colors.black38), // black38 has 38% opacity
+  ///     );
+  ///   },
+  /// ```
+  ///
+  /// If barrier builder is null, a default barrier is built according to
+  /// [barrierColor] and [barrierDismissible].
+  Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      get barrierBuilder;
+
   /// Whether the tooltip should provide acoustic and/or haptic feedback.
   ///
   /// For example, on Android a tap will produce a clicking sound and a

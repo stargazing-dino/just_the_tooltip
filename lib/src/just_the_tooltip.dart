@@ -35,6 +35,8 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.showDuration,
     this.triggerMode,
     this.barrierDismissible = true,
+    this.barrierColor = Colors.transparent,
+    this.barrierBuilder,
     this.enableFeedback,
     this.hoverShowDuration,
     this.fadeInDuration = const Duration(milliseconds: 150),
@@ -86,10 +88,17 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
   final bool barrierDismissible;
 
   @override
+  final Color barrierColor;
+
+  @override
   final TooltipTriggerMode? triggerMode;
 
   @override
   final bool? enableFeedback;
+
+  @override
+  final Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      barrierBuilder;
 
   // FIXME: This happens in the non-hover (i.e. isModal) case as well.
   @override
@@ -236,20 +245,20 @@ class _JustTheTooltipOverlayState extends JustTheTooltipState<OverlayEntry> {
     }
   }
 
-  // @override
-  // void didUpdateWidget(covariant JustTheTooltip oldWidget) {
-  //   super.didUpdateWidget(oldWidget);
+// @override
+// void didUpdateWidget(covariant JustTheTooltip oldWidget) {
+//   super.didUpdateWidget(oldWidget);
 
-  //   // This adds a post frame callback because otherwise the OverlayEntry
-  //   // builder would run before the widget has a chance to update with the
-  //   // newest config.
-  //   WidgetsBinding.instance?.addPostFrameCallback((_) {
-  //     if (mounted) {
-  //       entry?.markNeedsBuild();
-  //       skrim?.markNeedsBuild();
-  //     }
-  //   });
-  // }
+//   // This adds a post frame callback because otherwise the OverlayEntry
+//   // builder would run before the widget has a chance to update with the
+//   // newest config.
+//   WidgetsBinding.instance?.addPostFrameCallback((_) {
+//     if (mounted) {
+//       entry?.markNeedsBuild();
+//       skrim?.markNeedsBuild();
+//     }
+//   });
+// }
 }
 
 /// This is almost a one to one mapping to [Tooltip]'s [_TooltipState] except
@@ -310,6 +319,9 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
   late TooltipTriggerMode triggerMode;
   late bool enableFeedback;
   late bool barrierDismissible;
+  late Color barrierColor;
+  late Widget Function(BuildContext, Animation<double>, VoidCallback)?
+      barrierBuilder;
 
   // These properties are specific to just_the_tooltip
   // static const Curve _defaultAnimateCurve = Curves.linear;
@@ -601,6 +613,8 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
         tooltipTheme.enableFeedback ??
         _defaultEnableFeedback;
     barrierDismissible = widget.barrierDismissible;
+    barrierColor = widget.barrierColor;
+    barrierBuilder = widget.barrierBuilder;
 
     Widget result;
 
@@ -639,12 +653,19 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
   }
 
   Widget _createSkrim() {
+    if (barrierBuilder != null) {
+      return Container(
+        key: skrimKey,
+        child: barrierBuilder!(context, _animationController, _hideTooltip),
+      );
+    }
     return GestureDetector(
       key: skrimKey,
       behavior: barrierDismissible
           ? HitTestBehavior.translucent
           : HitTestBehavior.deferToChild,
       onTap: _hideTooltip,
+      child: Container(color: barrierColor),
     );
   }
 
