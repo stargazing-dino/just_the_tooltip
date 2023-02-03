@@ -189,7 +189,10 @@ class _JustTheTooltipOverlayState extends JustTheTooltipState<OverlayEntry> {
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: widget) != null);
+    assert(
+      Overlay.maybeOf(context) != null,
+      '${widget.runtimeType} require an Overlay widget ancestor for correct operation.',
+    );
 
     return super.build(context);
   }
@@ -203,7 +206,7 @@ class _JustTheTooltipOverlayState extends JustTheTooltipState<OverlayEntry> {
     );
     final skrimOverlay = OverlayEntry(builder: (context) => _createSkrim());
 
-    final overlay = Overlay.of(context);
+    final overlay = Overlay.maybeOf(context);
 
     if (overlay == null) {
       throw StateError('Cannot find the overlay for the context $context');

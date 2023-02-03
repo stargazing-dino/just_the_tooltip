@@ -53,21 +53,23 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.amber.shade700),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber.shade700,
+              ),
               onPressed: () {
                 Navigator.of(context).pushNamed('default');
               },
               child: const Text('default'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.blueGrey),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.blueGrey),
               onPressed: () {
                 Navigator.of(context).pushNamed('scroll');
               },
               child: const Text('scroll'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(primary: Colors.teal),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal),
               onPressed: () {
                 Navigator.of(context).pushNamed('tooltipArea');
               },
