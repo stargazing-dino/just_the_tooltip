@@ -102,6 +102,9 @@ abstract class JustTheInterface extends StatefulWidget {
   /// Called when the tooltip is shown.
   VoidCallback? get onShow;
 
+  /// Called when clicking on the tooltip
+  VoidCallback? get onClick;
+
   /// If true, once the tooltip is opened, it will not close after a set
   /// duration. It will instead instead stay on the screen until either the
   /// `scrim` is clicked or it is forcibly closed
@@ -254,4 +257,8 @@ abstract class JustTheInterface extends StatefulWidget {
   /// example, if the tooltip happens to go beyond its quadrant but there is
   /// scroll space beneath it the bounds will accomadate it.
   ScrollController? get scrollController;
+
+  /// If passed, the given area on screen will be allowed to click through without
+  /// dismissing the tooltip in non-modal mode
+  Rect? get clickableArea;
 }

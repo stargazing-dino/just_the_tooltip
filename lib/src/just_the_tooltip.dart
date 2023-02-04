@@ -26,6 +26,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     required this.child,
     this.onDismiss,
     this.onShow,
+    this.onClick,
     this.controller,
     // TODO: With the new [triggerMode] field isModal's only function is to keep
     // the tooltip open. But in that case, it seems like we can create a new
@@ -58,6 +59,7 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
     this.shadow,
     this.showWhenUnlinked = false,
     this.scrollController,
+    this.clickableArea,
   }) : super(key: key);
 
   @override
@@ -74,6 +76,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final VoidCallback? onShow;
+
+  @override
+  final VoidCallback? onClick;
 
   @override
   final bool isModal;
@@ -157,6 +162,9 @@ class JustTheTooltip extends StatefulWidget implements JustTheInterface {
 
   @override
   final ScrollController? scrollController;
+
+  @override
+  final Rect? clickableArea;
 
   @override
   JustTheTooltipState<OverlayEntry> createState() =>
@@ -332,6 +340,7 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
   late JustTheController _controller;
   late bool _hasBindingListeners = false;
   final _layerLink = LayerLink();
+  final _tooltipContentKey = GlobalKey();
 
   @override
   void initState() {
@@ -542,6 +551,27 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
       return;
     }
 
+    if (widget.onClick != null) {
+      final box =
+          _tooltipContentKey.currentContext?.findRenderObject() as RenderBox?;
+
+      if (box != null) {
+        final contentSize = box.size;
+        final contentPos = box.localToGlobal(Offset.zero);
+        final contentRect = Rect.fromLTWH(contentPos.dx, contentPos.dy,
+            contentSize.width, contentSize.height);
+        if (contentRect.contains(event.position)) {
+          widget.onClick!();
+          return;
+        }
+      }
+    }
+
+    if (widget.clickableArea != null &&
+        widget.clickableArea!.contains(event.position)) {
+      return;
+    }
+
     if (event is PointerUpEvent || event is PointerCancelEvent) {
       _hideTooltip();
     } else if (event is PointerDownEvent) {
@@ -699,6 +729,7 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
             builder: (context) {
               final scrollController = widget.scrollController;
               final wrappedChild = Material(
+                key: _tooltipContentKey,
                 type: MaterialType.transparency,
                 child: widget.content,
               );
