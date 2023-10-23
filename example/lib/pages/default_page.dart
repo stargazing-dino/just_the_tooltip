@@ -55,6 +55,7 @@ class _DefaultPageExampleState extends State<DefaultPageExample> {
           duration: const Duration(milliseconds: 1500),
           alignment: alignment,
           child: JustTheTooltip(
+            barrierColor: Colors.black.withOpacity(0.2),
             onShow: () {
               // print('onShow');
             },

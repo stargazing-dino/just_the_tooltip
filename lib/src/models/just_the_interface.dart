@@ -238,6 +238,10 @@ abstract class JustTheInterface extends StatefulWidget {
   /// The background color of the tooltip. This includes the tail.
   Color? get backgroundColor;
 
+  /// The color of the scrim that is displayed behind the tooltip when
+  /// [isModal] is true.
+  // Color? get barrierColor;
+
   /// The text direction that will `resolve` the [content] of the tooltip.
   TextDirection get textDirection;
 

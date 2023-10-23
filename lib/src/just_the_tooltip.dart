@@ -656,19 +656,22 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
   }
 
   Widget _createSkrim() {
-    if (barrierBuilder != null) {
-      return Container(
-        key: skrimKey,
-        child: barrierBuilder!(context, _animationController, _hideTooltip),
-      );
-    }
     return GestureDetector(
       key: skrimKey,
       behavior: barrierDismissible
           ? HitTestBehavior.translucent
           : HitTestBehavior.deferToChild,
       onTap: _hideTooltip,
-      child: Container(color: barrierColor),
+      child: FadeTransition(
+        opacity: CurvedAnimation(
+          parent: _animationController,
+          curve: widget.curve,
+          reverseCurve: widget.reverseCurve,
+        ),
+        child: ColoredBox(
+          color: widget.barrierColor,
+        ),
+      ),
     );
   }
 
