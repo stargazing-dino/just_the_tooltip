@@ -773,7 +773,7 @@ abstract class JustTheTooltipState<T> extends State<JustTheInterface>
       );
     }
 
-    final targetSize = box.getDryLayout(const BoxConstraints.tightForFinite());
+    final targetSize = box.size; // (const BoxConstraints.tightForFinite());
     final target = box.localToGlobal(box.size.center(Offset.zero));
     // TODO: Instead of this, change the alignment on
     // [CompositedTransformFollower]. That way we can allow a user configurable
